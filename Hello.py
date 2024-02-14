@@ -19,48 +19,84 @@ LOGGER = get_logger(__name__)
 
 import pandas as pd
 from langchain_openai import ChatOpenAI
-import os
+from langchain.prompts import PromptTemplate
+from openai import OpenAI
 
-gpt4 = ChatOpenAI(openai_api_key=os.environ["OPENAI_API_KEY"], model="gpt-4-turbo-preview")
+gpt4 = ChatOpenAI(openai_api_key=st.secrets["OPENAI_API_KEY"], model="gpt-4-turbo-preview")
+
+openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+@st.cache_data
+def call_gpt(text):
+    response = openai_client.chat.completions.create(
+        model="gpt-4-turbo-preview",
+        messages=[
+            {"role": "user", "content": text},
+        ],
+        n=3
+    )
+    return response.choices
 
 def run():
     st.set_page_config(
         page_title="Channel 1",
         page_icon="👋",
+        layout="wide"
     )
 
-    st.write("# Channel 1 Demo 👋")
+    st.write("# Channel 1 Demo")
 
-    df = pd.read_csv("cleaned.csv").drop(columns=["Unnamed: 0"])
-    story_index = 0
+    if "data" not in st.session_state:
+        st.session_state.data = pd.read_csv("cleaned.csv").drop(columns=["Unnamed: 0"])
+    if "story_index" not in st.session_state:
+        st.session_state.story_index = 0
 
-    with st.expander("Story Selector"):
-      story_index = st.selectbox(
-          "Story Selector",
-          df.index,
-          format_func=lambda x: df.loc[x].Title
-      )
-
-      df.loc[story_index]
+    st.session_state.story_index = st.sidebar.selectbox(
+        "Prefill Stories",
+        st.session_state.data.index,
+        format_func=lambda x: st.session_state.data.loc[x].Slug
+    )
 
     story = st.text_area(
         "Story",
-        value=df["Main Content"][story_index],
+        value=st.session_state.data["Main Content"][st.session_state.story_index],
         height=500
     )
 
-    prompt = st.text_area(
-        "Prompt",
-        value="Given this info, write a news story that's about 300 words. Include quotes where possible marked as SOT:",
+    instructions = st.text_area(
+        "Instructions",
+        value="Given this info, write a news script that's about 300 words. Include quotes where possible with SOT: at the beginning of the paragraph. Never make up information.",
     )
 
-    llm_input = f"{story}\n\n\####\n\n{prompt}"
+    prompt_template = PromptTemplate.from_template(
+"""{story}
+
+\###
+
+{instructions}""")
 
     with st.expander("AI Input", expanded=False):
-        st.write(llm_input)
+        st.write(prompt_template.format(story=story, instructions=instructions))
 
-    # if st.button("Submit"):
-    #     gpt4
+    submitted = st.button("Submit")
+
+    if submitted:
+        st.session_state.responses = call_gpt(prompt_template.format(story=story, instructions=instructions))
+        cols = st.columns(3)
+
+        for i, (col, response) in enumerate(zip(cols, st.session_state.responses)):
+            with col:
+                st.subheader(f"{i+1}")
+                st.write(response.message.content)
+    
+    if "responses" in st.session_state:
+        cols = st.columns(3)
+
+        for i, (col, response) in enumerate(zip(cols, st.session_state.responses)):
+            with col:
+                st.subheader(f"Script {i}")
+                st.write(response.message.content)
+        
     
 
 if __name__ == "__main__":
