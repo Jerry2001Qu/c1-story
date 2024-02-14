@@ -17,35 +17,51 @@ from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
+import pandas as pd
+from langchain_openai import ChatOpenAI
+import os
+
+gpt4 = ChatOpenAI(openai_api_key=os.environ["OPENAI_API_KEY"], model="gpt-4-turbo-preview")
 
 def run():
     st.set_page_config(
-        page_title="Hello",
+        page_title="Channel 1",
         page_icon="👋",
     )
 
-    st.write("# Welcome to Streamlit! 👋")
+    st.write("# Channel 1 Demo 👋")
 
-    st.sidebar.success("Select a demo above.")
+    df = pd.read_csv("cleaned.csv").drop(columns=["Unnamed: 0"])
+    story_index = 0
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
+    with st.expander("Story Selector"):
+      story_index = st.selectbox(
+          "Story Selector",
+          df.index,
+          format_func=lambda x: df.loc[x].Title
+      )
+
+      df.loc[story_index]
+
+    story = st.text_area(
+        "Story",
+        value=df["Main Content"][story_index],
+        height=500
     )
 
+    prompt = st.text_area(
+        "Prompt",
+        value="Given this info, write a news story that's about 300 words. Include quotes where possible marked as SOT:",
+    )
+
+    llm_input = f"{story}\n\n\####\n\n{prompt}"
+
+    with st.expander("AI Input", expanded=False):
+        st.write(llm_input)
+
+    # if st.button("Submit"):
+    #     gpt4
+    
 
 if __name__ == "__main__":
     run()
