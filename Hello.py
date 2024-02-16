@@ -26,7 +26,7 @@ gpt4 = ChatOpenAI(openai_api_key=st.secrets["OPENAI_API_KEY"], model="gpt-4-turb
 
 openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-@st.cache_data
+@st.cache_resource
 def call_gpt(text):
     response = openai_client.chat.completions.create(
         model="gpt-4-turbo-preview",
