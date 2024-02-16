@@ -33,9 +33,9 @@ def call_gpt(text):
         messages=[
             {"role": "user", "content": text},
         ],
-        n=3
+        n=1
     )
-    return response.choices
+    return response.choices[0].message.content
 
 def run():
     st.set_page_config(
@@ -48,20 +48,6 @@ def run():
 
     if "data" not in st.session_state:
         st.session_state.data = pd.read_csv("cleaned.csv").drop(columns=["Unnamed: 0"])
-    if "story_index" not in st.session_state:
-        st.session_state.story_index = 0
-
-    st.session_state.story_index = st.sidebar.selectbox(
-        "Prefill Stories",
-        st.session_state.data.index,
-        format_func=lambda x: st.session_state.data.loc[x].Slug
-    )
-
-    story = st.text_area(
-        "Story",
-        value=st.session_state.data["Main Content"][st.session_state.story_index],
-        height=500
-    )
 
     instructions = st.text_area(
         "Instructions",
@@ -75,27 +61,38 @@ def run():
 
 {instructions}""")
 
-    with st.expander("AI Input", expanded=False):
-        st.write(prompt_template.format(story=story, instructions=instructions))
-
     submitted = st.button("Submit")
 
-    if submitted:
-        st.session_state.responses = call_gpt(prompt_template.format(story=story, instructions=instructions))
-        cols = st.columns(3)
-
-        for i, (col, response) in enumerate(zip(cols, st.session_state.responses)):
-            with col:
-                st.subheader(f"{i+1}")
-                st.write(response.message.content)
+    row = st.columns(3)
+    if "cols" not in st.session_state:
+        st.session_state.cols = [[col, i] for i, col in enumerate(row)]
+    else:
+        for col, col_state in zip(row, st.session_state.cols):
+            col_state[0] = col
     
-    if "responses" in st.session_state:
-        cols = st.columns(3)
+    if "responses" not in st.session_state:
+        st.session_state.responses = {}
 
-        for i, (col, response) in enumerate(zip(cols, st.session_state.responses)):
-            with col:
-                st.subheader(f"Script {i}")
-                st.write(response.message.content)
+    if submitted:
+        for _, i in st.session_state.cols:
+            st.session_state.responses[i] = call_gpt(prompt_template.format(story=st.session_state.data["Main Content"][i], instructions=instructions))
+
+    for i, (col, story_id) in enumerate(st.session_state.cols):
+        key = f"{i}-{story_id}"
+        with col:
+            with st.container(border=True):
+                story_id = st.selectbox(
+                    "Prefill Story",
+                    st.session_state.data.index,
+                    index=story_id,
+                    format_func=lambda x: st.session_state.data.Slug[x],
+                    key=key+"story_selector",
+                )
+                st.session_state.cols[i][1] = story_id
+                with st.expander("Story"):
+                    st.write(st.session_state.data["Main Content"][story_id])
+                if story_id in st.session_state.responses:
+                    st.write(st.session_state.responses[story_id])
         
     
 
