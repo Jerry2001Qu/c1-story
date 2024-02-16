@@ -89,7 +89,7 @@ def run():
                     key=key+"story_selector",
                 )
                 st.session_state.cols[i][1] = story_id
-                with st.expander("Story"):
+                with st.expander(st.session_state.data.Title[story_id]):
                     st.write(st.session_state.data["Main Content"][story_id])
                 if story_id in st.session_state.responses:
                     st.write(st.session_state.responses[story_id])
