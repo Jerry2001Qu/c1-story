@@ -12,3 +12,4 @@ fuzzysearch
 torch
 torchaudio
 moviepy
+onnxruntime
