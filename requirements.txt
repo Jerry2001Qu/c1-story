@@ -11,3 +11,4 @@ pyloudnorm
 fuzzysearch
 torch
 torchaudio
+moviepy
