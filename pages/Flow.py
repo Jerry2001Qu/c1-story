@@ -3,6 +3,7 @@ from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
+import os
 import pandas as pd
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
@@ -23,9 +24,33 @@ def call_gpt(text):
     )
     return response.choices[0].message.content
 
+
+def save_uploaded(file_data):
+    with open(file_data.name,"wb") as f:
+        f.write(file_data.getbuffer())
+    return st.success(f"Saved File: {file_data.name}")
+
+
 def source_material():
-    video = st.file_uploader("Video", type=["mp4"], accept_multiple_files=False)
-    st.video(video)
+    video = st.file_uploader("Choose a video", type=["mp4"], accept_multiple_files=False)
+    if video:
+        save_uploaded(video)
+        with st.expander("Uploaded video"):
+            st.video(video.name)
+    
+    shotlist = st.text_area("Shotlist")
+    story = st.text_area("Story")
+
+    return video.name if video else None, shotlist, story
+
+
+from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
+
+def split_clips(video_filename):
+    scene_list = detect(video_filename, AdaptiveDetector(adaptive_threshold=5, min_scene_len=1))
+    st.write(f"Found {len(scene_list)} clips")
+    split_video_ffmpeg(video_filename, scene_list, show_progress=True, output_file_template="clips/$SCENE_NUMBER.mp4")
+
 
 def run():
     st.set_page_config(
@@ -36,7 +61,10 @@ def run():
 
     st.write("# Channel 1 Demo")
 
-    source_material()
+    video, shotlist, story = source_material()
+    if video:
+        if st.button("Split clips"):
+            split_clips(video)
 
 
 #     if "data" not in st.session_state:

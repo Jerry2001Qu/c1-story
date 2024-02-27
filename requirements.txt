@@ -5,3 +5,9 @@ pydeck
 streamlit
 langchain
 langchain-openai
+scenedetect[opencv]
+elevenlabs
+pyloudnorm
+fuzzysearch
+torch
+torchaudio
