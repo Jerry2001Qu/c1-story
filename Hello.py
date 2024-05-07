@@ -93,7 +93,7 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
             final_script = reformated_story if sot_script == "NO SOT" else sot_script
 
         trt = readtime.of_text(final_script).seconds
-        st.write(f"Estimated TRT: {trt}")
+        st.write(f"Estimated TRT: {trt}s")
 
         output_col_1, output_col_2 = st.columns(2)
         with output_col_1:
