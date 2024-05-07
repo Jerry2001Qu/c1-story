@@ -3,25 +3,41 @@ from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
-import pandas as pd
+import os
+
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_PROJECT"] = "Channel 1"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
+
+from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
-from openai import OpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain.globals import set_llm_cache
+from langchain.cache import SQLiteCache
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, XMLOutputParser
 
-gpt4 = ChatOpenAI(openai_api_key=st.secrets["OPENAI_API_KEY"], model="gpt-4-turbo-preview")
+openai_api_key = st.secrets["OPENAI_API_KEY"]
+anthropic_api_key = st.secrets["ANTHROPIC_API_KEY"]
 
-openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+gpt4 = ChatOpenAI(model="gpt-4-turbo", temperature=0, openai_api_key=openai_api_key)
 
-@st.cache_resource
-def call_gpt(text):
-    response = openai_client.chat.completions.create(
-        model="gpt-4-turbo-preview",
-        messages=[
-            {"role": "user", "content": text},
-        ],
-        n=1
-    )
-    return response.choices[0].message.content
+opus = ChatAnthropic(model="claude-3-opus-20240229", temperature=0, max_tokens=4096, anthropic_api_key=anthropic_api_key)
+sonnet = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0, max_tokens=4096, anthropic_api_key=anthropic_api_key)
+haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens=4096, anthropic_api_key=anthropic_api_key)
+
+set_llm_cache(SQLiteCache(database_path="langchain.db"))
+
+from src.prompts import get_sot_prompt, reformat_prompt, sot_prompt
+
+get_sot_chain = get_sot_prompt | opus
+reformat_chain = reformat_prompt | opus
+sot_chain = sot_prompt | opus
+
+def extract_xml(text):
+    return XMLOutputParser().invoke(text[text.find("<"):text.rfind(">")+1].replace("&", "and"))
+
+import readtime
 
 def run():
     st.set_page_config(
@@ -32,55 +48,72 @@ def run():
 
     st.write("# Channel 1 Demo")
 
-    if "data" not in st.session_state:
-        st.session_state.data = pd.read_csv("cleaned.csv").drop(columns=["Unnamed: 0"])
+    input_col_1, input_col_2 = st.columns(2)
+    with input_col_1:
+        shotlist = st.text_area(
+            "Shotlist",
+            height=300,
+            placeholder="""1. STILL SATELLITE IMAGE OF REGION BEFORE FLOODING
 
-    instructions = st.text_area(
-        "Instructions",
-        value="Given this info, write a news script that's about 300 words. Include quotes where possible with SOT: at the beginning of the paragraph. Never make up information.",
-    )
+RIO GRANDE DO SUL, BRAZIL (MAY 6, 2024) (EUROPEAN UNION/COPERNICUS SENTINEL-2 - Must on-screen courtesy European Union/Copernicus Sentinel-2) (MUTE)
 
-    prompt_template = PromptTemplate.from_template(
-"""{story}
+2. STILL SATELLITE IMAGE OF REGION AFTER FLOODING
 
-\###
+PORTO ALEGRE, RIO GRANDE DO SUL, BRAZIL (APRIL 21, 2024) (EUROPEAN UNION/COPERNICUS SENTINEL-2 - Must on-screen courtesy European Union/Copernicus Sentinel-2) (MUTE)"""
+        )
+    with input_col_2:
+        story = st.text_area(
+            "Story",
+            height=300,
+            placeholder="""Satellite images captured before and after heavy rains in Brazil's southernmost state of Rio Grande do Sul show the extent of devastating floods that have killed 85 people and caused destruction to cities and infrastructure.
 
-{instructions}""")
-
-    submitted = st.button("Submit")
-
-    row = st.columns(3)
-    if "cols" not in st.session_state:
-        st.session_state.cols = [[col, i] for i, col in enumerate(row)]
-    else:
-        for col, col_state in zip(row, st.session_state.cols):
-            col_state[0] = col
+Images from April 21 are compared alongside images captured on Monday (May 6) of the same areas, which include the state capital Porto Alegre and the city of Sao Leopoldo"""
+        )
     
-    if "responses" not in st.session_state:
-        st.session_state.responses = {}
+    if st.button("Run"):
+        with st.status("Running"):
+            st.write("Extracting SOT")
+            sots_raw = get_sot_chain.invoke({"SHOTLIST": shotlist}).content
+            sots_xml = extract_xml(sots_raw)
+            sots = sots_xml['response']
 
-    if submitted:
-        for _, i in st.session_state.cols:
-            st.session_state.responses[i] = call_gpt(prompt_template.format(story=st.session_state.data["Main Content"][i], instructions=instructions))
+            st.write("Reformatting story")
+            reformated_story_raw = reformat_chain.invoke({"STORY": story}).content
+            reformated_story_xml = extract_xml(reformated_story_raw)
+            reformated_story = reformated_story_xml['response']
 
-    for i, (col, story_id) in enumerate(st.session_state.cols):
-        key = f"{i}-{story_id}"
-        with col:
-            with st.container(border=True):
-                story_id = st.selectbox(
-                    "Prefill Story",
-                    st.session_state.data.index,
-                    index=story_id,
-                    format_func=lambda x: st.session_state.data.Slug[x],
-                    key=key+"story_selector",
-                )
-                st.session_state.cols[i][1] = story_id
-                with st.expander(st.session_state.data.Title[story_id]):
-                    st.write(st.session_state.data["Main Content"][story_id])
-                if story_id in st.session_state.responses:
-                    st.write(st.session_state.responses[story_id])
+            st.write("Adding SOT to story")
+            if "NO SOT" in sots:
+                sot_script = "NO SOT"
+            else:
+                sot_script_raw = sot_chain.invoke({"QUOTATIONS": sots, "SCRIPT": reformated_story}).content
+                sot_script_xml = extract_xml(sot_script_raw)
+                sot_script = sot_script_xml['response']
+            
+            final_script = reformated_story if sot_script == "NO SOT" else sot_script
+
+        trt = readtime.of_text(final_script).seconds
+        st.write(f"Estimated TRT: {trt}")
+
+        output_col_1, output_col_2 = st.columns(2)
+        with output_col_1:
+            st.subheader("Original Story")
+            st.write(story)
+        with output_col_2:
+            st.subheader("Final Story")
+            st.write(final_script)
         
-    
+        with st.expander("See details"):
+            st.subheader("SOTs")
+            st.write(sots)
+            st.divider()
+
+            st.subheader("Reformatted story")
+            st.write(reformated_story)
+            st.divider()
+
+            st.subheader("SOT story")
+            st.write(sot_script)
 
 if __name__ == "__main__":
     run()

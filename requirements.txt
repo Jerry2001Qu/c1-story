@@ -5,6 +5,7 @@ pydeck
 streamlit
 langchain
 langchain-openai
+langchain-anthropic
 scenedetect[opencv]
 elevenlabs
 pyloudnorm
@@ -13,3 +14,4 @@ torch
 torchaudio
 moviepy
 onnxruntime
+readtime
