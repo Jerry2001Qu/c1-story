@@ -28,16 +28,18 @@ haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens
 
 set_llm_cache(SQLiteCache(database_path="langchain.db"))
 
-from src.prompts import get_sot_prompt, reformat_prompt, sot_prompt
+from src.prompts import get_sot_prompt, reformat_prompt, sot_prompt, parse_prompt
 
-get_sot_chain = get_sot_prompt | opus
+get_sot_chain = get_sot_prompt | haiku
 reformat_chain = reformat_prompt | opus
 sot_chain = sot_prompt | opus
+parse_chain = parse_prompt | haiku
 
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<"):text.rfind(">")+1].replace("&", "and"))
 
 import readtime
+from annotated_text import annotated_text
 
 def run():
     st.set_page_config(
@@ -84,15 +86,18 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
 
             st.write("Adding SOT to story")
             if "NO SOT" in sots:
-                sot_script = "NO SOT"
+                sot_script = reformated_story
             else:
                 sot_script_raw = sot_chain.invoke({"QUOTATIONS": sots, "SCRIPT": reformated_story}).content
                 sot_script_xml = extract_xml(sot_script_raw)
                 sot_script = sot_script_xml['response']
             
-            final_script = reformated_story if sot_script == "NO SOT" else sot_script
+            st.write("Parsing story")
+            parsed_script_raw = parse_chain.invoke({"QUOTATIONS": sots, "SCRIPT": sot_script}).content
+            parsed_script_xml = extract_xml(parsed_script_raw)
+            parsed_script_json = JsonOutputParser().invoke(parsed_script_xml['response'])
 
-        trt = readtime.of_text(final_script).seconds
+        trt = readtime.of_text(sot_script).seconds
         st.write(f"Estimated TRT: {trt}s")
 
         output_col_1, output_col_2 = st.columns(2)
@@ -101,7 +106,13 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
             st.write(story)
         with output_col_2:
             st.subheader("Final Story")
-            st.write(final_script)
+            for section in parsed_script_json["sections"]:
+                with st.container(border=True):
+                    if section["type"] == "SOT":
+                        annotated_text(("SOT", "", "#8ef"))
+                    elif section["type"] == "ANCHOR":
+                        annotated_text(("ANCHOR", "", "#faa"))
+                    st.write(section["text"])
         
         with st.expander("See details"):
             st.subheader("SOTs")

@@ -1,7 +1,15 @@
 from langchain.prompts import PromptTemplate
 
 get_sot_prompt = PromptTemplate.from_template(
-"""<shotlist>
+"""I'm trying to extract shots with quotations from a shotlist.
+
+<example>
+1. PROTESTERS SHOUTING (English): "THEY'RE COMING FOR US, HOLD THE LINE"
+3. PROTESTER SHOUTING (English) "FREE PALESTINE" WHILE BEING TAKEN AWAY BY POLICE
+12. PROTESTER SAYING (English) "I AM A STUDENT HERE, I AM AN ENGLISH MAJOR. PLEASE DON'T FAIL US, DON'T FAIL US, YOU ARE ALREADY FAILING US" WHILE BEING TAKEN AWAY BY POLICE
+</example>
+
+<shotlist>
 {SHOTLIST}
 </shotlist>
 
@@ -65,4 +73,49 @@ story with a quotation if it makes sense to do so, but don't end the story with 
 quotation. Keep the quotations short, you may cut out a portion to keep it short.
 Insert quotations exactly with descriptions. Don't add transitions. Think through
 your answer before responding, including if it makes sense to start with a quote. Put the text in <response></response> tags."""
+)
+
+parse_prompt = PromptTemplate.from_template(
+"""Parse my script into a JSON object.
+
+<example>
+{{
+  "sections": [
+    {{
+      "text": "PROTESTERS GATHERED IN THE STREET, SHOUTING (English): \"NO JUSTICE, NO PEACE!\""
+      "type": "SOT",
+      "shot_id": 2,
+      "quote": "NO JUSTICE, NO PEACE!",
+    }},
+    {{
+      "text": "Hundreds of climate activists assembled outside the State Capitol early on Thursday, May second, to demand immediate government action against climate change."
+      "type": "ANCHOR",
+    }},
+    {{
+      "text": "Live TV footage showed protesters chanting slogans and carrying banners demanding policy changes to tackle environmental issues. Police in tactical gear maintained a tight perimeter around the Capitol building."
+      "type": "ANCHOR",
+    }},
+    {{
+      "text": "PROTESTER SHOUTING (English): \"CLIMATE JUSTICE NOW!\" WHILE WAVING A BANNER",
+      "type": "SOT",
+      "shot_id": 8,
+      "quote": "CLIMATE JUSTICE NOW!"
+    }},
+  ]
+}}
+
+</example>
+
+Here are the shots with quotes:
+<quotations>
+{QUOTATIONS}
+</quotations>
+
+Here is the script:
+<script>
+{SCRIPT}
+</script>
+
+Each paragraph should become a section. Some paragraphs are quotes. These should be matched with quotes from the shotlist & add a shot_id.
+Put the output in <response></response> tags"""
 )
