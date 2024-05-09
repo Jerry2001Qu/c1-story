@@ -19,6 +19,8 @@ from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, XML
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 anthropic_api_key = st.secrets["ANTHROPIC_API_KEY"]
+google_api_key = st.secrets["GOOGLE_API_KEY"]
+elevenlabs_api_key = st.secrets["ELEVENLABS_API_KEY"]
 
 gpt4 = ChatOpenAI(model="gpt-4-turbo", temperature=0, openai_api_key=openai_api_key)
 
@@ -28,6 +30,57 @@ haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens
 
 set_llm_cache(SQLiteCache(database_path="langchain.db"))
 
+import google.generativeai as genai
+genai.configure(api_key=google_api_key)
+
+generation_config = {
+  "temperature": 0,
+  "top_p": 0.95,
+  "top_k": 0,
+  "max_output_tokens": 8192,
+}
+
+safety_settings = [
+  {
+    "category": "HARM_CATEGORY_HARASSMENT",
+    "threshold": "BLOCK_NONE"
+  },
+  {
+    "category": "HARM_CATEGORY_HATE_SPEECH",
+    "threshold": "BLOCK_NONE"
+  },
+  {
+    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    "threshold": "BLOCK_NONE"
+  },
+  {
+    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+    "threshold": "BLOCK_NONE"
+  },
+]
+
+gemini = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", generation_config=generation_config, safety_settings=safety_settings)
+
+from elevenlabs.client import ElevenLabs
+from elevenlabs import Voice
+
+client = ElevenLabs(
+    api_key=elevenlabs_api_key
+)
+
+def TTS(text, filename):
+    audio = client.generate(
+        text=text,
+        voice=Voice(
+            voice_id="H2LXjnBS1droRODepT50"
+        )
+    )
+
+    with open(filename, 'wb') as file:
+        for chunk in audio:
+            if chunk:
+                file.write(chunk)
+
 from src.prompts import get_sot_prompt, reformat_prompt, sot_prompt, parse_prompt
 
 get_sot_chain = get_sot_prompt | haiku
@@ -35,8 +88,74 @@ reformat_chain = reformat_prompt | opus
 sot_chain = sot_prompt | opus
 parse_chain = parse_prompt | haiku
 
+from PIL import Image
+import base64
+from io import BytesIO
+import moviepy.editor as mp
+
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<"):text.rfind(">")+1].replace("&", "and"))
+
+def extract_first_frame_and_audio(input_file):
+    video = mp.VideoFileClip(str(input_file))
+    first_frame = video.get_frame(0)
+    frame_output = input_file.with_suffix(".jpg")
+    image = Image.fromarray(first_frame)
+    if not frame_output.exists():
+        image.save(frame_output)
+
+    audio = video.audio
+    audio_output = input_file.with_suffix(".mp3")
+    if not audio_output.exists():
+        audio.write_audiofile(str(audio_output))
+
+    video.close()
+    audio.close()
+    
+    return frame_output, audio_output
+
+def describe_clips(files, shotlist):
+    content = []
+
+    content += ["Clips:\n"]
+    for file in files:
+        name = file.stem
+        frame_file, audio_file = extract_first_frame_and_audio(file)
+        
+        content += [f"{name}:", genai.upload_file(frame_file), genai.upload_file(audio_file)]
+    
+    content += ["\nShotlist:\n", shotlist]
+
+    prompt = """Please match each clip with its shot in the shotlist. I've given you the first frame & audio from each clip. It should be in the same order,
+but shots may be matched to multiple adjacent clips. Make sure shots that include quotes are in the clip. Output XML in <response></response> tags
+
+<example>
+<clip>
+    <id>1</id>
+    <shot>1</shot>
+    <description>FIREFIGHTERS FORMING A LINE AND CLOSING IN ON A RAGING BLAZE, RESIDENTS SHOUTING (English): "GET OUT OF THE WAY, IT'S SPREADING!"</description>
+</clip>
+<clip>
+    <id>2</id>
+    <shot>2</shot>
+    <description>RESIDENTS HUDDLED TOGETHER BEHIND TEMPORARY SHELTERS</description>
+</clip>
+<clip>
+    <id>3</id>
+    <shot>2</shot>
+    <description>RESIDENTS HUDDLED TOGETHER BEHIND TEMPORARY SHELTERS</description>
+</clip>
+</example>"""
+
+    content += ["\n\n", prompt]
+
+    convo = gemini.start_chat()
+    convo.send_message(content)
+
+    print(gemini.count_tokens(content))
+
+    clips_xml = extract_xml(convo.last.text)
+    return clips_xml
 
 import readtime
 from annotated_text import annotated_text
