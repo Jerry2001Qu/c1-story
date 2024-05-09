@@ -169,6 +169,8 @@ import readtime
 from annotated_text import annotated_text
 from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
 from pathlib import Path
+from st_aggrid import AgGrid, GridOptionsBuilder
+import pandas as pd
 
 def run():
     st.set_page_config(
@@ -179,26 +181,27 @@ def run():
 
     st.write("# Channel 1 Demo")
 
+    if "run" not in st.session_state:
+        st.session_state["run"] = False
+    if "ran" not in st.session_state:
+        st.session_state["ran"] = False
+    
+    def reset():
+        st.session_state["run"] = False
+        st.session_state["ran"] = False
+
     input_col_1, input_col_2, input_col_3 = st.columns(3)
     with input_col_1:
         shotlist = st.text_area(
             "Shotlist",
             height=300,
-            placeholder="""1. STILL SATELLITE IMAGE OF REGION BEFORE FLOODING
-
-RIO GRANDE DO SUL, BRAZIL (MAY 6, 2024) (EUROPEAN UNION/COPERNICUS SENTINEL-2 - Must on-screen courtesy European Union/Copernicus Sentinel-2) (MUTE)
-
-2. STILL SATELLITE IMAGE OF REGION AFTER FLOODING
-
-PORTO ALEGRE, RIO GRANDE DO SUL, BRAZIL (APRIL 21, 2024) (EUROPEAN UNION/COPERNICUS SENTINEL-2 - Must on-screen courtesy European Union/Copernicus Sentinel-2) (MUTE)"""
+            on_change=reset,
         )
     with input_col_2:
         story = st.text_area(
             "Story",
             height=300,
-            placeholder="""Satellite images captured before and after heavy rains in Brazil's southernmost state of Rio Grande do Sul show the extent of devastating floods that have killed 85 people and caused destruction to cities and infrastructure.
-
-Images from April 21 are compared alongside images captured on Monday (May 6) of the same areas, which include the state capital Porto Alegre and the city of Sao Leopoldo"""
+            on_change=reset,
         )
     with input_col_3:
         video = st.file_uploader("Upload video", type=["mp4"], accept_multiple_files=False)
@@ -209,48 +212,83 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
                 st.video(str(video_file))
     
     if st.button("Run"):
+        st.session_state["run"] = True
+
+    if st.session_state["run"]:
         with st.status("Running"):
-            st.write("Splitting video")
-            scene_list = detect(str(video_file), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            video_folder = Path(DIR) / video_file.stem
-            video_folder.mkdir(parents=True, exist_ok=True)
-            split_video_ffmpeg(str(video_file), scene_list, output_file_template=f"{str(video_folder)}/$SCENE_NUMBER.mp4")
+            if not st.session_state["ran"]:
+                st.write("Splitting video")
+                scene_list = detect(str(video_file), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
+                video_folder = Path(DIR) / video_file.stem
+                video_folder.mkdir(parents=True, exist_ok=True)
+                split_video_ffmpeg(str(video_file), scene_list, output_file_template=f"{str(video_folder)}/$SCENE_NUMBER.mp4")
 
-            st.write("Labelling clips")
-            clips = list(video_folder.glob("*.mp4"))
-            clips_xml = describe_clips(clips[1:], shotlist)
-            clips = []
-            for clip in clips_xml["response"]:
-                new_section = {}
-                for part in clip["clip"]:
-                    for key, val in part.items():
-                        new_section[key] = val.strip()
-                clips.append(new_section)
+                st.write("Labelling clips")
+                clips = list(video_folder.glob("*.mp4"))
+                clips_xml = describe_clips(clips[1:], shotlist)
+                clips = []
+                for clip in clips_xml["response"]:
+                    new_section = {}
+                    for part in clip["clip"]:
+                        for key, val in part.items():
+                            new_section[key] = val.strip()
+                    clips.append(new_section)
+                st.session_state["clips"] = clips
 
-            st.write("Extracting SOT")
-            sots_raw = get_sot_chain.invoke({"SHOTLIST": shotlist}).content
-            sots_xml = extract_xml(sots_raw)
-            sots = sots_xml['response']
+                st.write("Extracting SOT")
+                sots_raw = get_sot_chain.invoke({"SHOTLIST": shotlist}).content
+                sots_xml = extract_xml(sots_raw)
+                sots = sots_xml['response']
+                st.session_state["sots"] = sots
 
-            st.write("Reformatting story")
-            reformated_story_raw = reformat_chain.invoke({"STORY": story}).content
-            reformated_story_xml = extract_xml(reformated_story_raw)
-            reformated_story = reformated_story_xml['response']
+                st.write("Reformatting story")
+                reformated_story_raw = reformat_chain.invoke({"STORY": story}).content
+                reformated_story_xml = extract_xml(reformated_story_raw)
+                reformated_story = reformated_story_xml['response']
+                st.session_state["reformated_story"] = reformated_story
 
-            st.write("Adding SOT to story")
-            if "NO SOT" in sots:
-                sot_script = reformated_story
+                st.write("Adding SOT to story")
+                if "NO SOT" in sots:
+                    sot_script = reformated_story
+                else:
+                    sot_script_raw = sot_chain.invoke({"QUOTATIONS": sots, "SCRIPT": reformated_story}).content
+                    sot_script_xml = extract_xml(sot_script_raw)
+                    sot_script = sot_script_xml['response']
+                st.session_state["sot_script"] = sot_script
+                
+                st.write("Parsing story")
+                parsed_script_raw = parse_chain.invoke({"QUOTATIONS": sots, "SCRIPT": sot_script}).content
+                parsed_script_xml = extract_xml(parsed_script_raw)
+                parsed_script_json = JsonOutputParser().invoke(parsed_script_xml['response'])
+                st.session_state["parsed_script_json"] = parsed_script_json
             else:
-                sot_script_raw = sot_chain.invoke({"QUOTATIONS": sots, "SCRIPT": reformated_story}).content
-                sot_script_xml = extract_xml(sot_script_raw)
-                sot_script = sot_script_xml['response']
-            
-            st.write("Parsing story")
-            parsed_script_raw = parse_chain.invoke({"QUOTATIONS": sots, "SCRIPT": sot_script}).content
-            parsed_script_xml = extract_xml(parsed_script_raw)
-            parsed_script_json = JsonOutputParser().invoke(parsed_script_xml['response'])
+                video_folder = Path(DIR) / video_file.stem
+                clips = st.session_state["clips"]
+                sots = st.session_state["sots"]
+                reformated_story = st.session_state["reformated_story"]
+                sot_script = st.session_state["sot_script"]
+                parsed_script_json = st.session_state["parsed_script_json"]
+        
+        st.session_state["ran"] = True
 
-            st.write("Generating audio")
+        trt = readtime.of_text(sot_script).seconds
+        st.write(f"Estimated TRT: {trt}s")
+
+        output_col_1, output_col_2 = st.columns(2)
+        with output_col_1:
+            st.subheader("Original Story")
+            st.write(story)
+        with output_col_2:
+            st.subheader("Final Story")
+            for section in parsed_script_json["sections"]:
+                with st.container(border=True):
+                    if section["type"] == "SOT":
+                        annotated_text(("SOT", "", "#8ef"))
+                    elif section["type"] == "ANCHOR":
+                        annotated_text(("ANCHOR", "", "#faa"))
+                    st.write(section["text"])
+        
+        if st.button("Generate audio"):
             audio_clips = []
             for i, section in enumerate(parsed_script_json["sections"]):
                 section['id'] = i
@@ -269,41 +307,77 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
 
             for audio in audio_clips:
                 audio.close()
+            
+            st.audio(str(output_audio_file), format="audio/mpeg")
 
-        with st.expander("See details"):
-            st.subheader("Labelled clips")
-            st.write(clips)
-            st.divider()
+        # data = {
+        #     'type': [],
+        #     'text': [],
+        # }
+        # for section in parsed_script_json["sections"]:
+        #     data['type'].append(section['type'])
+        #     data['text'].append(section['text'])
+        # df = pd.DataFrame(data)
 
-            st.subheader("SOTs")
-            st.write(sots)
-            st.divider()
+        # gb = GridOptionsBuilder.from_dataframe(df)
+        # gb.configure_default_column(editable=True, sortable=True)
+        # AgGrid(df, gridOptions=gb.build())
 
-            st.subheader("Reformatted story")
-            st.write(reformated_story)
-            st.divider()
 
-            st.subheader("SOT story")
-            st.write(sot_script)
+        #     st.write("Generating audio")
+        #     audio_clips = []
+        #     for i, section in enumerate(parsed_script_json["sections"]):
+        #         section['id'] = i
+        #         if section["type"] == "SOT":
+        #             clip = next(clip for clip in clips if str(clip["shot"]) == str(section["shot_id"]))
+        #             audio_clips.append(mp.AudioFileClip(str(video_folder / f"{clip['id']}.mp4")))
+        #         elif section["type"] == "ANCHOR":
+        #             filename = str(video_folder / f"{section['id']}.mp3")
+        #             TTS(section["text"], filename)
+        #             audio_clips.append(mp.AudioFileClip(filename))
+            
+        #     final_audio = mp.concatenate_audioclips(audio_clips)
 
-        trt = readtime.of_text(sot_script).seconds
-        st.write(f"Estimated TRT: {trt}s")
+        #     output_audio_file = video_folder / "final_audio.mp3"
+        #     final_audio.write_audiofile(output_audio_file)
 
-        st.audio(str(output_audio_file), format="audio/mpeg")
+        #     for audio in audio_clips:
+        #         audio.close()
 
-        output_col_1, output_col_2 = st.columns(2)
-        with output_col_1:
-            st.subheader("Original Story")
-            st.write(story)
-        with output_col_2:
-            st.subheader("Final Story")
-            for section in parsed_script_json["sections"]:
-                with st.container(border=True):
-                    if section["type"] == "SOT":
-                        annotated_text(("SOT", "", "#8ef"))
-                    elif section["type"] == "ANCHOR":
-                        annotated_text(("ANCHOR", "", "#faa"))
-                    st.write(section["text"])
+        # with st.expander("See details"):
+        #     st.subheader("Labelled clips")
+        #     st.write(clips)
+        #     st.divider()
+
+        #     st.subheader("SOTs")
+        #     st.write(sots)
+        #     st.divider()
+
+        #     st.subheader("Reformatted story")
+        #     st.write(reformated_story)
+        #     st.divider()
+
+        #     st.subheader("SOT story")
+        #     st.write(sot_script)
+
+        # trt = readtime.of_text(sot_script).seconds
+        # st.write(f"Estimated TRT: {trt}s")
+
+        # st.audio(str(output_audio_file), format="audio/mpeg")
+
+        # output_col_1, output_col_2 = st.columns(2)
+        # with output_col_1:
+        #     st.subheader("Original Story")
+        #     st.write(story)
+        # with output_col_2:
+        #     st.subheader("Final Story")
+        #     for section in parsed_script_json["sections"]:
+        #         with st.container(border=True):
+        #             if section["type"] == "SOT":
+        #                 annotated_text(("SOT", "", "#8ef"))
+        #             elif section["type"] == "ANCHOR":
+        #                 annotated_text(("ANCHOR", "", "#faa"))
+        #             st.write(section["text"])
 
 if __name__ == "__main__":
     run()
