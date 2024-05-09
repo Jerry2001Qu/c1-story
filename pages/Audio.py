@@ -68,6 +68,7 @@ client = ElevenLabs(
     api_key=elevenlabs_api_key
 )
 
+@st.cache_data
 def TTS(text, filename):
     audio = client.generate(
         text=text,
@@ -114,6 +115,7 @@ def extract_first_frame_and_audio(input_file):
     
     return frame_output, audio_output
 
+@st.cache_data
 def describe_clips(files, shotlist):
     content = []
 
@@ -157,8 +159,16 @@ but shots may be matched to multiple adjacent clips. Make sure shots that includ
     clips_xml = extract_xml(convo.last.text)
     return clips_xml
 
+DIR = "/tmp/"
+
+def save_uploaded(file_data):
+    with open(os.path.join(DIR, file_data.name),"wb") as f:
+        f.write(file_data.getbuffer())
+
 import readtime
 from annotated_text import annotated_text
+from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
+from pathlib import Path
 
 def run():
     st.set_page_config(
@@ -169,7 +179,7 @@ def run():
 
     st.write("# Channel 1 Demo")
 
-    input_col_1, input_col_2 = st.columns(2)
+    input_col_1, input_col_2, input_col_3 = st.columns(3)
     with input_col_1:
         shotlist = st.text_area(
             "Shotlist",
@@ -190,9 +200,33 @@ PORTO ALEGRE, RIO GRANDE DO SUL, BRAZIL (APRIL 21, 2024) (EUROPEAN UNION/COPERNI
 
 Images from April 21 are compared alongside images captured on Monday (May 6) of the same areas, which include the state capital Porto Alegre and the city of Sao Leopoldo"""
         )
+    with input_col_3:
+        video = st.file_uploader("Upload video", type=["mp4"], accept_multiple_files=False)
+        if video:
+            video_file = Path(os.path.join(DIR, video.name))
+            save_uploaded(video)
+            with st.expander("Uploaded video"):
+                st.video(str(video_file))
     
     if st.button("Run"):
         with st.status("Running"):
+            st.write("Splitting video")
+            scene_list = detect(str(video_file), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
+            video_folder = Path(DIR) / video_file.stem
+            video_folder.mkdir(parents=True, exist_ok=True)
+            split_video_ffmpeg(str(video_file), scene_list, output_file_template=f"{str(video_folder)}/$SCENE_NUMBER.mp4")
+
+            st.write("Labelling clips")
+            clips = list(video_folder.glob("*.mp4"))
+            clips_xml = describe_clips(clips[1:], shotlist)
+            clips = []
+            for clip in clips_xml["response"]:
+                new_section = {}
+                for part in clip["clip"]:
+                    for key, val in part.items():
+                        new_section[key] = val.strip()
+                clips.append(new_section)
+
             st.write("Extracting SOT")
             sots_raw = get_sot_chain.invoke({"SHOTLIST": shotlist}).content
             sots_xml = extract_xml(sots_raw)
@@ -216,7 +250,31 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
             parsed_script_xml = extract_xml(parsed_script_raw)
             parsed_script_json = JsonOutputParser().invoke(parsed_script_xml['response'])
 
+            st.write("Generating audio")
+            audio_clips = []
+            for i, section in enumerate(parsed_script_json["sections"]):
+                section['id'] = i
+                if section["type"] == "SOT":
+                    clip = next(clip for clip in clips if str(clip["shot"]) == str(section["shot_id"]))
+                    audio_clips.append(mp.AudioFileClip(str(video_folder / f"{clip['id']}.mp4")))
+                elif section["type"] == "ANCHOR":
+                    filename = str(video_folder / f"{section['id']}.mp3")
+                    TTS(section["text"], filename)
+                    audio_clips.append(mp.AudioFileClip(filename))
+            
+            final_audio = mp.concatenate_audioclips(audio_clips)
+
+            output_audio_file = video_folder / "final_audio.mp3"
+            final_audio.write_audiofile(output_audio_file)
+
+            for audio in audio_clips:
+                audio.close()
+
         with st.expander("See details"):
+            st.subheader("Labelled clips")
+            st.write(clips)
+            st.divider()
+
             st.subheader("SOTs")
             st.write(sots)
             st.divider()
@@ -231,6 +289,8 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
         trt = readtime.of_text(sot_script).seconds
         st.write(f"Estimated TRT: {trt}s")
 
+        st.audio(str(output_audio_file), format="audio/mpeg")
+
         output_col_1, output_col_2 = st.columns(2)
         with output_col_1:
             st.subheader("Original Story")
@@ -244,14 +304,6 @@ Images from April 21 are compared alongside images captured on Monday (May 6) of
                     elif section["type"] == "ANCHOR":
                         annotated_text(("ANCHOR", "", "#faa"))
                     st.write(section["text"])
-        
-        output_col_1, output_col_2 = st.columns(2)
-        with output_col_1:
-            st.subheader("Original Story")
-            st.write(story)
-        with output_col_2:
-            st.subheader("Final Story")
-            st.write(sot_script)
 
 if __name__ == "__main__":
     run()
