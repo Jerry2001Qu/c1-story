@@ -119,20 +119,8 @@ def extract_first_frame_and_audio(input_file):
 def describe_clips(files, shotlist):
     content = []
 
-    content += ["Clips:\n"]
-    for file in files:
-        name = file.stem
-        frame_file, audio_file = extract_first_frame_and_audio(file)
-        
-        content += [f"{name}:", genai.upload_file(frame_file), genai.upload_file(audio_file)]
-    
-    content += ["\nShotlist:\n", shotlist]
-
-    prompt = """Please match each clip with its shot in the shotlist. I've given you the first frame & audio from each clip. It should be in the same order,
-but shots may be matched to multiple adjacent clips. Make sure shots that include quotes are in the clip. Shots with quotes can only be matched to one clip.
-Output XML in <response></response> tags
-
-<example>
+    content += ["You are a video editor who is matching video clips with shots from a shotlist.\n"]
+    content += ["""<example>
 <clip>
     <id>1</id>
     <shot>1</shot>
@@ -148,7 +136,21 @@ Output XML in <response></response> tags
     <shot>2</shot>
     <description>RESIDENTS HUDDLED TOGETHER BEHIND TEMPORARY SHELTERS</description>
 </clip>
-</example>"""
+</example>
+
+Clips:"""]
+
+    for file in files:
+        name = file.stem
+        frame_file, audio_file = extract_first_frame_and_audio(file)
+        
+        content += [f"{name}:", genai.upload_file(frame_file), genai.upload_file(audio_file)]
+    
+    content += ["\nShotlist:\n", shotlist]
+
+    prompt = """Please match each clip with its shot in the shotlist. I've given you the first frame & audio from each clip. It should be in the same order,
+but shots may be matched to multiple adjacent clips. Shots with quotes can only be matched to one clip. Only label descriptions with those in the shotlist exactly.
+<shot></shot> should just be the number. Output XML in <response></response> tags"""
 
     content += ["\n\n", prompt]
 
@@ -354,6 +356,7 @@ def run():
                 sots_xml = extract_xml(sots_raw)
                 sots = sots_xml['response']
                 st.session_state["sots"] = sots
+                print(sots)
 
                 st.write("Reformatting story")
                 reformated_story_raw = reformat_chain.invoke({"STORY": story}).content
@@ -450,7 +453,6 @@ def run():
                 if section["type"] == "SOT":
                     options = [clip for clip in clips if str(clip["shot"]) == str(int(section["shot_id"]))]
                     if options:
-                        st.write(options)
                         clip = options[0]
                         audio_clips.append(mp.AudioFileClip(str(video_folder / f"{clip['id']}.mp4")))
                 elif section["type"] == "ANCHOR":
