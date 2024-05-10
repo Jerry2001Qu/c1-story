@@ -84,10 +84,10 @@ def TTS(text, filename):
 
 from src.prompts import get_sot_prompt, reformat_prompt, sot_prompt, parse_prompt
 
-get_sot_chain = get_sot_prompt | haiku
+get_sot_chain = get_sot_prompt | opus
 reformat_chain = reformat_prompt | opus
 sot_chain = sot_prompt | opus
-parse_chain = parse_prompt | haiku
+parse_chain = parse_prompt | opus
 
 from PIL import Image
 import base64
@@ -451,15 +451,20 @@ def run():
         if st.button("Generate audio"):
             audio_clips = []
             for i, section in df.iterrows():
-                if section["type"] == "SOT":
-                    options = [clip for clip in clips if str(clip["shot"]) == str(int(section["shot_id"]))]
-                    if options:
-                        clip = options[0]
-                        audio_clips.append(mp.AudioFileClip(str(video_folder / f"{clip['id']}.mp4")))
-                elif section["type"] == "ANCHOR":
-                    filename = str(video_folder / f"{i}.mp3")
-                    TTS(section["text"], filename)
-                    audio_clips.append(mp.AudioFileClip(filename))
+                try:
+                    if section["type"] == "SOT":
+                        options = [clip for clip in clips if str(clip["shot"]) == str(int(section["shot_id"]))]
+                        if options:
+                            clip = options[0]
+                            audio_clips.append(mp.AudioFileClip(str(video_folder / f"{clip['id']}.mp4")))
+                        else:
+                            st.write(f"Clip not found for shot {section['shot_id']}, skipping")
+                    elif section["type"] == "ANCHOR":
+                        filename = str(video_folder / f"{i}.mp3")
+                        TTS(section["text"], filename)
+                        audio_clips.append(mp.AudioFileClip(filename))
+                except Exception as e:
+                    st.write(f"Error with section {i}, {e}")
             
             final_audio = mp.concatenate_audioclips(audio_clips)
 

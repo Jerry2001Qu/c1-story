@@ -13,8 +13,8 @@ get_sot_prompt = PromptTemplate.from_template(
 {SHOTLIST}
 </shotlist>
 
-Please give me a numbered list of shots in the shotlist that contain quotations. Don't copy from the <example></example>. Copy them exactly
-and put it in <response></response> tags. If there are no quotes respond with <response>NO SOT</response>""")
+Please give me a numbered list of shots in the shotlist that contain quotations. Don't copy from the examples. Copy from
+the shotlist exactly and put it in <response></response> tags. If there are no quotes respond with <response>NO SOT</response>""")
 
 reformat_prompt = PromptTemplate.from_template(
 """I'm producing a television news segment.  I'd like to reformat a news story I wrote so it 
