@@ -153,7 +153,7 @@ Output XML in <response></response> tags
     content += ["\n\n", prompt]
 
     convo = gemini.start_chat()
-    convo.send_message(content)
+    convo.send_message(content, request_options={"timeout": 600})
 
     print(gemini.count_tokens(content))
 
