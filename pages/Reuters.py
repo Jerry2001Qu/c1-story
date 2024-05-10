@@ -484,6 +484,12 @@ def run():
             gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
             gb.configure_column("shot_id", width=30)
 
+            gb.configure_grid_options(
+                rowDragManaged=True,  # Enable managed row drag
+                animateRows=True,  # Add row drag animation
+                rowHeight=60,  # Adjust this value to increase/decrease row height
+                domLayout='autoHeight'  # Adjust grid height automatically to fit rows
+            )
             # gb.configure_grid_options(rowDragManaged = True, onRowDragEnd = onRowDragEnd, deltaRowDataMode = True, getRowNodeId = getRowNodeId, onGridReady = onGridReady, animateRows = True, onRowDragMove = onRowDragMove)
             df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine", height=600)["data"]
             
