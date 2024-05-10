@@ -93,6 +93,7 @@ from PIL import Image
 import base64
 from io import BytesIO
 import moviepy.editor as mp
+import html
 
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<"):text.rfind(">")+1].replace("&", "and"))
@@ -414,7 +415,7 @@ def run():
         output_col_1, output_col_2 = st.columns([1, 2])
         with output_col_1:
             st.subheader("Original Story")
-            st.write(story)
+            st.write(html.escape(story))
         with output_col_2:
             st.subheader("Final Story")
             data = {
