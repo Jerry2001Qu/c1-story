@@ -262,63 +262,8 @@ import readtime
 from annotated_text import annotated_text
 from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
 from pathlib import Path
-from st_aggrid import AgGrid, GridOptionsBuilder, JsCode, GridUpdateMode
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 import pandas as pd
-
-onRowDragEnd = JsCode("""
-function onRowDragEnd(e) {
-    console.log('onRowDragEnd', e);
-}
-""")
-
-getRowNodeId = JsCode("""
-function getRowNodeId(data) {
-    return data.id
-}
-""")
-
-onGridReady = JsCode("""
-function onGridReady() {
-    immutableStore.forEach(
-        function(data, index) {
-            data.id = index;
-            });
-    gridOptions.api.setRowData(immutableStore);
-    }
-""")
-
-onRowDragMove = JsCode("""
-function onRowDragMove(event) {
-    var movingNode = event.node;
-    var overNode = event.overNode;
-
-    var rowNeedsToMove = movingNode !== overNode;
-
-    if (rowNeedsToMove) {
-        var movingData = movingNode.data;
-        var overData = overNode.data;
-
-        immutableStore = newStore;
-
-        var fromIndex = immutableStore.indexOf(movingData);
-        var toIndex = immutableStore.indexOf(overData);
-
-        var newStore = immutableStore.slice();
-        moveInArray(newStore, fromIndex, toIndex);
-
-        immutableStore = newStore;
-        gridOptions.api.setRowData(newStore);
-
-        gridOptions.api.clearFocusedCell();
-    }
-
-    function moveInArray(arr, fromIndex, toIndex) {
-        var element = arr[fromIndex];
-        arr.splice(fromIndex, 1);
-        arr.splice(toIndex, 0, element);
-    }
-}
-""")
 
 def run():
     st.set_page_config(
@@ -490,9 +435,7 @@ def run():
                 rowHeight=60,  # Adjust this value to increase/decrease row height
                 domLayout='autoHeight'  # Adjust grid height automatically to fit rows
             )
-            # gb.configure_grid_options(rowDragManaged = True, onRowDragEnd = onRowDragEnd, deltaRowDataMode = True, getRowNodeId = getRowNodeId, onGridReady = onGridReady, animateRows = True, onRowDragMove = onRowDragMove)
             df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine", height=600)["data"]
-            st.write(df)
             # for section in parsed_script_json["sections"]:
             #     with st.container(border=True):
             #         if section["type"] == "SOT":
