@@ -349,6 +349,7 @@ def run():
                         for key, val in part.items():
                             new_section[key] = val.strip() if type(val) is str else val
                     clips.append(new_section)
+                print(clips)
                 st.session_state["clips"] = clips
 
                 st.write("Extracting SOT")
