@@ -338,7 +338,7 @@ def run():
                 split_video_ffmpeg(str(video_file), scene_list, output_file_template=f"{str(video_folder)}/$SCENE_NUMBER.mp4")
 
                 st.write("Labelling clips")
-                clips = list(video_folder.glob("*.mp4"))
+                clips = list(sorted(video_folder.glob("*.mp4")))
                 clips_xml = describe_clips(clips[1:], shotlist)
                 clips = []
                 for clip in clips_xml["response"]:
@@ -450,6 +450,7 @@ def run():
                 if section["type"] == "SOT":
                     options = [clip for clip in clips if str(clip["shot"]) == str(int(section["shot_id"]))]
                     if options:
+                        st.write(options)
                         clip = options[0]
                         audio_clips.append(mp.AudioFileClip(str(video_folder / f"{clip['id']}.mp4")))
                 elif section["type"] == "ANCHOR":
