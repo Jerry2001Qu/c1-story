@@ -149,8 +149,8 @@ Clips:"""]
     content += ["\nShotlist:\n", shotlist]
 
     prompt = """Please match each clip with its shot in the shotlist. I've given you the first frame & audio from each clip. It should be in the same order,
-but shots may be matched to multiple adjacent clips. Shots with quotes can only be matched to one clip. Only label descriptions with those in the shotlist exactly.
-<shot></shot> should just be the number. Output XML in <response></response> tags"""
+but shots may be matched to multiple adjacent clips. Shots with quotes can only be matched to one clip. Include <id></id>, <shot></shot>, & <description>
+for each clip. Only label descriptions with those in the shotlist exactly. <shot></shot> should just be the number. Output XML in <response></response> tags"""
 
     content += ["\n\n", prompt]
 
