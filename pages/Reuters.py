@@ -429,9 +429,9 @@ def run():
             df = pd.DataFrame(data)
 
             gb = GridOptionsBuilder.from_dataframe(df)
-            gb.configure_column("type", width=40, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True)
+            gb.configure_column("type", width=40, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
             gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
-            gb.configure_column("shot_id", width=40)
+            gb.configure_column("shot_id", width=40, editable=True)
 
             gb.configure_grid_options(
                 rowDragManaged=True,  # Enable managed row drag
