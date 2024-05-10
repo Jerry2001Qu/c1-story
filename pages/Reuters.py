@@ -480,12 +480,11 @@ def run():
             df = pd.DataFrame(data)
 
             gb = GridOptionsBuilder.from_dataframe(df)
-            gb.configure_column("type", width=40, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True)
-            gb.configure_column("text", wrapText=True, editable=True)
+            gb.configure_column("type", width=40)
+            gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
             gb.configure_column("shot_id", width=20)
 
-            gb.configure_grid_options(rowDragManaged = True, onRowDragEnd = onRowDragEnd, deltaRowDataMode = True, getRowNodeId = getRowNodeId, onGridReady = onGridReady, animateRows = True, onRowDragMove = onRowDragMove)
-            df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, theme="alpine", height=600)["data"]
+            df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine", height=600)["data"]
             
             # for section in parsed_script_json["sections"]:
             #     with st.container(border=True):
