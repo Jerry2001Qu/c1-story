@@ -351,7 +351,7 @@ def run():
             }
             for section in parsed_script_json["sections"]:
                 data['type'].append(section['type'])
-                data['summary'].append(section['summary'])
+                data['summary'].append(section['summary'] if section['type'] == 'ANCHOR' else None)
                 data['shot_id'].append(section['shot_id'] if section['type'] == 'SOT' else None)
                 data['text'].append(section['text'])
             df = pd.DataFrame(data)
