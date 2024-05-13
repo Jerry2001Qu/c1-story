@@ -368,7 +368,7 @@ def run():
                 rowHeight=60,
                 domLayout='autoHeight'
             )
-            df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine", height=1000)["data"]
+            df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
             # for section in parsed_script_json["sections"]:
             #     with st.container(border=True):
             #         if section["type"] == "SOT":
