@@ -309,7 +309,8 @@ def run():
         for s1, s2 in zip(parsed_script_json["sections"], section_summary_json["sections"]):
             if s1["id"] != s2["id"]:
                 print("ERROR: IDs didn't match", s1, s2)
-            s1["summary"] = s2["summary"]
+            if s1["type"] == "ANCHOR":
+                s1["summary"] = s2["summary"]
 
         with st.expander("See details"):
             st.subheader("Labelled clips")
@@ -356,10 +357,10 @@ def run():
             df = pd.DataFrame(data)
 
             gb = GridOptionsBuilder.from_dataframe(df)
-            gb.configure_column("type", width=40, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
-            gb.configure_column("summary", width=100, wrapText=True, autoHeight=True, editable=True)
+            gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
+            gb.configure_column("summary", width=100, wrapText=True, editable=True)
             gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
-            gb.configure_column("shot_id", width=40, editable=True)
+            gb.configure_column("shot_id", width=50, editable=True)
 
             gb.configure_grid_options(
                 rowDragManaged=True,
