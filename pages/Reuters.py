@@ -366,6 +366,7 @@ def run():
                 rowDragManaged=True,
                 animateRows=True,
                 rowHeight=60,
+                scrollbar=True,
                 domLayout='autoHeight'
             )
             df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
