@@ -82,12 +82,13 @@ def TTS(text, filename):
             if chunk:
                 file.write(chunk)
 
-from src.prompts import get_sot_prompt, reformat_prompt, sot_prompt, parse_prompt
+from src.prompts import get_sot_prompt, reformat_prompt, sot_prompt, parse_prompt, section_summary_prompt
 
 get_sot_chain = get_sot_prompt | opus
 reformat_chain = reformat_prompt | opus
 sot_chain = sot_prompt | opus
 parse_chain = parse_prompt | opus
+section_summary_chain = section_summary_prompt | opus
 
 from PIL import Image
 import base64
@@ -167,98 +168,6 @@ DIR = "/tmp/"
 def save_uploaded(file_data):
     with open(os.path.join(DIR, file_data.name),"wb") as f:
         f.write(file_data.getbuffer())
-
-import requests
-
-reuters_client_id = st.secrets["REUTERS_CLIENT_ID"]
-reuters_client_secret = st.secrets["REUTERS_CLIENT_SECRET"]
-
-@st.cache_data(show_spinner=False, ttl=86400)
-def get_oauth_token():
-    url = "https://auth.thomsonreuters.com/oauth/token"
-    headers = {"Content-Type": "application/json"}
-    payload = {
-        "client_id": reuters_client_id,
-        "client_secret": reuters_client_secret,
-        "grant_type": "client_credentials",
-        "audience": "7a14b6a2-73b8-4ab2-a610-80fb9f40f769",
-        "scope": "https://api.thomsonreuters.com/auth/reutersconnect.contentapi.read https://api.thomsonreuters.com/auth/reutersconnect.contentapi.write"
-    }
-    response = requests.post(url, headers=headers, json=payload)
-    response.raise_for_status()
-    return response.json()["access_token"]
-
-def graphql_query(query, variables, token=get_oauth_token()):
-    url = "https://api.reutersconnect.com/content/graphql"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-    response = requests.post(url, headers=headers, json={"query": query, "variables": variables})
-    response.raise_for_status()
-    return response.json()
-
-def download_asset(item_id, rendition_id, token=get_oauth_token()):
-    query = """
-    mutation DownloadAsset($itemId: ID!, $renditionId: ID!) {
-        download(itemId: $itemId, renditionId: $renditionId) {
-            ... on GenericItem {
-                url
-                type
-            }
-        }
-    }
-    """
-    variables = {
-        "itemId": item_id,
-        "renditionId": rendition_id
-    }
-    data = graphql_query(query, variables, token=get_oauth_token())
-    return data["data"]["download"]["url"], data["data"]["download"]["type"]
-
-def get_assets(item_id, token=get_oauth_token(), desired_codes=["stream:shotlist:json", "stream:6756:16x9:mpg"]):
-    query = """
-    query GetAssets($itemId: ID!) {
-        item(id: $itemId) {
-            associations {
-                renditions {
-                    code
-                    mimeType
-                    type
-                    uri
-                    version
-                    ... on VideoRendition {
-                        mimeType
-                        fileName
-                        audioBitRate
-                        audioSampleRate
-                        colourIndicator
-                        duration
-                        code
-                        format
-                        height
-                        sizeInBytes
-                        type
-                        uri
-                        version
-                        videoAspectRatio
-                        videoAvgBitrate
-                        width
-                    }
-                }
-            }
-        }
-    }
-    """
-    variables = {"itemId": item_id}
-    data = graphql_query(query, variables, token)
-    associations = data["data"]["item"]["associations"]
-
-    filtered_renditions = [
-        rendition for association in associations for rendition in association["renditions"]
-        if rendition["code"] in desired_codes
-    ]
-    return filtered_renditions
 
 import readtime
 from annotated_text import annotated_text
@@ -379,6 +288,13 @@ def run():
                 parsed_script_xml = extract_xml(parsed_script_raw)
                 parsed_script_json = JsonOutputParser().invoke(parsed_script_xml['response'])
                 st.session_state["parsed_script_json"] = parsed_script_json
+
+                st.write("Writing summaries")
+                print(str(parsed_script_json))
+                section_summary_raw = section_summary_chain.invoke({"SCRIPT", str(parsed_script_json)}).content
+                section_summary_xml = extract_xml(section_summary_raw)
+                section_summary_json = JsonOutputParser().invoke(section_summary_xml['response'])
+                st.session_state["section_summary_json"] = section_summary_json
             else:
                 video_folder = Path(DIR) / video_file.stem
                 clips = st.session_state["clips"]
@@ -386,8 +302,14 @@ def run():
                 reformated_story = st.session_state["reformated_story"]
                 sot_script = st.session_state["sot_script"]
                 parsed_script_json = st.session_state["parsed_script_json"]
+                section_summary_json = st.session_state["section_summary_json"]
         
         st.session_state["ran"] = True
+
+        for s1, s2 in zip(parsed_script_json["sections"], section_summary_json["sections"]):
+            if s1["id"] != s2["id"]:
+                print("ERROR: IDs didn't match", s1, s2)
+            s1["summary"] = s2["summary"]
 
         with st.expander("See details"):
             st.subheader("Labelled clips")
@@ -408,6 +330,9 @@ def run():
             st.subheader("Parsed story")
             st.write(parsed_script_json)
 
+            st.subheader("Section summaries")
+            st.write(section_summary_json)
+
         trt = readtime.of_text(sot_script).seconds
         st.write(f"Estimated TRT: {trt}s")
 
@@ -419,27 +344,30 @@ def run():
             st.subheader("Final Story")
             data = {
                 'type': [],
+                'summary': [],
                 'shot_id': [],
                 'text': [],
             }
             for section in parsed_script_json["sections"]:
                 data['type'].append(section['type'])
+                data['summary'].append(section['summary'])
                 data['shot_id'].append(section['shot_id'] if section['type'] == 'SOT' else None)
                 data['text'].append(section['text'])
             df = pd.DataFrame(data)
 
             gb = GridOptionsBuilder.from_dataframe(df)
             gb.configure_column("type", width=40, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
+            gb.configure_column("summary", width=100, wrapText=True, autoHeight=True, editable=True)
             gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
             gb.configure_column("shot_id", width=40, editable=True)
 
             gb.configure_grid_options(
-                rowDragManaged=True,  # Enable managed row drag
-                animateRows=True,  # Add row drag animation
-                rowHeight=60,  # Adjust this value to increase/decrease row height
-                domLayout='autoHeight'  # Adjust grid height automatically to fit rows
+                rowDragManaged=True,
+                animateRows=True,
+                rowHeight=60,
+                domLayout='autoHeight'
             )
-            df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine", height=600)["data"]
+            df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine", height=1000)["data"]
             # for section in parsed_script_json["sections"]:
             #     with st.container(border=True):
             #         if section["type"] == "SOT":
