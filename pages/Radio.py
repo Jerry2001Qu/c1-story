@@ -351,40 +351,40 @@ def run():
             st.write(facts)
         with output_col_2:
             st.subheader("Final Story")
-            data = {
-                'type': [],
-                'summary': [],
-                'shot_id': [],
-                'text': [],
-            }
-            for section in parsed_script_json["sections"]:
-                data['type'].append(section['type'])
-                data['summary'].append(section['summary'] if section['type'] == 'ANCHOR' else None)
-                data['shot_id'].append(section['shot_id'] if section['type'] == 'SOT' else None)
-                data['text'].append(section['text'])
-            df = pd.DataFrame(data)
-
-            gb = GridOptionsBuilder.from_dataframe(df)
-            gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
-            gb.configure_column("summary", width=100, wrapText=True, editable=True)
-            gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
-            gb.configure_column("shot_id", width=50, editable=True)
-
-            gb.configure_grid_options(
-                rowDragManaged=True,
-                animateRows=True,
-                rowHeight=60,
-                scrollbar=True,
-                domLayout='autoHeight'
-            )
-            df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
+            # data = {
+            #     'type': [],
+            #     'summary': [],
+            #     'shot_id': [],
+            #     'text': [],
+            # }
             # for section in parsed_script_json["sections"]:
-            #     with st.container(border=True):
-            #         if section["type"] == "SOT":
-            #             annotated_text(("SOT", "", "#8ef"))
-            #         elif section["type"] == "ANCHOR":
-            #             annotated_text(("ANCHOR", "", "#faa"))
-            #         st.write(section["text"])
+            #     data['type'].append(section['type'])
+            #     data['summary'].append(section['summary'] if section['type'] == 'ANCHOR' else None)
+            #     data['shot_id'].append(section['shot_id'] if section['type'] == 'SOT' else None)
+            #     data['text'].append(section['text'])
+            # df = pd.DataFrame(data)
+
+            # gb = GridOptionsBuilder.from_dataframe(df)
+            # gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
+            # gb.configure_column("summary", width=100, wrapText=True, editable=True)
+            # gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
+            # gb.configure_column("shot_id", width=50, editable=True)
+
+            # gb.configure_grid_options(
+            #     rowDragManaged=True,
+            #     animateRows=True,
+            #     rowHeight=60,
+            #     scrollbar=True,
+            #     domLayout='autoHeight'
+            # )
+            # df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
+            for section in parsed_script_json["sections"]:
+                with st.container(border=True):
+                    if section["type"] == "SOT":
+                        annotated_text(("SOT", "", "#8ef"))
+                    elif section["type"] == "ANCHOR":
+                        annotated_text(("ANCHOR", "", "#faa"))
+                    st.write(section["text"])
         
         if st.button("Generate audio"):
             audio_clips = []
