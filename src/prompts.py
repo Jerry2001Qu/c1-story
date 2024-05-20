@@ -157,3 +157,19 @@ Here is the script:
 Write a summary for each section. The first section summary should summarize the key story. Keep summaries short, less than 40 characters.
 Put the output in <response></response> tags."""
 )
+
+facts_prompt = PromptTemplate.from_template(
+"""Give me a list of facts from this story.
+
+Here is the script:
+<script>
+{SCRIPT}
+</script>
+
+Here is the shotlist:
+<shotlist>
+{SHOTLIST}
+</shotlist>
+
+Return a numbered list with the most important facts at the start. Put your response in <response></response> tags."""
+)
