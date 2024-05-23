@@ -1,128 +1,30 @@
+# Prompts
+
+# STREAMLIT
+from src.constants import LANGCHAIN_API_KEY, ANTHROPIC_API_KEY
+# /STREAMLIT
+
+import os
+
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_PROJECT"] = "Channel 1"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
+
+from langchain_core.messages import HumanMessage
+from langchain_anthropic import ChatAnthropic
+from langchain.globals import set_llm_cache
+from langchain.cache import SQLiteCache
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, XMLOutputParser
 from langchain.prompts import PromptTemplate
 
-get_sot_prompt = PromptTemplate.from_template(
-"""I'm trying to extract shots with quotations from a shotlist.
+opus = ChatAnthropic(model="claude-3-opus-20240229", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
+sonnet = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
+haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 
-<example>
-1. PROTESTERS SHOUTING (English): "THEY'RE COMING FOR US, HOLD THE LINE"
-3. PROTESTER SHOUTING (English) "FREE PALESTINE" WHILE BEING TAKEN AWAY BY POLICE
-12. PROTESTER SAYING (English) "I AM A STUDENT HERE, I AM AN ENGLISH MAJOR. PLEASE DON'T FAIL US, DON'T FAIL US, YOU ARE ALREADY FAILING US" WHILE BEING TAKEN AWAY BY POLICE
-</example>
+set_llm_cache(SQLiteCache(database_path="langchain.db"))
 
-<shotlist>
-{SHOTLIST}
-</shotlist>
-
-Please give me a numbered list of shots in the shotlist that contain quotations. Don't copy from the examples. Copy from
-the shotlist exactly and put it in <response></response> tags. If there are no quotes respond with <response>NO SOT</response>""")
-
-reformat_prompt = PromptTemplate.from_template(
-"""I'm producing a television news segment.  I'd like to reformat a news story I wrote so it 
-can be spoken by an on camera news anchor. Please don't change any of the facts of 
-my original story text at all, and please don't change the wording at all.  Just reformat it 
-so a TV news anchor could easily read it aloud.  Any dates need to be formatted so 
-they can be read aloud. For example, May 1st instead of May 1.
-
-Here is the story:
-<story>
-{STORY}
-</story>
-
-Reformat the story and put it in <response></response> tags"""
-)
-
-sot_prompt = PromptTemplate.from_template(
-"""I'm producing a television news segment. I'd like to insert clips of quotations into a news script.
-
-<example>
-POLICE GATHERING AT THE ENTRANCE OF A CONCERT VENUE,
-FANS YELLING (English): "THEY'RE SHUTTING IT DOWN, STAY TOGETHER"
-
-Scores of police officers assembled at the gates of the Madison Square Garden late Saturday night, intent on halting a surprise concert that had spiraled out of control due to overwhelming attendance.
-
-Live streaming on social media depicted officers in uniform clearing the area and confronting fans who had scaled fences to gain entry.
-
-FAN SHOUTING (English) "MUSIC IS OUR RIGHT" AS POLICE LEAD THEM AWAY
-
-The air was thick with the sound of sirens as the crowd grew increasingly agitated, resisting the police’s efforts to disperse the impromptu gathering.
-
-Fans, some equipped with concert posters and glow sticks, tried to prevent the police from entering the venue by forming human chains, all while chanting, "let us sing" and shining flashlights towards the officers.
-
-FAN EXCLAIMING (English) "I’VE WAITED MONTHS FOR THIS, YOU CAN’T JUST TAKE IT AWAY" WHILE BEING ESCORTED OUT BY POLICE
-
-A few individuals near the back of the crowd chose not to resist, and footage showed them walking towards the exits with their hands visibly empty and raised.
-
-The unexpected police intervention at Madison Square Garden became a pivotal moment, showcasing the challenges faced in managing unexpectedly large crowds at major events.
-</example>
-
-Here are the clips of quotations:
-<quotations>
-{QUOTATIONS}
-</quotations>
-
-Here is the script:
-<script>
-{SCRIPT}
-</script>
-
-Using only the list of clips that contain quotations, insert those quotations into the 
-news script where it feels appropriate to the story, and in a way that makes sense to 
-the overall flow of the story. But otherwise don't change the wording of the news script 
-at all. The quotations should be spread out throughout the story. You may start the 
-story with a quotation if it makes sense to do so, but don't end the story with a 
-quotation. Keep the quotations short, you may cut out a portion to keep it short.
-Insert quotations exactly with descriptions. Don't add transitions. Think through
-your answer before responding, including if it makes sense to start with a quote. Put the text in <response></response> tags."""
-)
-
-parse_prompt = PromptTemplate.from_template(
-"""Parse my script into a JSON object.
-
-<example>
-{{
-  "sections": [
-    {{
-      "id": 1,
-      "text": "PROTESTERS GATHERED IN THE STREET, SHOUTING (English): \"NO JUSTICE, NO PEACE!\""
-      "type": "SOT",
-      "shot_id": 2,
-      "quote": "NO JUSTICE, NO PEACE!",
-    }},
-    {{
-      "id": 2,
-      "text": "Hundreds of climate activists assembled outside the State Capitol early on Thursday, May second, to demand immediate government action against climate change."
-      "type": "ANCHOR",
-    }},
-    {{
-      "id": 3,
-      "text": "Live TV footage showed protesters chanting slogans and carrying banners demanding policy changes to tackle environmental issues. Police in tactical gear maintained a tight perimeter around the Capitol building."
-      "type": "ANCHOR",
-    }},
-    {{
-      "id": 4,
-      "text": "PROTESTER SHOUTING (English): \"CLIMATE JUSTICE NOW!\" WHILE WAVING A BANNER",
-      "type": "SOT",
-      "shot_id": 8,
-      "quote": "CLIMATE JUSTICE NOW!"
-    }},
-  ]
-}}
-</example>
-
-Here are the shots with quotes:
-<quotations>
-{QUOTATIONS}
-</quotations>
-
-Here is the script:
-<script>
-{SCRIPT}
-</script>
-
-Each paragraph should become a section. Some paragraphs are quotes. These should be matched with quotes from the shotlist & add a shot_id.
-Put the output in <response></response> tags"""
-)
-
+# STREAMLIT
 section_summary_prompt = PromptTemplate.from_template(
 """Write a summary for each section in my script.
 
@@ -173,3 +75,291 @@ Here is the shotlist:
 
 Return a numbered list with the most important facts at the start. Try to capture every fact in the script & shotlist. Put your response in <response></response> tags."""
 )
+# /STREAMLIT
+
+get_sot_prompt = PromptTemplate.from_template(
+"""I'm trying to extract shots with quotations from a shotlist.
+
+<example>
+1. PROTESTERS SHOUTING (English): "THEY'RE COMING FOR US, HOLD THE LINE"
+3. PROTESTER SHOUTING (English) "FREE PALESTINE" WHILE BEING TAKEN AWAY BY POLICE
+12. PROTESTER SAYING (English) "I AM A STUDENT HERE, I AM AN ENGLISH MAJOR. PLEASE DON'T FAIL US, DON'T FAIL US, YOU ARE ALREADY FAILING US" WHILE BEING TAKEN AWAY BY POLICE
+</example>
+
+<shotlist>
+{SHOTLIST}
+</shotlist>
+
+Please give me a numbered list of shots in the shotlist that contain quotations. Don't copy from the examples. 
+Include the entire section from the shotlist including parts like :(SOUNDBITE)(English) LOREM IPSUM, SAYING:".
+Copy from the shotlist exactly and put it in <response></response> tags. If there are no quotes respond with <response>NO SOT</response>.""")
+
+parse_sot_prompt = PromptTemplate.from_template(
+"""You will be given quotes that will be aired on the news. Your task is to extract key information from the quote.
+
+Here are the quotes:
+<quotes>
+{QUOTES}
+</quotes>
+
+Please extract the following information from the quote:
+- The ID
+- The verbatim text of what was said
+- The name of the person who said it, title case (if not available, put "Unknown")
+- The title of the person who said it, title case (e.g. "Protester", "Former President", etc. If no title is available, just put "Unknown")
+- The language the quote was spoken in
+
+Provide your extractions in JSON format. Use the ID as a key. For each object use the keys "quote", "name", "title", and "language" for the respective pieces of information.
+Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid.
+
+<example>
+{{
+  "1": {{
+      "quote": "...",
+      "name": "...",
+      "title": "CEO and President",
+      "language": "...",
+  }},
+  "4": {{
+      "quote": "...",
+      "name": "...",
+      "title": "...",
+      "language": "...",
+  }},
+}}
+</example>
+
+Provide the extractions inside <response></response> tags.""")
+
+reformat_prompt = PromptTemplate.from_template(
+"""I'm producing a television news segment.  I'd like to reformat a news story I wrote so it
+can be spoken by an on camera news anchor. Please don't change any of the facts of
+my original story text at all, and please don't change the wording at all.  Just reformat it
+so a TV news anchor could easily read it aloud.  Any dates need to be formatted so
+they can be read aloud. For example, May 1st instead of May 1.
+
+Here is the story:
+<story>
+{STORY}
+</story>
+
+Reformat the story and put it in <response></response> tags"""
+)
+
+sot_prompt = PromptTemplate.from_template(
+"""I'm producing a television news segment. I'd like to insert clips of quotations into a news script.
+
+<example>
+POLICE GATHERING AT THE ENTRANCE OF A CONCERT VENUE,
+FANS YELLING (English): "THEY'RE SHUTTING IT DOWN, STAY TOGETHER"
+
+Scores of police officers assembled at the gates of the Madison Square Garden late Saturday night, intent on halting a surprise concert that had spiraled out of control due to overwhelming attendance.
+
+Live streaming on social media depicted officers in uniform clearing the area and confronting fans who had scaled fences to gain entry.
+
+FAN SHOUTING (English) "MUSIC IS OUR RIGHT" AS POLICE LEAD THEM AWAY
+
+The air was thick with the sound of sirens as the crowd grew increasingly agitated, resisting the police’s efforts to disperse the impromptu gathering.
+
+Fans, some equipped with concert posters and glow sticks, tried to prevent the police from entering the venue by forming human chains, all while chanting, "let us sing" and shining flashlights towards the officers.
+
+FAN EXCLAIMING (English) "I’VE WAITED MONTHS FOR THIS, YOU CAN’T JUST TAKE IT AWAY" WHILE BEING ESCORTED OUT BY POLICE
+
+A few individuals near the back of the crowd chose not to resist, and footage showed them walking towards the exits with their hands visibly empty and raised.
+
+The unexpected police intervention at Madison Square Garden became a pivotal moment, showcasing the challenges faced in managing unexpectedly large crowds at major events.
+</example>
+
+Here are the clips of quotations:
+<quotations>
+{QUOTATIONS}
+</quotations>
+
+Here is the script:
+<script>
+{SCRIPT}
+</script>
+
+Please carefully read through the list of quotation clips and the news script.
+
+In a <scratchpad>, think through where it would make the most sense to insert each quotation into the news script in a way that fits the overall story and flow. Remember to:
+
+- Keep the quotations short, cutting out portions if needed to keep them concise. No more than 1 or 2 sentences.
+- Spread the quotations throughout the story
+- You may start the story with a quotation if it makes sense to do so
+- Do not end the story with a quotation
+- Insert the portions of quotations including their descriptions
+- Do not add any transitions between the quotations and the rest of the script
+- Do not change the wording of the news script except to insert the quotations
+
+After planning it out, provide your final response with the quotations inserted into the appropriate parts of the news script inside <response></response> tags."""
+)
+
+parse_prompt = PromptTemplate.from_template(
+"""Parse my script into a JSON object.
+
+<example>
+{{
+  "sections": [
+    {{
+      "id": 1,
+      "text": "PROTESTERS GATHERED IN THE STREET, SHOUTING (English): \"NO JUSTICE, NO PEACE!\""
+      "type": "SOT",
+      "shot_id": 2,
+      "quote": "NO JUSTICE, NO PEACE!",
+    }},
+    {{
+      "id": 2,
+      "text": "Hundreds of climate activists assembled outside the State Capitol early on Thursday, May second, to demand immediate government action against climate change."
+      "type": "ANCHOR",
+    }},
+    {{
+      "id": 3,
+      "text": "Live TV footage showed protesters chanting slogans and carrying banners demanding policy changes to tackle environmental issues. Police in tactical gear maintained a tight perimeter around the Capitol building."
+      "type": "ANCHOR",
+    }},
+    {{
+      "id": 4,
+      "text": "PROTESTER SHOUTING (English): \"CLIMATE JUSTICE NOW!\" WHILE WAVING A BANNER",
+      "type": "SOT",
+      "shot_id": 8,
+      "quote": "CLIMATE JUSTICE NOW!"
+    }},
+  ]
+}}
+</example>
+
+Here are the shots with quotes:
+<quotations>
+{QUOTATIONS}
+</quotations>
+
+Here is the script:
+<script>
+{SCRIPT}
+</script>
+
+Each paragraph should become a section. Some paragraphs are quotes. These should be matched with quotes from the shotlist & add a shot_id.
+There may not be any quotes. Only put speech in the quote field, no emotes like (laughs). Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid.
+Put the output in <response></response> tags"""
+)
+
+logline_prompt = PromptTemplate.from_template(
+"""You are a TV script writer. Here is a list of text sections:
+
+<sections>
+{SECTIONS}
+</sections>
+
+For each section, write a logline/summary sentence that is no more than 40 characters long. Capture the key point of the section concisely.
+
+Return your response as a JSON object with a list of sections. Each section object should have an "id" field containing the section number (e.g. 0, 2, etc.)
+and a "logline" field containing the logline/summary you wrote for that section.
+
+<example>
+{{
+  "sections": [
+    {{
+      "id": 1,
+      "logline": "..."
+    }},
+    {{
+      "id": 2,
+      "logline": "..."
+    }},
+  ]
+}}
+</example>
+
+Enclose your final JSON response inside <response></response> tags."""
+)
+
+headline_prompt = PromptTemplate.from_template(
+"""Here is the script for a news story:
+
+<script>
+{SCRIPT}
+</script>
+
+Please read the story script carefully. Then, in a <brainstorming> tag, come up with 3-5 potential headlines for this story. The headlines should:
+- Summarize the key points of the story
+- Be concise (aim for around 40 characters or less)
+- Be written in an attention-grabbing style that would make readers want to click on the story
+- Is informative over all else
+
+After brainstorming potential headlines, select the one you think is best and output it in <response></response> tag. The headline should be in title case."""
+)
+
+parse_broll_prompt = PromptTemplate.from_template(
+"""Parse this list of broll placements into JSON.
+
+<example>
+{{
+  "sections": [
+    {{
+      "id": 1,
+      "brolls": [
+        {{
+            "id": "007",
+            "start": 0.00,
+            "end": 4.00
+        }},
+        {{
+            "id": "004",
+            "start": 4.00,
+            "end": 9.21,
+        }},
+      ]
+    }},
+    {{
+      "id": 3,
+      "brolls": [
+        {{
+            "id": "005",
+            "start": 0.00,
+            "end": 6.00,
+        }},
+        {{
+            "id": "011",
+            "start": 6.00,
+            "end": 10.16,
+        }},
+      ]
+    }},
+  ]
+}}
+</example>
+
+Here are the section start and end times:
+<sections>
+{SECTIONS}
+</sections>
+
+Here is the list of broll placements:
+<broll_placements>
+{BROLL_PLACEMENTS}
+</broll_placements>
+
+Parse the <broll_placements></broll_placements> into each <section></section>. Start each section at 0. Put your response in <response></response> tags."""
+)
+
+get_sot_chain = get_sot_prompt | opus
+parse_sot_chain = parse_sot_prompt | opus
+reformat_chain = reformat_prompt | opus
+sot_chain = sot_prompt | opus
+parse_chain = parse_prompt | opus
+logline_chain = logline_prompt | opus
+headline_chain = headline_prompt | opus
+parse_broll_chain = parse_broll_prompt | opus
+
+def extract_xml(text):
+    return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
+
+def run_chain(chain, params):
+    response_raw = chain.invoke(params).content
+    response_xml = extract_xml(response_raw)
+    return response_xml['response']
+
+def run_chain_json(chain, params):
+    response = run_chain(chain, params)
+    return JsonOutputParser().invoke(response)

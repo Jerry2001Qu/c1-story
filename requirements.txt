@@ -6,6 +6,7 @@ streamlit
 langchain
 langchain-openai
 langchain-anthropic
+langchain-community
 scenedetect[opencv]
 elevenlabs
 pyloudnorm
@@ -17,4 +18,5 @@ onnxruntime
 readtime
 streamlit-aggrid
 st-annotated-text
-google-generativeai
+google-cloud-storage
+google-cloud-aiplatform

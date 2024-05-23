@@ -1,16 +1,15 @@
 import requests
 import streamlit as st
 
-reuters_client_id = st.secrets["REUTERS_CLIENT_ID"]
-reuters_client_secret = st.secrets["REUTERS_CLIENT_SECRET"]
+from src.constants import REUTERS_CLIENT_ID, REUTERS_CLIENT_SECRET
 
 @st.cache_data(show_spinner=False, ttl=86400)
 def get_oauth_token():
     url = "https://auth.thomsonreuters.com/oauth/token"
     headers = {"Content-Type": "application/json"}
     payload = {
-        "client_id": reuters_client_id,
-        "client_secret": reuters_client_secret,
+        "client_id": REUTERS_CLIENT_ID,
+        "client_secret": REUTERS_CLIENT_SECRET,
         "grant_type": "client_credentials",
         "audience": "7a14b6a2-73b8-4ab2-a610-80fb9f40f769",
         "scope": "https://api.thomsonreuters.com/auth/reutersconnect.contentapi.read https://api.thomsonreuters.com/auth/reutersconnect.contentapi.write"
@@ -29,6 +28,29 @@ def graphql_query(query, variables, token=get_oauth_token()):
     response.raise_for_status()
     return response.json()
 
+@st.cache_data(show_spinner=False)
+def get_item(item_id, token=get_oauth_token()):
+    query = """
+    query GetItem($itemId: ID!) {
+        item(id: $itemId) {
+            associations {
+                bodyXhtml
+                headLine
+                language
+                located
+            }
+        }
+    }
+    """
+    variables = {
+        "itemId": item_id,
+    }
+    data = graphql_query(query, variables, token=get_oauth_token())
+
+    association = data["data"]["item"]["associations"][0]
+    return association["bodyXhtml"], association["headLine"], association["language"], association["located"]
+
+@st.cache_data(show_spinner=False, ttl=60*5)
 def download_asset(item_id, rendition_id, token=get_oauth_token()):
     query = """
     mutation DownloadAsset($itemId: ID!, $renditionId: ID!) {
@@ -47,7 +69,8 @@ def download_asset(item_id, rendition_id, token=get_oauth_token()):
     data = graphql_query(query, variables, token=get_oauth_token())
     return data["data"]["download"]["url"], data["data"]["download"]["type"]
 
-def get_assets(item_id, token=get_oauth_token(), desired_codes=["stream:shotlist:json", "stream:6756:16x9:mpg"]):
+@st.cache_data(show_spinner=False)
+def get_assets(item_id, token=get_oauth_token(), desired_codes=["stream:5128:16x9:mp4"]):
     query = """
     query GetAssets($itemId: ID!) {
         item(id: $itemId) {
