@@ -17,7 +17,7 @@ class VideoEditor:
 
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
                  output_resolution: Tuple[int, int] = (640, 480),
-                 font: Path = None, font_size=24, logo_path: Path = None,
+                 font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40):
         self.news_script = news_script
         self.clip_manager = clip_manager
@@ -94,13 +94,15 @@ class VideoEditor:
         """Adds a lower-third logline to the given clip."""
 
         output_width, output_height = clip.w, clip.h
+        logo_logline_padding = 2
 
         # Calculate logline dimensions based on video resolution and padding
         logline_height = int(output_height * 0.1)  # 10% of video height
         logline_width = output_width - self.logline_padding * 2
         if self.logo_path:
             logline_width -= logline_height
-        
+            logline_width -= logo_logline_padding
+
         logline_x = self.logline_padding
         logline_y = output_height - self.logline_padding - logline_height
 
@@ -126,7 +128,7 @@ class VideoEditor:
                 .set_opacity(0.8)
                 .resize(height=logline_height)
                 .set_position(
-                    (logline_x + logline_width, logline_y)
+                    (logline_x + logline_width + logo_logline_padding, logline_y)
                 )
                 .set_duration(clip.duration)
             )
@@ -136,17 +138,21 @@ class VideoEditor:
 
         # 4. Compose final clip
         return mp.CompositeVideoClip(final_elements)
-    
+
     def _create_text_clip(self, text: str, width: int, height: int) -> mp.ImageClip:
         """Creates a transparent ImageClip with the given text."""
         text_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_image)
 
         # Load the font
+        if self.font_size:
+            font_size = self.font_size
+        else:
+            font_size = height // 2
         if not self.font:
             font = ImageFont.load_default()
         else:
-            font = ImageFont.truetype(str(self.font), self.font_size)
+            font = ImageFont.truetype(str(self.font), font_size)
 
         # Get text size, adjust height, calculate position
         text_bbox = draw.textbbox((0, 0), text, font=font)
