@@ -77,8 +77,8 @@ def run():
         
         st.session_state["ran"] = True
 
-        # trt = readtime.of_text(sot_script).seconds
-        # st.write(f"Estimated TRT: {trt}s")
+        trt = script.get_total_read_time_seconds()
+        st.write(f"Estimated TRT: {trt}s")
 
         output_col_1, output_col_2 = st.columns([1, 2])
         with output_col_1:
@@ -126,7 +126,7 @@ def run():
 
                 st.write("Assembling video")
                 video_output_file = story_folder / "output.mp4"
-                video_editor = VideoEditor(script, clip_manager)
+                video_editor = VideoEditor(script, clip_manager, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-Regular.ttf"))
                 video_editor.assemble_video(output_file=video_output_file)
 
             st.video(str(video_output_file), autoplay=True)

@@ -101,7 +101,9 @@ class NewsScript:
     
     def generate_audio_and_broll(self):
         """Generates audio, matches clips, and adds B-roll placements."""
+        # STREAMLIT
         from src.audio_processor import AudioProcessor
+        # /STREAMLIT
         audio_processor = AudioProcessor(self, self.clip_manager, self.folder)
         audio_processor.process_audio_and_broll()
 
@@ -175,6 +177,11 @@ class NewsScript:
         """Generates a headline for the news script."""
         headline = run_chain(headline_chain, {"SCRIPT": self.text_script})
         return headline
+    
+    def get_total_read_time_seconds(self):
+        """Returns the total read time of the text script."""
+        import readtime
+        return readtime.of_text(self.text_script).seconds
     
 def is_type(obj, type_):
     return str(type(obj)) == str(type_)

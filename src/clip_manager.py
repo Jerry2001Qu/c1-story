@@ -75,7 +75,12 @@ class ClipManager:
             clip_dict = {}
             for part in clip_data["clip"]:
                 for key, val in part.items():
-                    clip_dict[key] = val.strip()
+                    if not val:
+                        clip_dict[key] = val
+                    if isinstance(val, str):
+                        clip_dict[key] = val.strip()
+                    else:
+                        clip_dict[key] = val
             clip_file = self.clips_folder / f"{clip_dict['id']}.mp4"
             clip = Clip(clip_dict['id'], clip_file, clip_dict['shot'], clip_dict['description'], clip_dict['quote'], self.clips_folder)
             self.clips.append(clip)
