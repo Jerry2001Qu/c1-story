@@ -16,7 +16,7 @@ class VideoEditor:
     """Handles video editing, including assembling clips and B-roll."""
 
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
-                 output_resolution: Tuple[int, int] = (1920, 1080),
+                 output_resolution: Tuple[int, int] = (1280, 720),
                  font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40):
         self.news_script = news_script
