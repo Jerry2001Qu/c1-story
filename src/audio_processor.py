@@ -45,7 +45,7 @@ class AudioProcessor:
                 audio_clips.append(audio_clip)
 
         anchor_audio = mp.concatenate_audioclips(audio_clips)
-        anchor_audio.write_audiofile(str(self.anchor_audio_file))
+        anchor_audio.write_audiofile(str(self.anchor_audio_file), logger=None)
 
     def _match_sot_clips(self):
         """Matches SOTScriptSections with corresponding clips from ClipManager."""
