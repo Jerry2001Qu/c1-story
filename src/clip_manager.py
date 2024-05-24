@@ -9,6 +9,7 @@ import streamlit as st
 from pathlib import Path
 from typing import List, Dict, Optional
 import moviepy.editor as mp
+import time
 
 def is_folder_empty(folder_path: Path) -> bool:
     return not any(folder_path.iterdir())
@@ -66,8 +67,10 @@ class ClipManager:
         if is_folder_empty(self.clips_folder):
             from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True, 
+            status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True, 
                             output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
+            if status != 0:
+                st.error(f"Splitting video into clips failed with code: {status}")
 
     def load_and_match_clips(self):
         """Loads clips, creating Clip objects."""
@@ -93,6 +96,7 @@ class ClipManager:
     def generate_full_descriptions(self, story_title: str):
         for clip in self.clips:
             clip.generate_full_description(story_title)
+            time.sleep(15)
 
     def describe_clips(self) -> Dict:
         """Uses Gemini to match clips to shot descriptions."""
