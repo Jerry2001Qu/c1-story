@@ -65,30 +65,23 @@ class ClipManager:
     def split_video_into_clips(self):
         """Splits the main video into clips based on scene detection."""
         self.clips_folder.mkdir(parents=True, exist_ok=True)
+        # Check if video file exists and is readable
+        import os
+        if not self.video_file_path.exists():
+            st.write(f"Error: The video file {self.video_file_path} does not exist.")
+        if not os.access(str(self.video_file_path), os.R_OK):
+            st.write(f"Error: The video file {self.video_file_path} is not readable.")
+
+        # Check if the output directory exists and is writable
+        if not self.clips_folder.exists():
+            st.write(f"Error: The directory {self.clips_folder} does not exist.")
+        if not os.access(str(self.clips_folder), os.W_OK):
+            st.write(f"Error: The directory {self.clips_folder} is not writable.")
         if is_folder_empty(self.clips_folder):
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            from contextlib import contextmanager, redirect_stdout
-            from io import StringIO
-            import os
-
-            @contextmanager
-            def st_capture():
-                with StringIO() as stdout, redirect_stdout(stdout):
-                    old_write = stdout.write
-
-                    def new_write(string):
-                        ret = old_write(string)
-                        st.write(f"{stdout.getvalue()}\n".encode()) 
-                        return ret
-                    
-                    stdout.write = new_write
-                    yield
-            
-            with st_capture():
-                print("starting")
-                error = split_video_ffmpeg(str(self.video_file_path), scene_list,
-                                output_file_template=f"{str(self.clips_folder)}/$SCENE_NUMBER.mp4", show_output=True)
-                print(error)
+            error = split_video_ffmpeg(str(self.video_file_path), scene_list,
+                            output_file_template=f"{str(self.clips_folder)}/$SCENE_NUMBER.mp4", show_output=True)
+            st.write(error)
             st.write(list(self.clips_folder.glob("*.mp4")))
 
     def load_and_match_clips(self):
