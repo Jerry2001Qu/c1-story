@@ -62,6 +62,7 @@ def run():
                 clip_manager = ClipManager(video_file_path, clips_folder, shotlist)
                 st.write("Splitting video")
                 clip_manager.split_video_into_clips()
+                return
                 st.write("Load & matching clips")
                 clip_manager.load_and_match_clips()
                 st.write("Transcribing clips")
