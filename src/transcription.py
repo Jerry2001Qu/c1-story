@@ -40,7 +40,8 @@ class WhisperResults:
             A WhisperResults object containing the transcription data.
         """
         import streamlit as st
-        st.write(file)
+        x = file
+        st.write(f"{x.exists()}, {x}")
         transcript = openai_client.audio.transcriptions.create(
             file=file, 
             model="whisper-1", 

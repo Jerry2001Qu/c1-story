@@ -51,6 +51,9 @@ def run():
     
         if st.button("Generate script"):
             st.session_state["run"] = True
+    
+    x = story_folder
+    st.write(f"{x.exists()}, {x}")
 
     if st.session_state["run"]:
         with st.status("Running"):

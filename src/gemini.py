@@ -190,6 +190,8 @@ Clips:"""
 
     files = list(sorted(clips_folder.glob("*.mp4")))
     for file in files:
+        x = file
+        st.write(f"{x.exists()}, {x}")
         name = file.stem
         frame_file, audio_file = extract_middle_frame_and_audio(file)
 

@@ -83,6 +83,8 @@ class ClipManager:
                     else:
                         clip_dict[key] = val
             clip_file = self.clips_folder / f"{clip_dict['id']}.mp4"
+            x = clip_file
+            st.write(f"{x.exists()}, {x}")
             clip = Clip(clip_dict['id'], clip_file, clip_dict['shot'], clip_dict['description'], clip_dict['quote'], self.clips_folder)
             self.clips.append(clip)
     
