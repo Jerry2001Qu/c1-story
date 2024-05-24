@@ -71,6 +71,8 @@ class ClipManager:
     def load_and_match_clips(self):
         """Loads clips, creating Clip objects."""
         clips_xml = self.describe_clips()
+        import streamlit as st
+        st.write(list(self.clips_folder.glob('**/*')))
         for clip_data in clips_xml["response"]:
             clip_dict = {}
             for part in clip_data["clip"]:
@@ -82,7 +84,6 @@ class ClipManager:
                     else:
                         clip_dict[key] = val
             clip_file = self.clips_folder / f"{clip_dict['id']}.mp4"
-            import streamlit as st
             st.write(clip_file)
             st.write(clip_file.exists())
             clip = Clip(clip_dict['id'], clip_file, clip_dict['shot'], clip_dict['description'], clip_dict['quote'], self.clips_folder)
