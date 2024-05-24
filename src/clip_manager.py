@@ -86,9 +86,10 @@ class ClipManager:
                     yield
             
             with st_capture():
-                split_video_ffmpeg(str(self.video_file_path), scene_list,
+                print("starting")
+                error = split_video_ffmpeg(str(self.video_file_path), scene_list,
                                 output_file_template=f"{str(self.clips_folder)}/$SCENE_NUMBER.mp4", show_output=True)
-                print("hi")
+                print(error)
             st.write(list(self.clips_folder.glob("*.mp4")))
 
     def load_and_match_clips(self):
