@@ -73,8 +73,6 @@ class ClipManager:
         """Loads clips, creating Clip objects."""
         clips_xml = self.describe_clips()
         for clip_data in clips_xml["response"]:
-            print(clip_data)
-            st.write(clip_data)
             clip_dict = {}
             for part in clip_data["clip"]:
                 for key, val in part.items():
