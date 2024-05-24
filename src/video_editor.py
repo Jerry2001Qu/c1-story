@@ -3,6 +3,7 @@
 # STREAMLIT
 from src.clip_manager import ClipManager
 from src.news_script import NewsScript, AnchorScriptSection, SOTScriptSection, is_type
+import streamlit as st
 # /STREAMLIT
 
 from pathlib import Path
@@ -30,7 +31,9 @@ class VideoEditor:
     def assemble_video(self, output_file: Path = Path("output.mp4")):
         """Assembles the final video from script sections and B-roll."""
         video_clips = []
-        for section in self.news_script.sections:
+        # STREAMLIT
+        progress_bar = st.progress(0.0)
+        for i, section in enumerate(self.news_script.sections):
             if is_type(section, SOTScriptSection):
                 if section.clip is not None:
                     video_clips.append(self._process_sot_section(section))
@@ -38,12 +41,16 @@ class VideoEditor:
                 video_clips.append(self._process_anchor_section(section))
             else:
                 print(f"ERROR: Unknown section type: {type(section)}")
+            progress_bar.progress(i / (len(self.news_script.sections)-1))
 
         logline = self.news_script.get_anchor_sections()[0].logline
         concat_video = mp.concatenate_videoclips(video_clips, method="compose")
         final_video = self._add_logline(concat_video, logline)
+
+        st.write("Outputing final video file")
         final_video.write_videofile(str(output_file), fps=24, threads=8,
                                     verbose=True, logger=None)
+        # /STREAMLIT
 
     def _process_sot_section(self, section: SOTScriptSection) -> mp.VideoFileClip:
         """Processes a SOTScriptSection, extracting and resizing the clip."""

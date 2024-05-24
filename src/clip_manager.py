@@ -98,7 +98,7 @@ class ClipManager:
         progress_bar = st.progress(0.0)
         for i, clip in enumerate(self.clips):
             clip.generate_full_description(story_title)
-            progress_bar.progress(i / len(self.clips))
+            progress_bar.progress(i / (len(self.clips)-1))
         # /STREAMLIT
 
     def describe_clips(self) -> Dict:
