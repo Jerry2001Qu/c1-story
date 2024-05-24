@@ -72,7 +72,7 @@ def download_asset(item_id, rendition_id, token=get_oauth_token()):
     return data["data"]["download"]["url"], data["data"]["download"]["type"]
 
 @st.cache_data(show_spinner=False)
-def get_assets(item_id, token=get_oauth_token(), desired_codes=["stream:5128:16x9:mp4"]):
+def get_assets(item_id, token=get_oauth_token(), desired_codes=["stream:2000:16x9:mp4"]):
     query = """
     query GetAssets($itemId: ID!) {
         item(id: $itemId) {

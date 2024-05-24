@@ -16,7 +16,7 @@ class VideoEditor:
     """Handles video editing, including assembling clips and B-roll."""
 
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
-                 output_resolution: Tuple[int, int] = (1280, 720),
+                 output_resolution: Tuple[int, int] = (768, 432),
                  font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40):
         self.news_script = news_script
@@ -43,7 +43,7 @@ class VideoEditor:
         concat_video = mp.concatenate_videoclips(video_clips, method="compose")
         final_video = self._add_logline(concat_video, logline)
         final_video.write_videofile(str(output_file), fps=24, threads=8,
-                                    verbose=False, logger=None)
+                                    verbose=True, logger=None)
 
     def _process_sot_section(self, section: SOTScriptSection) -> mp.VideoFileClip:
         """Processes a SOTScriptSection, extracting and resizing the clip."""
