@@ -193,7 +193,7 @@ Clips:"""
         name = file.stem
         frame_file, audio_file = extract_middle_frame_and_audio(file)
 
-        content += [f"{name}:", upload_to_gcs(frame_file), upload_to_gcs(audio_file)]
+        content += [f"ID {name}:", upload_to_gcs(frame_file), upload_to_gcs(audio_file)]
 
     content += ["\nShotlist:\n", shotlist]
 
@@ -203,7 +203,7 @@ The quote should match with what is said in the clip. If the quote doesn't match
 Ex: Shot1 has a quote saying, "GET OUT OF THE WAY, IT'S SPREADING!", and likely matches with the audio in clip002.
 Then assemble the final list using these quote clips as guide posts. Include <id></id>, <shot></shot>, <description></description>, & <quote></quote> for each clip.
 Quote is 1 if the clip contains a quote, otherwise 0. If a clip doesn't doesn't match anything, say so and set <shot></shot> to -1, and <description></description> to Unknown.
-Only label descriptions with those in the shotlist exactly. <shot></shot> should just be the number. Output XML in <response></response> tags"""
+Only label descriptions with those in the shotlist exactly. <shot></shot> should just be the number. <id></id> should be what I gave you, in a form like 001. Output XML in <response></response> tags"""
 
     content += ["\n\n", prompt]
 

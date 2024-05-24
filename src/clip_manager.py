@@ -63,20 +63,14 @@ class ClipManager:
     def split_video_into_clips(self):
         """Splits the main video into clips based on scene detection."""
         self.clips_folder.mkdir(parents=True, exist_ok=True)
-        st.write(str(self.clips_folder))
-        st.write(is_folder_empty(self.clips_folder))
-        st.write(list(self.clips_folder.glob('*.mp4')))
         if is_folder_empty(self.clips_folder):
             from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            st.write(scene_list)
             split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True, 
                             output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
 
     def load_and_match_clips(self):
         """Loads clips, creating Clip objects."""
-        st.write(is_folder_empty(self.clips_folder))
-        st.write(list(self.clips_folder.glob('*.mp4')))
         clips_xml = self.describe_clips()
         for clip_data in clips_xml["response"]:
             clip_dict = {}
@@ -89,8 +83,6 @@ class ClipManager:
                     else:
                         clip_dict[key] = val
             clip_file = self.clips_folder / f"{clip_dict['id']}.mp4"
-            st.write(clip_file)
-            st.write(clip_file.exists())
             clip = Clip(clip_dict['id'], clip_file, clip_dict['shot'], clip_dict['description'], clip_dict['quote'], self.clips_folder)
             self.clips.append(clip)
     
