@@ -10,8 +10,6 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import moviepy.editor as mp
 
-from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
-
 def is_folder_empty(folder_path: Path) -> bool:
     return not any(folder_path.iterdir())
 
@@ -65,24 +63,11 @@ class ClipManager:
     def split_video_into_clips(self):
         """Splits the main video into clips based on scene detection."""
         self.clips_folder.mkdir(parents=True, exist_ok=True)
-        # Check if video file exists and is readable
-        import os
-        if not self.video_file_path.exists():
-            st.write(f"Error: The video file {self.video_file_path} does not exist.")
-        if not os.access(str(self.video_file_path), os.R_OK):
-            st.write(f"Error: The video file {self.video_file_path} is not readable.")
-
-        # Check if the output directory exists and is writable
-        if not self.clips_folder.exists():
-            st.write(f"Error: The directory {self.clips_folder} does not exist.")
-        if not os.access(str(self.clips_folder), os.W_OK):
-            st.write(f"Error: The directory {self.clips_folder} is not writable.")
         if is_folder_empty(self.clips_folder):
+            from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            error = split_video_ffmpeg(str(self.video_file_path), scene_list,
-                            output_file_template=f"{str(self.clips_folder)}/$SCENE_NUMBER.mp4", show_output=True)
-            st.write(error)
-            st.write(list(self.clips_folder.glob("*.mp4")))
+            split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True, 
+                            output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
 
     def load_and_match_clips(self):
         """Loads clips, creating Clip objects."""
@@ -98,8 +83,6 @@ class ClipManager:
                     else:
                         clip_dict[key] = val
             clip_file = self.clips_folder / f"{clip_dict['id']}.mp4"
-            x = clip_file
-            st.write(f"{x.exists()}, {x}")
             clip = Clip(clip_dict['id'], clip_file, clip_dict['shot'], clip_dict['description'], clip_dict['quote'], self.clips_folder)
             self.clips.append(clip)
     

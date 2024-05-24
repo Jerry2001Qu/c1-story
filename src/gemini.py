@@ -150,7 +150,7 @@ def extract_middle_frame_and_audio(input_file: Path) -> Tuple[Path, Path]:
     return frame_output, audio_output 
 
 
-# @st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def describe_clips(clips_folder: Path, shotlist: str) -> Dict:
     """
     Uses the Gemini model to match video clips to shot descriptions from a shotlist. Also determines if each video clip has a quote.

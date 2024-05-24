@@ -51,9 +51,6 @@ def run():
     
         if st.button("Generate script"):
             st.session_state["run"] = True
-    
-    x = story_folder
-    st.write(f"{x.exists()}, {x}")
 
     if st.session_state["run"]:
         with st.status("Running"):
@@ -62,7 +59,6 @@ def run():
                 clip_manager = ClipManager(video_file_path, clips_folder, shotlist)
                 st.write("Splitting video")
                 clip_manager.split_video_into_clips()
-                return
                 st.write("Load & matching clips")
                 clip_manager.load_and_match_clips()
                 st.write("Transcribing clips")
