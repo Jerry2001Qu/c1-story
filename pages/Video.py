@@ -37,7 +37,7 @@ def run():
         st.session_state["download_run"] = True
     
     if st.session_state["download_run"]:
-        story_folder = Path("/tmp") / clean_reuters_id
+        story_folder = Path("./") / clean_reuters_id
         dataloader = ReutersAPIDataLoader(reuters_id, story_folder)
         storyline = dataloader.load_storyline()
         shotlist = dataloader.load_shotlist()

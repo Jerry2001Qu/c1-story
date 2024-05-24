@@ -67,7 +67,6 @@ class ClipManager:
         self.clips_folder.mkdir(parents=True, exist_ok=True)
         if is_folder_empty(self.clips_folder):
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            st.write(scene_list)
             from contextlib import contextmanager, redirect_stdout
             from io import StringIO
             import os
