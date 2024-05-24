@@ -3,6 +3,7 @@
 # STREAMLIT
 from src.transcription import WhisperResults
 from src.gemini import full_description, describe_clips
+import streamlit as st
 # /STREAMLIT
 
 from pathlib import Path
@@ -62,6 +63,8 @@ class ClipManager:
     def split_video_into_clips(self):
         """Splits the main video into clips based on scene detection."""
         self.clips_folder.mkdir(parents=True, exist_ok=True)
+        st.write(is_folder_empty(self.clips_folder))
+        st.write(list(self.clips_folder.glob('**/*')))
         if is_folder_empty(self.clips_folder):
             from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
@@ -71,8 +74,6 @@ class ClipManager:
     def load_and_match_clips(self):
         """Loads clips, creating Clip objects."""
         clips_xml = self.describe_clips()
-        import streamlit as st
-        st.write(list(self.clips_folder.glob('**/*')))
         for clip_data in clips_xml["response"]:
             clip_dict = {}
             for part in clip_data["clip"]:
