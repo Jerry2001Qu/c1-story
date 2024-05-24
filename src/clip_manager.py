@@ -65,6 +65,18 @@ class ClipManager:
     def split_video_into_clips(self):
         """Splits the main video into clips based on scene detection."""
         self.clips_folder.mkdir(parents=True, exist_ok=True)
+        # Check if video file exists and is readable
+        import os
+        if not self.video_file_path.exists():
+            print(f"Error: The video file {self.video_file_path} does not exist.")
+        if not os.access(str(self.video_file_path), os.R_OK):
+            print(f"Error: The video file {self.video_file_path} is not readable.")
+
+        # Check if the output directory exists and is writable
+        if not self.clips_folder.exists():
+            print(f"Error: The directory {self.clips_folder} does not exist.")
+        if not os.access(str(self.clips_folder), os.W_OK):
+            print(f"Error: The directory {self.clips_folder} is not writable.")
         if is_folder_empty(self.clips_folder):
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
             error = split_video_ffmpeg(str(self.video_file_path), scene_list,
