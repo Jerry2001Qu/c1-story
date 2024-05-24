@@ -68,6 +68,8 @@ class ClipManager:
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
             split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True, 
                             output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
+            
+            st.write(str(self.clips_folder / "$SCENE_NUMBER.mp4"))
 
     def load_and_match_clips(self):
         """Loads clips, creating Clip objects."""
