@@ -82,8 +82,9 @@ class ClipManager:
                     else:
                         clip_dict[key] = val
             clip_file = self.clips_folder / f"{clip_dict['id']}.mp4"
-            print(clip_file)
-            print(clip_file.exists())
+            import streamlit as st
+            st.write(clip_file)
+            st.write(clip_file.exists())
             clip = Clip(clip_dict['id'], clip_file, clip_dict['shot'], clip_dict['description'], clip_dict['quote'], self.clips_folder)
             self.clips.append(clip)
     
