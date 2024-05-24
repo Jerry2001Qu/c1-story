@@ -94,9 +94,13 @@ class ClipManager:
             clip.transcribe_clip()
     
     def generate_full_descriptions(self, story_title: str):
-        for clip in self.clips:
+        # STREAMLIT
+        progress_bar = st.progress(0.0)
+        for i, clip in enumerate(self.clips):
             clip.generate_full_description(story_title)
+            progress_bar.progress(i / len(self.clips))
             time.sleep(15)
+        # /STREAMLIT
 
     def describe_clips(self) -> Dict:
         """Uses Gemini to match clips to shot descriptions."""
