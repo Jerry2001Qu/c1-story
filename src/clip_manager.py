@@ -63,6 +63,7 @@ class ClipManager:
     def split_video_into_clips(self):
         """Splits the main video into clips based on scene detection."""
         self.clips_folder.mkdir(parents=True, exist_ok=True)
+        st.write(str(self.clips_folder))
         st.write(is_folder_empty(self.clips_folder))
         st.write(list(self.clips_folder.glob('*.mp4')))
         if is_folder_empty(self.clips_folder):
