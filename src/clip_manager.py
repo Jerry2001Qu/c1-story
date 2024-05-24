@@ -67,8 +67,28 @@ class ClipManager:
         self.clips_folder.mkdir(parents=True, exist_ok=True)
         if is_folder_empty(self.clips_folder):
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True, 
-                            output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
+            st.write(scene_list)
+            from contextlib import contextmanager, redirect_stdout
+            from io import StringIO
+            import os
+
+            @contextmanager
+            def st_capture():
+                with StringIO() as stdout, redirect_stdout(stdout):
+                    old_write = stdout.write
+
+                    def new_write(string):
+                        ret = old_write(string)
+                        os.write(1, f"{stdout.getvalue()}\n".encode()) 
+                        return ret
+                    
+                    stdout.write = new_write
+                    yield
+            
+            with st_capture():
+                split_video_ffmpeg(str(self.video_file_path), scene_list,
+                                output_file_template=f"{str(self.clips_folder)}/$SCENE_NUMBER.mp4", show_output=True)
+                print("hi")
             st.write(list(self.clips_folder.glob("*.mp4")))
 
     def load_and_match_clips(self):
