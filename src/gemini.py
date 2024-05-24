@@ -150,7 +150,7 @@ def extract_middle_frame_and_audio(input_file: Path) -> Tuple[Path, Path]:
     return frame_output, audio_output 
 
 
-@st.cache_data(show_spinner=False)
+# @st.cache_data(show_spinner=False)
 def describe_clips(clips_folder: Path, shotlist: str) -> Dict:
     """
     Uses the Gemini model to match video clips to shot descriptions from a shotlist. Also determines if each video clip has a quote.
@@ -191,6 +191,7 @@ Clips:"""
     files = list(sorted(clips_folder.glob("*.mp4")))
     for file in files:
         x = file
+        st.write("gemini")
         st.write(f"{x.exists()}, {x}")
         name = file.stem
         frame_file, audio_file = extract_middle_frame_and_audio(file)
