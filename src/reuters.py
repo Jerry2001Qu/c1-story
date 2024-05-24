@@ -38,6 +38,7 @@ def get_item(item_id, token=get_oauth_token()):
                 headLine
                 language
                 located
+                type
             }
         }
     }
@@ -47,8 +48,9 @@ def get_item(item_id, token=get_oauth_token()):
     }
     data = graphql_query(query, variables, token=get_oauth_token())
 
-    association = data["data"]["item"]["associations"][0]
-    return association["bodyXhtml"], association["headLine"], association["language"], association["located"]
+    associations = data["data"]["item"]["associations"]
+    text_association = [association for association in associations if association["type"] == "text"][0]
+    return text_association["bodyXhtml"], text_association["headLine"], text_association["language"], text_association["located"]
 
 @st.cache_data(show_spinner=False, ttl=60*5)
 def download_asset(item_id, rendition_id, token=get_oauth_token()):
