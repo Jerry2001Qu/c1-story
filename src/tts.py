@@ -2,6 +2,7 @@
 
 # STREAMLIT
 from src.constants import ELEVENLABS_API_KEY
+import streamlit as st
 # /STREAMLIT
 
 from elevenlabs.client import ElevenLabs
@@ -11,6 +12,7 @@ client = ElevenLabs(
     api_key=ELEVENLABS_API_KEY
 )
 
+@st.cache_data(show_spinner=False)
 def TTS(text, filename, previous_text="", next_text=""):
     additional_body_parameters = {}
     if previous_text:

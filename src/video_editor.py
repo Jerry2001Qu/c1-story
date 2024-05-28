@@ -49,7 +49,7 @@ class VideoEditor:
 
         st.write("Outputing final video file")
         final_video.write_videofile(str(output_file), fps=24, threads=8,
-                                    verbose=True, logger=None)
+                                    logger=None)
         # /STREAMLIT
 
     def _process_sot_section(self, section: SOTScriptSection) -> mp.VideoFileClip:

@@ -21,3 +21,4 @@ st-annotated-text
 google-cloud-storage
 google-cloud-aiplatform
 pillow
+pycountry

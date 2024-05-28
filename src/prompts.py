@@ -118,13 +118,13 @@ Ensure quotes are properly escaped or replaced with single quotes to ensure JSON
       "quote": "...",
       "name": "...",
       "title": "CEO and President",
-      "language": "...",
+      "language": "english",
   }},
   "4": {{
       "quote": "...",
       "name": "...",
       "title": "...",
-      "language": "...",
+      "language": "chinese",
   }},
 }}
 </example>
@@ -343,6 +343,34 @@ Here is the list of broll placements:
 Parse the <broll_placements></broll_placements> into each <section></section>. Start each section at 0. Put your response in <response></response> tags."""
 )
 
+match_sot_prompt = PromptTemplate.from_template(
+"""Your task is to find the substring in one language that best matches the meaning of a string in English.
+
+Here is the English string to match:
+<english>
+{ENGLISH_STRING}
+</english>
+
+And here is the text in another language to find the matching substring in:
+<other_language>
+{OTHER_LANGUAGE_STRING}
+</other_language>
+
+Your resulting substring should be contiguous & be taken exactly from the other language. It should be in that other language.
+Put your response in <response></response> tags."""
+)
+
+language_to_iso_prompt = PromptTemplate.from_template(
+"""Your task is to convert a given language name to its corresponding ISO 639-1 language code.
+
+The language name to convert is:
+<language_name>
+{LANGUAGE_NAME}
+</language_name>
+
+If this doesn't match any language name, return Unknown. Put your response in <response></response> tags."""
+)
+
 get_sot_chain = get_sot_prompt | opus
 parse_sot_chain = parse_sot_prompt | opus
 reformat_chain = reformat_prompt | opus
@@ -351,6 +379,8 @@ parse_chain = parse_prompt | opus
 logline_chain = logline_prompt | opus
 headline_chain = headline_prompt | opus
 parse_broll_chain = parse_broll_prompt | opus
+match_sot_chain = match_sot_prompt | opus
+language_to_iso_chain = language_to_iso_prompt | opus
 
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
@@ -358,7 +388,7 @@ def extract_xml(text):
 def run_chain(chain, params):
     response_raw = chain.invoke(params).content
     response_xml = extract_xml(response_raw)
-    return response_xml['response']
+    return response_xml['response'].strip()
 
 def run_chain_json(chain, params):
     response = run_chain(chain, params)

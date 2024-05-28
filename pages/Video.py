@@ -5,6 +5,8 @@ LOGGER = get_logger(__name__)
 
 from pathlib import Path
 
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
+
 from src.dataloader import ReutersAPIDataLoader
 from src.clip_manager import ClipManager
 from src.news_script import NewsScript
@@ -37,7 +39,7 @@ def run():
         st.session_state["download_run"] = True
     
     if st.session_state["download_run"]:
-        story_folder = Path("./") / clean_reuters_id
+        story_folder = Path("/tmp") / clean_reuters_id
         dataloader = ReutersAPIDataLoader(reuters_id, story_folder)
         storyline = dataloader.load_storyline()
         shotlist = dataloader.load_shotlist()
@@ -61,14 +63,13 @@ def run():
                 clip_manager.split_video_into_clips()
                 st.write("Load & matching clips")
                 clip_manager.load_and_match_clips()
-                st.write("Transcribing clips")
-                clip_manager.transcribe_clips()
                 st.write("Generating full descriptions")
                 clip_manager.generate_full_descriptions(story_title)
                 
                 script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder)
                 script.generate_script()
                 script.generate_lower_thirds()
+                script.match_sot_clips()
 
                 st.session_state["clip_manager"] = clip_manager
                 st.session_state["script"] = script
@@ -77,6 +78,9 @@ def run():
                 script = st.session_state["script"]
         
         st.session_state["ran"] = True
+
+        with st.expander("Details"):
+            st.write(clip_manager.clips)
 
         trt = script.get_total_read_time_seconds()
         st.write(f"Estimated TRT: {trt}s")
@@ -87,39 +91,22 @@ def run():
             st.write(storyline)
         with output_col_2:
             st.subheader("Final Story")
-            st.write(script.__repr__())
-            # data = {
-            #     'type': [],
-            #     'shot_id': [],
-            #     'text': [],
-            # }
-            # for section in parsed_script_json["sections"]:
-            #     data['type'].append(section['type'])
-            #     data['shot_id'].append(section['shot_id'] if section['type'] == 'SOT' else None)
-            #     data['text'].append(section['text'])
-            # df = pd.DataFrame(data)
+            
+            df = script.to_dataframe()
+            gb = GridOptionsBuilder.from_dataframe(df)
+            gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
+            gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
+            gb.configure_column("shot_id", width=50, editable=True)
 
-            # gb = GridOptionsBuilder.from_dataframe(df)
-            # gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
-            # gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
-            # gb.configure_column("shot_id", width=50, editable=True)
-
-            # gb.configure_grid_options(
-            #     rowDragManaged=True,
-            #     animateRows=True,
-            #     rowHeight=60,
-            #     scrollbar=True,
-            #     domLayout='autoHeight'
-            # )
-            # df = AgGrid(df, gridOptions=gb.build(), allow_unsafe_jscode=True, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
-            # for section in script.sections:
-            #     with st.container(border=True):
-            #         if section["type"] == "SOT":
-            #             annotated_text(("SOT", "", "#8ef"))
-            #         elif section["type"] == "ANCHOR":
-            #             annotated_text(("ANCHOR", "", "#faa"))
-            #         st.write(section["text"])
-        
+            gb.configure_grid_options(
+                rowDragManaged=True,
+                animateRows=True,
+                rowHeight=60,
+                scrollbar=True,
+                domLayout='autoHeight'
+            )
+            df = AgGrid(df, gridOptions=gb.build(), height=2000, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
+            script.from_dataframe(df)
         if st.button("Generate video"):
             with st.status("Running"):
                 st.write("Generating audio & broll")

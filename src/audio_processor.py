@@ -6,6 +6,7 @@ from src.prompts import run_chain_json, parse_broll_chain
 from src.news_script import NewsScript, AnchorScriptSection, is_type
 from src.tts import TTS
 from src.gemini import add_broll
+from src.language import Language
 # /STREAMLIT
 
 from pathlib import Path
@@ -25,9 +26,8 @@ class AudioProcessor:
         self.anchor_audio_folder.mkdir(parents=True, exist_ok=True)
 
     def process_audio_and_broll(self):
-        """Processes audio for anchor sections, matches SOT clips, and adds B-roll."""
+        """Processes audio for anchor sections, and adds B-roll."""
         self._process_anchor_audio()
-        self._match_sot_clips()
         self._add_broll_placements()
 
     def _process_anchor_audio(self):
@@ -46,32 +46,6 @@ class AudioProcessor:
 
         anchor_audio = mp.concatenate_audioclips(audio_clips)
         anchor_audio.write_audiofile(str(self.anchor_audio_file), logger=None)
-
-    def _match_sot_clips(self):
-        """Matches SOTScriptSections with corresponding clips from ClipManager."""
-        for section in self.news_script.get_sot_sections():
-            try:
-                clip = next(clip for clip in self.clip_manager.clips if str(clip.shot_id) == str(section.shot_id))
-            except StopIteration:
-                print(f"No clip found for shot ID: {section.shot_id}")
-                section.clip = None
-                continue
-            section.clip = clip
-
-            quote = section.quote
-            timestamps = fuzzy_match(quote, clip.whisper_results)
-            if timestamps:
-                section.start = timestamps[0].start
-                section.end = timestamps[-1].end + 0.5
-            else:
-                if clip.whisper_results.has_speech:
-                    section.start = clip.whisper_results.timestamps[0].start
-                    section.end = clip.whisper_results.timestamps[-1].end
-                    print(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {section.quote}, whisper: {clip.whisper_results}")
-                else:
-                    section.start = 0.0
-                    section.end = clip.load_video().duration
-                    print(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, quote: {section.quote}, whisper: {clip.whisper_results}")
 
     def _add_broll_placements(self):
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""
@@ -101,30 +75,3 @@ class AudioProcessor:
             if section.id != broll_data["id"]:
                 print(f"WARNING: IDS DON'T MATCH script: {section.id}, broll: {broll_data['id']}")
             section.brolls = broll_data["brolls"]
-
-from difflib import SequenceMatcher
-from fuzzysearch import find_near_matches
-
-def prep_text(text):
-    lower = text.lower().strip().replace("-", " ")
-    return ''.join(filter(lambda x: x.isalpha() or x == ' ', lower))
-
-def prep_word(word):
-    lower = word.lower()
-    return ''.join(filter(lambda x: x.isalpha(), lower))
-
-def fuzzy_match(quote, whisper_results):
-    fuzzy = find_near_matches(prep_text(quote), prep_text(whisper_results.text), max_l_dist=int(len(quote) / 5))
-    if not fuzzy:
-        return None
-    fuzzy_match = fuzzy[0].matched
-
-    quote_words = [prep_word(word) for word in fuzzy_match.split()]
-    whisper_words = [prep_word(word.word) for word in whisper_results.timestamps]
-    matcher = SequenceMatcher(None, quote_words, whisper_words)
-    seq_match = matcher.find_longest_match(0, len(quote_words), 0, len(whisper_words))
-
-    if seq_match.size > 0:
-        return whisper_results.timestamps[seq_match.b:seq_match.b + seq_match.size]
-    else:
-        return None

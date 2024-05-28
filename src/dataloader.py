@@ -60,7 +60,7 @@ class LocalDataLoader(DataLoader):
     
     def get_story_title(self) -> str:
         """Loads the story title."""
-        return self.folder_path.stem
+        return self.folder_path.resolve().stem
 
     def get_video_file_path(self) -> Path:
         """Returns the path to the video file 'video.mp4'."""

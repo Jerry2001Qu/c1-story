@@ -4,6 +4,7 @@
 from src.constants import GOOGLE_JSON
 import os
 import json
+import streamlit as st
 
 google_json = json.loads(GOOGLE_JSON, strict=False)
 temp_file_path = "/tmp/service_account.json"
@@ -14,7 +15,7 @@ with open(temp_file_path, "w") as f:
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file_path
 
 from src.prompts import extract_xml
-import streamlit as st
+from src.clip_manager import Clip
 # /STREAMLIT
 
 import random
@@ -150,8 +151,7 @@ def extract_middle_frame_and_audio(input_file: Path) -> Tuple[Path, Path]:
     return frame_output, audio_output 
 
 
-@st.cache_data(show_spinner=False)
-def describe_clips(clips_folder: Path, shotlist: str) -> Dict:
+def describe_clips(clips: List[Clip], shotlist: str) -> Dict:
     """
     Uses the Gemini model to match video clips to shot descriptions from a shotlist. Also determines if each video clip has a quote.
     """
@@ -188,12 +188,13 @@ Shot1 has a quote saying, "GET OUT OF THE WAY, IT'S SPREADING!", and likely matc
 Clips:"""
     ]
 
-    files = list(sorted(clips_folder.glob("*.mp4")))
-    for file in files:
-        name = file.stem
-        frame_file, audio_file = extract_middle_frame_and_audio(file)
+    for clip in clips:
+        name = clip.id
+        frame_file, audio_file = extract_middle_frame_and_audio(clip.file_path)
 
         content += [f"ID {name}:", upload_to_gcs(frame_file), upload_to_gcs(audio_file)]
+        content += [f"Clip has speech with transcript: {clip.whisper_results.text}" if clip.whisper_results.has_speech else "Clip doesn't have speech"]
+        content += ["\n\n"]
 
     content += ["\nShotlist:\n", shotlist]
 
@@ -221,8 +222,14 @@ def full_description(clip_file, description, title):
 
     content += [upload_to_gcs(clip_file)]
 
-    content += ["This clip is from a video about: ", title]
-    content += ["This clip should specifically contain: ", description]
+    if title:
+        content += ["This clip is from a video about: ", title]
+    else:
+        print("ERROR: Title is None")
+    if description:
+        content += ["This clip should specifically contain: ", description]
+    else:
+        print("ERROR: Description is None")
     content += ["""You are a news video editor. Please describe this video with as much detail as possible."""]
 
     content += ["""<example>

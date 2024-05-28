@@ -3,13 +3,15 @@
 # STREAMLIT
 from src.clip_manager import ClipManager, Clip
 from src.prompts import run_chain, run_chain_json, \
-                        get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain
+                        get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain
+from src.language import Language
 # /STREAMLIT
 
 from typing import List, Optional
 from abc import ABC
 from pathlib import Path
 import moviepy.editor as mp
+import pandas as pd
 
 class ScriptSection(ABC):
     """Represents a single section of the news script."""
@@ -45,14 +47,14 @@ class SOTScriptSection(ScriptSection):
 
         self.name: Optional[str] = None
         self.title: Optional[str] = None
-        self.language: Optional[str] = None
+        self.language: Optional[Language] = None
 
         self.clip: Optional[Clip] = None
         self.start: Optional[float] = None
         self.end: Optional[float] = None
     
     def __repr__(self):
-        return f"""{self.id}: {self.get_byline()}
+        return f"""{self.id} ({self.clip.id if self.clip else "No clip"}): {self.get_byline()}
 
 {self.quote}"""
 
@@ -106,6 +108,47 @@ class NewsScript:
         # /STREAMLIT
         audio_processor = AudioProcessor(self, self.clip_manager, self.folder)
         audio_processor.process_audio_and_broll()
+    
+    def match_sot_clips(self):
+        """Matches SOTScriptSections with corresponding clips from ClipManager."""
+        for section in self.get_sot_sections():
+            try:
+                clip = next(clip for clip in self.clip_manager.clips if str(clip.shot_id) == str(section.shot_id))
+            except StopIteration:
+                print(f"No clip found for shot ID: {section.shot_id}")
+                section.clip = None
+                continue
+            section.clip = clip
+
+            if section.language != clip.whisper_results.language:
+                print(f"Language does not match {section.language} (section {section.id}) != {clip.whisper_results.language} (clip {clip.id})")
+
+            if clip.whisper_results.language == Language.from_str("English"):
+                self._match_sot_clips_same_language(section, clip, section.quote)
+            else:
+                self._match_sot_clips_different_language(section, clip)
+
+    def _match_sot_clips_same_language(self, section, clip, quote):
+        timestamps = fuzzy_match(quote, clip.whisper_results)
+        if timestamps:
+            section.start = timestamps[0].start
+            section.end = timestamps[-1].end + 0.5
+        else:
+            if clip.whisper_results.has_speech:
+                section.start = clip.whisper_results.timestamps[0].start
+                section.end = clip.whisper_results.timestamps[-1].end
+                print(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
+            else:
+                section.start = 0.0
+                section.end = clip.load_video().duration
+                print(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, quote: {quote}, whisper: {clip.whisper_results.text}")
+
+    def _match_sot_clips_different_language(self, section, clip):
+        english_str = section.quote
+        other_language_str = clip.whisper_results.text
+
+        other_language_substring = run_chain(match_sot_chain, {"ENGLISH_STRING": english_str, "OTHER_LANGUAGE_STRING": other_language_str})
+        self._match_sot_clips_same_language(section, clip, other_language_substring)
 
     def _extract_sots(self) -> str:
         """Extracts and parses soundbites (SOTs) from the shotlist."""
@@ -163,7 +206,7 @@ class NewsScript:
             shot_id_str = str(section.shot_id)
             section.name = parsed_sots[shot_id_str]["name"]
             section.title = parsed_sots[shot_id_str]["title"]
-            section.language = parsed_sots[shot_id_str]["language"]
+            section.language = Language.from_str(parsed_sots[shot_id_str]["language"])
 
     def get_sot_sections(self) -> List[SOTScriptSection]:
         """Returns a list of SOTScriptSections."""
@@ -183,5 +226,69 @@ class NewsScript:
         import readtime
         return readtime.of_text(self.text_script).seconds
     
+    def to_dataframe(self):
+        data = {
+            'type': [],
+            'shot_id': [],
+            'text': [],
+        }
+        for section in self.sections:
+            if is_type(section, AnchorScriptSection):
+                data['type'] += ["ANCHOR"]
+                data['shot_id'] += [None]
+                data['text'] += [section.text]
+            elif is_type(section, SOTScriptSection):
+                data['type'] += ["SOT"]
+                data['shot_id'] += [section.shot_id]
+                data['text'] += [section.quote]
+            else:
+                print(f"ERROR: Unrecognized section of type: {type(section)}")
+        df = pd.DataFrame(data)
+        return df
+    
+    def from_dataframe(self, df):
+        self.sections = []
+        for id, row in df.iterrows():
+            if row["type"] == "ANCHOR":
+                self.sections += [AnchorScriptSection(id, row["text"])]
+            elif row["type"] == "SOT":
+                self.sections += [SOTScriptSection(id, row["text"], int(row["shot_id"]), row["text"])]
+            else:
+                print(f"ERROR: Unrecognized section of type: {row['type']}")
+        self.generate_lower_thirds()
+        self.match_sot_clips()
+    
 def is_type(obj, type_):
     return str(type(obj)) == str(type_)
+
+from difflib import SequenceMatcher
+from fuzzysearch import find_near_matches
+
+def prep_text(text):
+    lower = text.lower().strip().replace("-", " ")
+    return ''.join(filter(lambda x: x.isalpha() or x == ' ', lower))
+
+def prep_word(word):
+    lower = word.lower()
+    return ''.join(filter(lambda x: x.isalpha(), lower))
+
+def split_into_words_by_language(text, language):
+    if language in [Language.from_str("chinese"), Language.from_str("lao"), Language.from_str("burmese")]:
+        return list(text)
+    return text.split()
+
+def fuzzy_match(quote, whisper_results):
+    fuzzy = find_near_matches(prep_text(quote), prep_text(whisper_results.text), max_l_dist=int(len(quote) / 5))
+    if not fuzzy:
+        return None
+    fuzzy_match = fuzzy[0].matched
+
+    quote_words = [prep_word(word) for word in split_into_words_by_language(fuzzy_match, whisper_results.language)]
+    whisper_words = [prep_word(word.word) for word in whisper_results.timestamps]
+    matcher = SequenceMatcher(None, quote_words, whisper_words)
+    seq_match = matcher.find_longest_match(0, len(quote_words), 0, len(whisper_words))
+
+    if seq_match.size > 0:
+        return whisper_results.timestamps[seq_match.b:seq_match.b + seq_match.size]
+    else:
+        return None

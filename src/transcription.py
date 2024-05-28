@@ -2,6 +2,7 @@
 
 # STREAMLIT
 from src.constants import OPENAI_API_KEY
+from src.language import Language
 # /STREAMLIT
 
 from dataclasses import dataclass
@@ -26,7 +27,7 @@ class WhisperResults:
     timestamps: List[Word]
     no_speech_prob: float
     has_speech: bool
-    language: str
+    language: Language
 
     @classmethod
     def from_file(cls, file: Path):
@@ -40,13 +41,13 @@ class WhisperResults:
             A WhisperResults object containing the transcription data.
         """
         transcript = openai_client.audio.transcriptions.create(
-            file=file, 
-            model="whisper-1", 
-            response_format="verbose_json", 
+            file=file,
+            model="whisper-1",
+            response_format="verbose_json",
             timestamp_granularities=["segment", "word"]
         )
         segments = transcript.segments
-        language = transcript.language
+        language = Language.from_str(transcript.language)
         timestamps = [Word(word['word'], word['start'], word['end']) for word in transcript.words]
 
         text = "".join([seg["text"] for seg in segments])
@@ -55,6 +56,6 @@ class WhisperResults:
             min_no_speech_prob = min([seg["no_speech_prob"] for seg in segments])
         else:
             min_no_speech_prob = 1.0
-        has_speech = min_no_speech_prob < 0.2
+        has_speech = bool(text)
 
         return cls(text, timestamps, min_no_speech_prob, has_speech, language)

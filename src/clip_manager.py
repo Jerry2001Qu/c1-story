@@ -2,7 +2,6 @@
 
 # STREAMLIT
 from src.transcription import WhisperResults
-from src.gemini import full_description, describe_clips
 import streamlit as st
 # /STREAMLIT
 
@@ -17,16 +16,19 @@ def is_folder_empty(folder_path: Path) -> bool:
 class Clip:
     """Represents a single video clip."""
 
-    def __init__(self, clip_id: str, clip_file: Path, shot_id: int, shotlist_description: str, has_quote: bool, clips_folder: Path):
+    def __init__(self, clip_id: str, clip_file: Path, clips_folder: Path):
         self.id = clip_id
         self.file_path = clip_file
-        self.shot_id = shot_id
-        self.shotlist_description = shotlist_description
-        self.has_quote = has_quote
         self.clips_folder = clips_folder
 
+        self.shot_id: Optional[int] = None
+        self.shotlist_description: Optional[str] = None
+        self.has_quote: Optional[bool] = None
         self.whisper_results: Optional[WhisperResults] = None
         self.full_description: Optional[str] = None
+
+    def __repr__(self):
+        return f"""{self.id} ({self.shot_id}, quote: {self.has_quote}): {self.shotlist_description}"""
 
     def load_video(self) -> mp.VideoFileClip:
         """Loads the video clip using moviepy."""
@@ -50,15 +52,18 @@ class Clip:
 
     def _get_full_description_from_gemini(self, story_title: str) -> str:
         """Calls the Gemini API to generate a full description for the clip."""
+        from src.gemini import full_description
         return full_description(self.file_path, self.shotlist_description, story_title)
+
 
 class ClipManager:
     """Manages video clips, including splitting, description, and speech recognition."""
 
-    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str):
+    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str, has_splash_screen=False):
         self.video_file_path = video_file_path
         self.clips_folder = clips_folder
         self.shotlist = shotlist
+        self.has_splash_screen = has_splash_screen
         self.clips: List[Clip] = []
 
     def split_video_into_clips(self):
@@ -67,13 +72,19 @@ class ClipManager:
         if is_folder_empty(self.clips_folder):
             from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True, 
+            status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True,
                             output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
             if status != 0:
                 st.error(f"Splitting video into clips failed with code: {status}")
 
     def load_and_match_clips(self):
         """Loads clips, creating Clip objects."""
+        self.clips = [Clip(file.stem, file, self.clips_folder) for file in sorted(self.clips_folder.glob("*.mp4"))]
+        if self.has_splash_screen:
+            self.clips = self.clips[1:]
+
+        self.transcribe_clips()
+
         clips_xml = self.describe_clips()
         for clip_data in clips_xml["response"]:
             clip_dict = {}
@@ -85,14 +96,19 @@ class ClipManager:
                         clip_dict[key] = val.strip()
                     else:
                         clip_dict[key] = val
-            clip_file = self.clips_folder / f"{clip_dict['id']}.mp4"
-            clip = Clip(clip_dict['id'], clip_file, clip_dict['shot'], clip_dict['description'], clip_dict['quote'], self.clips_folder)
-            self.clips.append(clip)
-    
+            try:
+                clip = next(clip for clip in self.clips if str(clip.id) == str(clip_dict['id']))
+            except StopIteration:
+                print(f"Clip not found with id, {clip_dict['id']}")
+                continue
+            clip.shot_id = clip_dict['shot']
+            clip.shotlist_description = clip_dict["description"]
+            clip.has_quote = clip_dict['quote']
+
     def transcribe_clips(self):
         for clip in self.clips:
             clip.transcribe_clip()
-    
+
     def generate_full_descriptions(self, story_title: str):
         # STREAMLIT
         progress_bar = st.progress(0.0)
@@ -103,7 +119,8 @@ class ClipManager:
 
     def describe_clips(self) -> Dict:
         """Uses Gemini to match clips to shot descriptions."""
-        return describe_clips(self.clips_folder, self.shotlist)
+        from src.gemini import describe_clips
+        return describe_clips(self.clips, self.shotlist)
 
     def get_clip(self, clip_id):
         for clip in self.clips:
