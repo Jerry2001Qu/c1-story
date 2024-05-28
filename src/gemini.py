@@ -160,6 +160,7 @@ def describe_clips(clips: List[Clip], shotlist: str) -> Dict:
     # Instructions and example for Gemini
     content += [
         "You are a video editor who is matching video clips with shots from a shotlist.\n",
+        "Here is an example:",
         """<example>
 Shot1 has a quote saying, "GET OUT OF THE WAY, IT'S SPREADING!", and likely matches with the audio in clip002.
 
@@ -185,16 +186,20 @@ Shot1 has a quote saying, "GET OUT OF THE WAY, IT'S SPREADING!", and likely matc
 </response>
 </example>
 
-Clips:"""
+Here are the clips:
+<clips>"""
     ]
 
     for clip in clips:
         name = clip.id
         frame_file, audio_file = extract_middle_frame_and_audio(clip.file_path)
 
+        content += ["<clip>\n"]
         content += [f"ID {name}:", upload_to_gcs(frame_file), upload_to_gcs(audio_file)]
-        content += [f"Clip has speech with transcript: {clip.whisper_results.text}" if clip.whisper_results.has_speech else "Clip doesn't have speech"]
+        content += [f"Clip has speech with transcript: {clip.whisper_results.english_text}" if clip.whisper_results.has_speech else "Clip may not have speech"]
+        content += ["\n</clip>"]
         content += ["\n\n"]
+    content += ["</clips>"]
 
     content += ["\nShotlist:\n", shotlist]
 

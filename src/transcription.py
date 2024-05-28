@@ -28,6 +28,7 @@ class WhisperResults:
     no_speech_prob: float
     has_speech: bool
     language: Language
+    english_text: str
 
     @classmethod
     def from_file(cls, file: Path):
@@ -58,4 +59,15 @@ class WhisperResults:
             min_no_speech_prob = 1.0
         has_speech = bool(text)
 
-        return cls(text, timestamps, min_no_speech_prob, has_speech, language)
+        if language == Language.from_str("english"):
+            english_text = text
+        else:
+            translation = openai_client.audio.translations.create(
+                file=file,
+                model="whisper-1",
+                response_format="json",
+            )
+            english_text = translation.text
+
+
+        return cls(text, timestamps, min_no_speech_prob, has_speech, language, english_text)
