@@ -47,9 +47,9 @@ class WhisperResults:
             response_format="verbose_json",
             timestamp_granularities=["segment", "word"]
         )
-        print(transcript)
+
         segments = transcript.segments
-        language = Language.from_str(transcript.language)
+        language = Language.from_str(transcript.language) if transcript.language else None
         timestamps = [Word(word['word'], word['start'], word['end']) for word in transcript.words]
 
         text = "".join([seg["text"] for seg in segments])
