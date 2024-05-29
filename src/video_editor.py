@@ -72,8 +72,8 @@ class VideoEditor:
 
             # 2. Original audio with fadeout and lower volume
             original_audio = clip.audio
-            original_audio = mp.CompositeAudioClip([
-                original_audio.subclip(0, self.lower_volume_duration).audio_fadeout(self.lower_volume_duration),
+            original_audio = mp.concatenate_audioclips([
+                original_audio.subclip(0, dub_start_time).audio_fadeout(dub_start_time).subclip(0, self.lower_volume_duration),
                 cap_loudness_audio_clip(original_audio.subclip(self.lower_volume_duration, clip.duration), self.dub_volume_lufs).set_start(self.lower_volume_duration)
             ])
 
