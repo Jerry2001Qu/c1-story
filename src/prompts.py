@@ -241,7 +241,7 @@ Here is the script:
 
 Each paragraph should become a section. Some paragraphs are quotes. These should be matched with quotes from the shotlist & add a shot_id.
 There may not be any quotes. Only put speech in the quote field, no emotes like (laughs). Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid.
-Put the output in <response></response> tags"""
+Ensure the order remains the same. Put the output in <response></response> tags"""
 )
 
 logline_prompt = PromptTemplate.from_template(
