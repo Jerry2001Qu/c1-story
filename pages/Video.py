@@ -4,6 +4,7 @@ from streamlit.logger import get_logger
 LOGGER = get_logger(__name__)
 
 from pathlib import Path
+import shutil
 
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
@@ -12,12 +13,21 @@ from src.clip_manager import ClipManager
 from src.news_script import NewsScript
 from src.video_editor import VideoEditor
 
+from src.prompts import cache
+
 def run():
     st.set_page_config(
         page_title="Channel 1",
         page_icon="👋",
         layout="wide"
     )
+
+    with st.sidebar:
+        if st.button("Clear caches"):
+            st.cache_data.clear()
+            cache.clear()
+            for folder in Path("/tmp").glob("tagreuters*"):
+                shutil.rmtree(folder)
 
     st.write("# Channel 1 Demo")
 

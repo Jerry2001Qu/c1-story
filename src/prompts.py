@@ -22,7 +22,8 @@ opus = ChatAnthropic(model="claude-3-opus-20240229", temperature=0, max_tokens=4
 sonnet = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 
-set_llm_cache(SQLiteCache(database_path="langchain.db"))
+cache = SQLiteCache(database_path="langchain.db")
+set_llm_cache(cache)
 
 # STREAMLIT
 section_summary_prompt = PromptTemplate.from_template(
