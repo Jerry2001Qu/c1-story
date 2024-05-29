@@ -21,7 +21,7 @@ class VideoEditor:
                  output_resolution: Tuple[int, int] = (768, 432),
                  font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40, dub_volume_lufs=-40,
-                 lower_volume_duration=2.0, dub_delay=1.0):
+                 lower_volume_duration=3.0, dub_delay=0.5):
         self.news_script = news_script
         self.clip_manager = clip_manager
         self.output_resolution = output_resolution
