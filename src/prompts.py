@@ -371,6 +371,38 @@ The language name to convert is:
 If this doesn't match any language name, return Unknown. Put your response in <response></response> tags."""
 )
 
+match_clip_to_sots_prompt = PromptTemplate.from_template(
+"""You will be provided with two pieces of information:
+
+<sots>
+{SOTS}
+</sots>
+
+<clips_with_transcripts>
+{CLIPS_WITH_TRANSCRIPTS}
+</clips_with_transcripts>
+
+Your task is to match each clip from the clips_with_transcripts to the most relevant sot from the sots. Not every clip will necessarily have a matching sot.
+
+Return a JSON in a format like:
+<example>
+{{
+   "matches": [
+      {{
+         "clip_id": <clip_id>,
+         "sot_id": <sot_id>,
+         "shotlist_description": <sot_description>
+      }},
+      ...
+   ]
+}}
+</example>
+
+The transcript from a clip should match the quote from a sot to match. If a clip doesn't match any sot, set sot_id to None.
+If the clip matches an sot, copy it's description from the sots list, otherwise None.
+Put your response in <response></response> tags."""
+)
+
 get_sot_chain = get_sot_prompt | opus
 parse_sot_chain = parse_sot_prompt | opus
 reformat_chain = reformat_prompt | opus
@@ -381,6 +413,7 @@ headline_chain = headline_prompt | opus
 parse_broll_chain = parse_broll_prompt | opus
 match_sot_chain = match_sot_prompt | opus
 language_to_iso_chain = language_to_iso_prompt | opus
+match_clip_to_sots_chain = match_clip_to_sots_prompt | opus
 
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))

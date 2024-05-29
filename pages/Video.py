@@ -61,14 +61,21 @@ def run():
                 clip_manager = ClipManager(video_file_path, clips_folder, shotlist)
                 st.write("Splitting video")
                 clip_manager.split_video_into_clips()
-                st.write("Load & matching clips")
-                clip_manager.load_and_match_clips()
+                st.write("Loading clips")
+                clip_manager.load_clips()
+                st.write("Transcribing clips")
+                clip_manager.transcribe_clips()
+                st.write("Matching clips to shotlist")
+                clip_manager.match_clips()
                 st.write("Generating full descriptions")
                 clip_manager.generate_full_descriptions(story_title)
                 
                 script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder)
+                st.write("Generating script")
                 script.generate_script()
+                st.write("Generating lower thirds")
                 script.generate_lower_thirds()
+                st.write("Matching sots to clips")
                 script.match_sot_clips()
 
                 st.session_state["clip_manager"] = clip_manager

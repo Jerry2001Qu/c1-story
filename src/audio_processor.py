@@ -28,6 +28,7 @@ class AudioProcessor:
     def process_audio_and_broll(self):
         """Processes audio for anchor sections, and adds B-roll."""
         self._process_anchor_audio()
+        self._generate_sot_translations()
         self._add_broll_placements()
 
     def _process_anchor_audio(self):
@@ -38,7 +39,7 @@ class AudioProcessor:
                 audio_file = self.anchor_audio_folder / f"{section.id}.mp3"
                 previous_text = self.news_script.sections[i - 1].text if i > 0 else ""
                 next_text = self.news_script.sections[i + 1].text if i < len(self.news_script.sections) - 1 else ""
-                TTS(section.text, str(audio_file), previous_text, next_text)
+                TTS(section.text, str(audio_file), previous_text=previous_text, next_text=next_text)
                 audio_clip = mp.AudioFileClip(str(audio_file))
                 section.anchor_audio_file = audio_file
                 section.anchor_audio_clip = audio_clip
@@ -46,6 +47,14 @@ class AudioProcessor:
 
         anchor_audio = mp.concatenate_audioclips(audio_clips)
         anchor_audio.write_audiofile(str(self.anchor_audio_file), logger=None)
+    
+    def _generate_sot_translations(self):
+        """Generates dubbed translations for non-English SOT"""
+        for section in self.news_script.get_sot_sections():
+            if section.language == Language.from_str("english"):
+                continue
+            audio_file = self.anchor_audio_folder / f"{section.id}_dub.mp3"
+            section.generate_dub(audio_file)
 
     def _add_broll_placements(self):
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""

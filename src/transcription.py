@@ -60,7 +60,9 @@ class WhisperResults:
             min_no_speech_prob = 1.0
         has_speech = bool(text)
 
-        if language == Language.from_str("english"):
+        if not language:
+            english_text = text
+        elif language == Language.from_str("english"):
             english_text = text
         else:
             translation = openai_client.audio.translations.create(

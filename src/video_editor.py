@@ -3,6 +3,7 @@
 # STREAMLIT
 from src.clip_manager import ClipManager
 from src.news_script import NewsScript, AnchorScriptSection, SOTScriptSection, is_type
+from src.language import Language
 import streamlit as st
 # /STREAMLIT
 
@@ -19,7 +20,8 @@ class VideoEditor:
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
                  output_resolution: Tuple[int, int] = (768, 432),
                  font: Path = None, font_size=None, logo_path: Path = None,
-                 logline_padding=40):
+                 logline_padding=40, dub_volume_lufs=-40,
+                 lower_volume_duration=2.0, dub_delay=0.5):
         self.news_script = news_script
         self.clip_manager = clip_manager
         self.output_resolution = output_resolution
@@ -27,6 +29,9 @@ class VideoEditor:
         self.font_size = font_size
         self.logo_path = logo_path
         self.logline_padding = logline_padding
+        self.dub_volume_lufs = dub_volume_lufs
+        self.lower_volume_duration = lower_volume_duration
+        self.dub_delay = dub_delay
 
     def assemble_video(self, output_file: Path = Path("output.mp4")):
         """Assembles the final video from script sections and B-roll."""
@@ -57,6 +62,37 @@ class VideoEditor:
         clip = section.clip.load_video()
         clip = resize_image_clip(clip, self.output_resolution)
         clip = clip.subclip(section.start, min(section.end, clip.duration))
+
+        # Dubbing logic
+        if section.language != Language.from_str("English") and section.dub_audio_file:
+            dub_audio = mp.AudioFileClip(str(section.dub_audio_file))
+
+            # 1. Calculate the time the dub starts
+            dub_start_time = self.lower_volume_duration + self.dub_delay
+
+            # 2. Original audio with fadeout and lower volume
+            original_audio = clip.audio
+            original_audio = mp.concatenate_audioclips([
+                original_audio.subclip(0, dub_start_time).audio_fadeout(self.lower_volume_duration),
+                cap_loudness_audio_clip(original_audio.subclip(dub_start_time, clip.duration), self.dub_volume_lufs)
+            ])
+
+            # 3. Delayed dubbed audio
+            delayed_dub_audio = dub_audio.set_start(dub_start_time)
+
+            # 4. Combine original and dubbed audio
+            new_audio = mp.CompositeAudioClip([original_audio, delayed_dub_audio])
+
+            # 5. Adjust video speed if needed
+            new_duration = max(clip.duration, new_audio.duration)
+            if new_duration > clip.duration:
+                speed_factor = clip.duration / new_duration
+                clip = clip.fx(mp.vfx.speedx, speed_factor)
+
+            # 6. Set new audio
+            clip = clip.set_audio(new_audio)
+            clip = clip.set_duration(new_duration)
+
         return clip
 
     def _process_anchor_section(self, section: AnchorScriptSection) -> mp.VideoFileClip:
@@ -199,7 +235,7 @@ def resize_image_clip(image_clip, target_resolution):
 
     return cropped_clip
 
-def cap_loudness(clip, max_lufs=-30):
+def cap_loudness(clip: mp.VideoFileClip, max_lufs=-30):
     audio_data = np.array(list(clip.audio.iter_frames(fps=48000)))
 
     meter = pyln.Meter(rate=48000, block_size=min(0.4, clip.duration)) # block_size must not exceed clip duration
@@ -210,3 +246,15 @@ def cap_loudness(clip, max_lufs=-30):
     adjustment_factor = 10 ** ((max_lufs - current_loudness) / 20)
     adjusted_audio = clip.audio.volumex(adjustment_factor)
     return clip.set_audio(adjusted_audio)
+
+def cap_loudness_audio_clip(clip: mp.AudioFileClip, max_lufs=-30):
+    audio_data = np.array(list(clip.iter_frames(fps=48000)))
+
+    meter = pyln.Meter(rate=48000, block_size=min(0.4, clip.duration)) # block_size must not exceed clip duration
+    current_loudness = meter.integrated_loudness(audio_data)
+    if current_loudness < max_lufs:
+        return clip
+
+    adjustment_factor = 10 ** ((max_lufs - current_loudness) / 20)
+    adjusted_audio = clip.volumex(adjustment_factor)
+    return adjusted_audio

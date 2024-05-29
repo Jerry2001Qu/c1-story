@@ -151,7 +151,7 @@ def extract_middle_frame_and_audio(input_file: Path) -> Tuple[Path, Path]:
     return frame_output, audio_output 
 
 
-def describe_clips(clips: List[Clip], shotlist: str) -> Dict:
+def describe_clips(clips: List[Clip], shotlist: str, previous_shot_id, next_shot_id) -> Dict:
     """
     Uses the Gemini model to match video clips to shot descriptions from a shotlist. Also determines if each video clip has a quote.
     """
@@ -201,14 +201,17 @@ Here are the clips:
         content += ["\n\n"]
     content += ["</clips>"]
 
+    content += [f"""
+These clips are between shot {previous_shot_id} and shot {next_shot_id}
+"""]
+
     content += ["\nShotlist:\n", shotlist]
 
-    prompt = """Please match each clip with its shot in the shotlist. It should be in the same order, but shots may be matched to multiple adjacent clips.
-You can skip to the right shot if need be. Start by going through shots with quotes in them and assign them to matching clips.
-The quote should match with what is said in the clip. If the quote doesn't match any shot, make your best guess (perhaps find a shot that has unclear speech), but say you're not sure. Write these down.
-Ex: Shot1 has a quote saying, "GET OUT OF THE WAY, IT'S SPREADING!", and likely matches with the audio in clip002.
-Then assemble the final list using these quote clips as guide posts. Include <id></id>, <shot></shot>, <description></description>, & <quote></quote> for each clip.
-Quote is 1 if the clip contains a quote, otherwise 0. If a clip doesn't doesn't match anything, say so and set <shot></shot> to -1, and <description></description> to Unknown.
+    prompt = f"""Please match each clip with its shot in the shotlist.
+Each clip should be in the same order, but shots may be matched to multiple adjacent clips. You can skip to the right shot if need be.
+Include <id></id>, <shot></shot>, <description></description>, & <quote></quote> for each clip. Quote is 1 if the clip contains a quote, otherwise 0.
+Try to match shots with quotes to the correct clip. The audio might be hard to hear but try your best.
+Generally just fill it with shots based on order, but if a clip really doesn't match anything, say so and set <shot></shot> to -1, and <description></description> to Unknown.
 Only label descriptions with those in the shotlist exactly. <shot></shot> should just be the number. <id></id> should be what I gave you, in a form like 001. Output XML in <response></response> tags"""
 
     content += ["\n\n", prompt]

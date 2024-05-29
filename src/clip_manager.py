@@ -2,6 +2,7 @@
 
 # STREAMLIT
 from src.transcription import WhisperResults
+from src.prompts import run_chain, run_chain_json, match_clip_to_sots_chain, get_sot_chain
 import streamlit as st
 # /STREAMLIT
 
@@ -55,7 +56,6 @@ class Clip:
         from src.gemini import full_description
         return full_description(self.file_path, self.shotlist_description, story_title)
 
-
 class ClipManager:
     """Manages video clips, including splitting, description, and speech recognition."""
 
@@ -77,37 +77,99 @@ class ClipManager:
             if status != 0:
                 st.error(f"Splitting video into clips failed with code: {status}")
 
-    def load_and_match_clips(self):
-        """Loads clips, creating Clip objects."""
+    def load_clips(self):
         self.clips = [Clip(file.stem, file, self.clips_folder) for file in sorted(self.clips_folder.glob("*.mp4"))]
         if self.has_splash_screen:
             self.clips = self.clips[1:]
 
-        self.transcribe_clips()
-
-        clips_xml = self.describe_clips()
-        for clip_data in clips_xml["response"]:
-            clip_dict = {}
-            for part in clip_data["clip"]:
-                for key, val in part.items():
-                    if not val:
-                        clip_dict[key] = val
-                    if isinstance(val, str):
-                        clip_dict[key] = val.strip()
-                    else:
-                        clip_dict[key] = val
-            try:
-                clip = next(clip for clip in self.clips if str(clip.id) == str(clip_dict['id']))
-            except StopIteration:
-                print(f"Clip not found with id, {clip_dict['id']}")
+    def match_clips(self):
+        sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()})
+        for sot_match in sot_matches["matches"]:
+            clip_id = sot_match["clip_id"]
+            sot_id = sot_match["sot_id"]
+            shotlist_description = sot_match["shotlist_description"]
+            if sot_id is None:
                 continue
-            clip.shot_id = clip_dict['shot']
-            clip.shotlist_description = clip_dict["description"]
-            clip.has_quote = clip_dict['quote']
+
+            clip = self.get_clip(clip_id)
+            clip.shot_id = int(sot_id)
+            clip.shotlist_description = shotlist_description
+            clip.has_quote = 1
+
+        # Find groups of clips where has_quote is None
+        groups = []
+        current_group = []
+        for clip in self.clips:
+            if clip.has_quote is None:
+                current_group.append(clip)
+            else:
+                if current_group:
+                    groups.append(current_group)
+                    current_group = []
+        if current_group:
+            groups.append(current_group)
+
+        # Describe each group with shot_id of previous and next clip
+        for group in groups:
+            # Get the shot_id of the previous and next clip
+            previous_shot_id = None
+            next_shot_id = None
+            if group:  # Check if group is not empty
+                group_start_index = self.clips.index(group[0])
+                if group_start_index > 0:
+                    previous_shot_id = self.clips[group_start_index - 1].shot_id
+                group_end_index = self.clips.index(group[-1])
+                if group_end_index < len(self.clips) - 1:
+                    next_shot_id = self.clips[group_end_index + 1].shot_id
+
+            shotlist_start_idx = 0
+            if previous_shot_id:
+                shotlist_start_idx = self.shotlist.find(f"{previous_shot_id+1}. ")
+            shotlist_end_idx = len(self.shotlist)
+            if next_shot_id:
+                shotlist_end_idx = self.shotlist.find(f"{next_shot_id}. ")
+            shotlist = self.shotlist[shotlist_start_idx:shotlist_end_idx]
+
+            # Describe the group
+            clips_xml = self.describe_clips(group, shotlist, previous_shot_id=previous_shot_id, next_shot_id=next_shot_id)
+            for clip_data in clips_xml["response"]:
+                clip_dict = {}
+                for part in clip_data["clip"]:
+                    for key, val in part.items():
+                        if not val:
+                            clip_dict[key] = val
+                        if isinstance(val, str):
+                            clip_dict[key] = val.strip()
+                        else:
+                            clip_dict[key] = val
+                try:
+
+                    clip = self.get_clip(str(clip_dict['id']))
+                except StopIteration:
+                    print(f"Clip not found with id, {clip_dict['id']}")
+                    continue
+                clip.shot_id = clip_dict['shot']
+                clip.shotlist_description = clip_dict["description"]
+                clip.has_quote = clip_dict['quote']
+
+    def _extract_sots(self) -> str:
+        """Extracts and parses soundbites (SOTs) from the shotlist."""
+        sots = run_chain(get_sot_chain, {"SHOTLIST": self.shotlist})
+        return sots
 
     def transcribe_clips(self):
         for clip in self.clips:
             clip.transcribe_clip()
+
+    def get_quotes_str(self):
+        output = ""
+        for clip in self.clips:
+            if clip.whisper_results.has_speech:
+                output += f"""<clip>
+ID {clip.id}: {clip.whisper_results.english_text}
+</clip>
+"""
+        return output
 
     def generate_full_descriptions(self, story_title: str):
         # STREAMLIT
@@ -117,10 +179,10 @@ class ClipManager:
             progress_bar.progress(i / (len(self.clips)-1))
         # /STREAMLIT
 
-    def describe_clips(self) -> Dict:
+    def describe_clips(self, clips, shotlist, previous_shot_id, next_shot_id) -> Dict:
         """Uses Gemini to match clips to shot descriptions."""
         from src.gemini import describe_clips
-        return describe_clips(self.clips, self.shotlist)
+        return describe_clips(clips, shotlist, previous_shot_id, next_shot_id)
 
     def get_clip(self, clip_id):
         for clip in self.clips:

@@ -5,6 +5,7 @@ from src.clip_manager import ClipManager, Clip
 from src.prompts import run_chain, run_chain_json, \
                         get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain
 from src.language import Language
+from src.tts import TTS
 # /STREAMLIT
 
 from typing import List, Optional
@@ -52,6 +53,8 @@ class SOTScriptSection(ScriptSection):
         self.clip: Optional[Clip] = None
         self.start: Optional[float] = None
         self.end: Optional[float] = None
+
+        self.dub_audio_file: Optional[Path] = None
     
     def __repr__(self):
         return f"""{self.id} ({self.clip.id if self.clip else "No clip"}): {self.get_byline()}
@@ -66,6 +69,10 @@ class SOTScriptSection(ScriptSection):
             return f"{self.name}, {self.title}"
         else:
             return ""
+    
+    def generate_dub(self, audio_file: Path):
+        self.dub_audio_file = audio_file
+        TTS(self.quote, str(audio_file), "9f8o652aaiVK5HavyCf1")
 
 class NewsScript:
     """Represents the entire news script."""

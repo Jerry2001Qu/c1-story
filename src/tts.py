@@ -13,7 +13,7 @@ client = ElevenLabs(
 )
 
 @st.cache_data(show_spinner=False)
-def TTS(text, filename, previous_text="", next_text=""):
+def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_text=""):
     additional_body_parameters = {}
     if previous_text:
         additional_body_parameters['previous_text'] = previous_text
@@ -22,7 +22,7 @@ def TTS(text, filename, previous_text="", next_text=""):
     audio = client.generate(
         text=text,
         voice=Voice(
-            voice_id="LHgN09QqKzsRsniiMpww", # 9f8o652aaiVK5HavyCf1 daniel
+            voice_id=voice_id, # 9f8o652aaiVK5HavyCf1 daniel
             settings=VoiceSettings(stability=0.3, similarity_boost=0.5, style=0.5, use_speaker_boost=True)
         ),
         request_options={
