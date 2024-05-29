@@ -21,7 +21,7 @@ class VideoEditor:
                  output_resolution: Tuple[int, int] = (768, 432),
                  font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40, dub_volume_lufs=-40,
-                 lower_volume_duration=2.0, dub_delay=0.5):
+                 lower_volume_duration=2.0, dub_delay=1.0):
         self.news_script = news_script
         self.clip_manager = clip_manager
         self.output_resolution = output_resolution
@@ -73,7 +73,7 @@ class VideoEditor:
             # 2. Original audio with fadeout and lower volume
             original_audio = clip.audio
             original_audio = mp.concatenate_audioclips([
-                original_audio.subclip(0, dub_start_time).audio_fadeout(dub_start_time).subclip(0, self.lower_volume_duration),
+                original_audio.subclip(0, self.lower_volume_duration*1.1).audio_fadeout(self.lower_volume_duration*1.1).subclip(0, self.lower_volume_duration),
                 cap_loudness_audio_clip(original_audio.subclip(self.lower_volume_duration, clip.duration), self.dub_volume_lufs).set_start(self.lower_volume_duration)
             ])
 
