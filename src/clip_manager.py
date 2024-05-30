@@ -84,17 +84,23 @@ class ClipManager:
 
     def match_clips(self):
         sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()})
+        used_sot_ids = set()
         for sot_match in sot_matches["matches"]:
             clip_id = sot_match["clip_id"]
             sot_id = sot_match["sot_id"]
             shotlist_description = sot_match["shotlist_description"]
             if sot_id is None:
                 continue
+            if sot_id in used_sot_ids:
+                print(f"WARNING: Two clips were matched to the same sot {sot_id}")
+                continue
 
             clip = self.get_clip(clip_id)
             clip.shot_id = int(sot_id)
             clip.shotlist_description = shotlist_description
             clip.has_quote = 1
+
+            used_sot_ids.add(sot_id)
         
         print(self.clips)
 
