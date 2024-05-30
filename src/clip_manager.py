@@ -77,7 +77,8 @@ class ClipManager:
             status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True,
                             output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
             if status != 0:
-                st.error(f"Splitting video into clips failed with code: {status}")
+                if self.error_handler:
+                    self.error_handler.error(f"ERROR: Splitting video into clips failed with code: {status}")
 
     def load_clips(self):
         self.clips = [Clip(file.stem, file, self.clips_folder) for file in sorted(self.clips_folder.glob("*.mp4"))]
@@ -191,7 +192,7 @@ ID {clip.id}: {clip.whisper_results.english_text}
                 clip.generate_full_description(story_title)
             except ValueError:
                 if self.error_handler:
-                    self.error_handler.error(f"Error in generating full description for clip {clip.id}, likely content blocked by Gemini.")
+                    self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
             progress_bar.progress(i / (len(self.clips)-1))
         # /STREAMLIT
 
