@@ -12,6 +12,7 @@ from src.dataloader import ReutersAPIDataLoader
 from src.clip_manager import ClipManager
 from src.news_script import NewsScript
 from src.video_editor import VideoEditor
+from src.error_handler import StreamlitErrorHandler
 
 from src.prompts import cache
 
@@ -28,6 +29,9 @@ def run():
             cache.clear()
             for folder in Path("/tmp").glob("tagreuters*"):
                 shutil.rmtree(folder)
+        
+        error_bar = st.container()
+    error_handler = StreamlitErrorHandler(error_bar)
 
     st.write("# Channel 1 Demo")
 
@@ -69,7 +73,7 @@ def run():
         with st.status("Running"):
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"
-                clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"))
+                clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"), error_handler=error_handler)
                 st.write("Splitting video")
                 clip_manager.split_video_into_clips()
                 st.write("Loading clips")

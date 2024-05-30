@@ -59,12 +59,13 @@ class Clip:
 class ClipManager:
     """Manages video clips, including splitting, description, and speech recognition."""
 
-    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str, anchor_image_path: Path, has_splash_screen=False):
+    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str, anchor_image_path: Path, has_splash_screen: bool = False, error_handler = None):
         self.video_file_path = video_file_path
         self.clips_folder = clips_folder
         self.shotlist = shotlist
         self.anchor_image_path = anchor_image_path
         self.has_splash_screen = has_splash_screen
+        self.error_handler = error_handler
         self.clips: List[Clip] = []
 
     def split_video_into_clips(self):
@@ -186,7 +187,11 @@ ID {clip.id}: {clip.whisper_results.english_text}
         # STREAMLIT
         progress_bar = st.progress(0.0)
         for i, clip in enumerate(self.clips):
-            clip.generate_full_description(story_title)
+            try:
+                clip.generate_full_description(story_title)
+            except ValueError:
+                if self.error_handler:
+                    self.error_handler.error(f"Error in generating full description for clip {clip.id}, likely content blocked by Gemini.")
             progress_bar.progress(i / (len(self.clips)-1))
         # /STREAMLIT
 
