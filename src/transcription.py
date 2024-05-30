@@ -3,6 +3,7 @@
 # STREAMLIT
 from src.constants import OPENAI_API_KEY
 from src.language import Language
+import streamlit as st
 # /STREAMLIT
 
 from dataclasses import dataclass
@@ -31,6 +32,7 @@ class WhisperResults:
     english_text: str
 
     @classmethod
+    @st.cache_data(show_spinner=False)
     def from_file(cls, file: Path):
         """
         Performs speech recognition on an audio file using OpenAI's Whisper API.
