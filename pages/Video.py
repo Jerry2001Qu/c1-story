@@ -65,6 +65,7 @@ def run():
             st.session_state["run"] = True
 
     if st.session_state["run"]:
+        print(reuters_id)
         with st.status("Running"):
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"

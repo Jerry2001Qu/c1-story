@@ -123,12 +123,18 @@ class ClipManager:
                     next_shot_id = self.clips[group_end_index + 1].shot_id
 
             shotlist_start_idx = 0
-            if previous_shot_id:
+            if previous_shot_id is not None:
                 shotlist_start_idx = self.shotlist.find(f"{previous_shot_id+1}. ")
+                if shotlist_start_idx == -1:
+                    shotlist_start_idx = 0
             shotlist_end_idx = len(self.shotlist)
-            if next_shot_id:
+            if next_shot_id is not None:
                 shotlist_end_idx = self.shotlist.find(f"{next_shot_id}. ")
+                if shotlist_end_idx == -1:
+                    shotlist_end_idx = len(self.shotlist)
             shotlist = self.shotlist[shotlist_start_idx:shotlist_end_idx]
+
+            print(previous_shot_id, next_shot_id, shotlist_start_idx, shotlist_end_idx, shotlist)
 
             # Describe the group
             clips_xml = self.describe_clips(group, shotlist, previous_shot_id=previous_shot_id, next_shot_id=next_shot_id)
