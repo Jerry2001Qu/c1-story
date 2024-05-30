@@ -95,6 +95,8 @@ class ClipManager:
             clip.shot_id = int(sot_id)
             clip.shotlist_description = shotlist_description
             clip.has_quote = 1
+        
+        print(self.clips)
 
         # Find groups of clips where has_quote is None
         groups = []
@@ -108,6 +110,8 @@ class ClipManager:
                     current_group = []
         if current_group:
             groups.append(current_group)
+        
+        print(groups)
 
         # Describe each group with shot_id of previous and next clip
         for group in groups:
