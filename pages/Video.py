@@ -67,8 +67,6 @@ def run():
     
         if st.button("Generate script"):
             st.session_state["run"] = True
-    
-    st.write("TESTING")
 
     if st.session_state["run"]:
         print(reuters_id)
