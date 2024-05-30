@@ -32,7 +32,6 @@ class WhisperResults:
     english_text: str
 
     @classmethod
-    @st.cache_data(show_spinner=False)
     def from_file(cls, file: Path):
         """
         Performs speech recognition on an audio file using OpenAI's Whisper API.
@@ -43,12 +42,7 @@ class WhisperResults:
         Returns:
             A WhisperResults object containing the transcription data.
         """
-        transcript = openai_client.audio.transcriptions.create(
-            file=file,
-            model="whisper-1",
-            response_format="verbose_json",
-            timestamp_granularities=["segment", "word"]
-        )
+        transcript = openai_transcribe(file.resolve())
 
         segments = transcript.segments
         language = Language.from_str(transcript.language) if transcript.language else None
@@ -76,3 +70,12 @@ class WhisperResults:
 
 
         return cls(text, timestamps, min_no_speech_prob, has_speech, language, english_text)
+
+@st.cache_data(show_spinner=False)
+def openai_transcribe(abs_file_path: Path):
+    return openai_client.audio.transcriptions.create(
+            file=abs_file_path,
+            model="whisper-1",
+            response_format="verbose_json",
+            timestamp_granularities=["segment", "word"]
+        )
