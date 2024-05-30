@@ -101,6 +101,7 @@ def run():
             else:
                 clip_manager = st.session_state["clip_manager"]
                 script = st.session_state["script"]
+                quick_script.write(script.__repr__())
         
         st.session_state["ran"] = True
 
