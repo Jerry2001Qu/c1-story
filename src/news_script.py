@@ -33,11 +33,7 @@ class AnchorScriptSection(ScriptSection):
         self.brolls: Optional[List] = None
     
     def __repr__(self):
-        return f"""{self.id}: {self.logline}
-
-{self.text}
-
-{self.brolls}"""
+        return f"""{self.text}"""
 
 
 class SOTScriptSection(ScriptSection):
@@ -59,9 +55,7 @@ class SOTScriptSection(ScriptSection):
         self.dub_audio_file: Optional[Path] = None
     
     def __repr__(self):
-        return f"""{self.id} ({self.clip.id if self.clip else "No clip"}): {self.get_byline()}
-
-{self.quote}"""
+        return f"""SOT ({self.get_byline() if self.is_interview() else "No byline"}): {self.quote}"""
 
     def is_interview(self):
         return self.name != "Unknown"

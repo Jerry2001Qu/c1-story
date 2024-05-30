@@ -70,10 +70,18 @@ def run():
 
     if st.session_state["run"]:
         print(reuters_id)
+        quick_script = st.expander("Quick Script")
         with st.status("Running"):
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"
                 clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"), error_handler=error_handler)
+                script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder)
+                st.write("Generating script")
+                script.generate_script()
+                st.write("Generating lower thirds")
+                script.generate_lower_thirds()
+                quick_script.write(script.__repr__())
+
                 st.write("Splitting video")
                 clip_manager.split_video_into_clips()
                 st.write("Loading clips")
@@ -85,11 +93,6 @@ def run():
                 st.write("Generating full descriptions")
                 clip_manager.generate_full_descriptions(story_title)
                 
-                script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder)
-                st.write("Generating script")
-                script.generate_script()
-                st.write("Generating lower thirds")
-                script.generate_lower_thirds()
                 st.write("Matching sots to clips")
                 script.match_sot_clips()
 
