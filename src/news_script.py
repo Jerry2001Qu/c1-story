@@ -35,7 +35,9 @@ class AnchorScriptSection(ScriptSection):
     def __repr__(self):
         return f"""{self.id}: {self.logline}
 
-{self.text}"""
+{self.text}
+
+{self.brolls}"""
 
 
 class SOTScriptSection(ScriptSection):

@@ -99,7 +99,13 @@ class VideoEditor:
         """Processes an AnchorScriptSection, assembling B-roll and audio."""
         broll_clips = []
         for broll_info in section.brolls:
-            broll_clip = self._load_and_process_broll(broll_info)
+            if broll_info["id"] == "Anchor":
+                broll_clip = self.clip_manager.get_anchor_image_clip()
+                broll_duration = broll_info['end'] - broll_info['start']
+                broll_clip = broll_clip.set_duration(broll_duration)
+                broll_clip = resize_image_clip(broll_clip, self.output_resolution)
+            else:
+                broll_clip = self._load_and_process_broll(broll_info)
             broll_clips.append(broll_clip)
 
         combined_broll = mp.concatenate_videoclips(broll_clips, method="compose")

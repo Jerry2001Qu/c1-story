@@ -69,7 +69,7 @@ def run():
         with st.status("Running"):
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"
-                clip_manager = ClipManager(video_file_path, clips_folder, shotlist)
+                clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"))
                 st.write("Splitting video")
                 clip_manager.split_video_into_clips()
                 st.write("Loading clips")
@@ -108,23 +108,24 @@ def run():
             st.subheader("Original Story")
             st.write(storyline)
         with output_col_2:
-            st.subheader("Final Story")
-            
-            df = script.to_dataframe()
-            gb = GridOptionsBuilder.from_dataframe(df)
-            gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
-            gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
-            gb.configure_column("shot_id", width=50, editable=True)
+            with st.container(height=2000, border=False):
+                st.subheader("Final Story")
+                
+                df = script.to_dataframe()
+                gb = GridOptionsBuilder.from_dataframe(df)
+                gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
+                gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
+                gb.configure_column("shot_id", width=50, editable=True)
 
-            gb.configure_grid_options(
-                rowDragManaged=True,
-                animateRows=True,
-                rowHeight=60,
-                scrollbar=True,
-                domLayout='autoHeight'
-            )
-            df = AgGrid(df, gridOptions=gb.build(), height=2000, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
-            script.from_dataframe(df)
+                gb.configure_grid_options(
+                    rowDragManaged=True,
+                    animateRows=True,
+                    rowHeight=60,
+                    scrollbar=True,
+                    domLayout='autoHeight'
+                )
+                df = AgGrid(df, gridOptions=gb.build(), height=None, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
+                script.from_dataframe(df)
         if st.button("Generate video"):
             with st.status("Running"):
                 st.write("Generating audio & broll")

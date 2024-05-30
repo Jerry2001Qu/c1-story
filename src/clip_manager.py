@@ -59,10 +59,11 @@ class Clip:
 class ClipManager:
     """Manages video clips, including splitting, description, and speech recognition."""
 
-    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str, has_splash_screen=False):
+    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str, anchor_image_path: Path, has_splash_screen=False):
         self.video_file_path = video_file_path
         self.clips_folder = clips_folder
         self.shotlist = shotlist
+        self.anchor_image_path = anchor_image_path
         self.has_splash_screen = has_splash_screen
         self.clips: List[Clip] = []
 
@@ -199,3 +200,6 @@ ID {clip.id}: {clip.whisper_results.english_text}
             if clip.id == clip_id:
                 return clip
         return None
+    
+    def get_anchor_image_clip(self):
+        return mp.ImageClip(str(self.anchor_image_path))
