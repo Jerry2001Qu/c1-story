@@ -79,11 +79,12 @@ class SOTScriptSection(ScriptSection):
 class NewsScript:
     """Represents the entire news script."""
     
-    def __init__(self, storyline: str, shotlist: str, clip_manager: ClipManager, folder: Path = Path("./")):
+    def __init__(self, storyline: str, shotlist: str, clip_manager: ClipManager, folder: Path = Path("./"), error_handler = None):
         self.storyline = storyline
         self.shotlist = shotlist
         self.clip_manager = clip_manager
         self.folder = folder
+        self.error_handler = error_handler
 
         self.headline: Optional[str] = None
         self.sections: List[ScriptSection] = []
@@ -124,7 +125,8 @@ class NewsScript:
             try:
                 clip = next(clip for clip in self.clip_manager.clips if str(clip.shot_id) == str(section.shot_id))
             except StopIteration:
-                print(f"No clip found for shot ID: {section.shot_id}")
+                if self.error_handler:
+                    self.error_handler.error(f"ERROR: No clip found for shot ID: {section.shot_id}, this section {section.id} will be omited.")
                 section.clip = None
                 continue
             section.clip = clip
@@ -146,10 +148,14 @@ class NewsScript:
             if clip.whisper_results.has_speech:
                 section.start = clip.whisper_results.timestamps[0].start
                 section.end = clip.whisper_results.timestamps[-1].end
+                if self.error_handler:
+                    self.error_handler.warning(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}")
                 print(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
             else:
                 section.start = 0.0
                 section.end = clip.load_video().duration
+                if self.error_handler:
+                    self.error_handler.warning(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}")
                 print(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, quote: {quote}, whisper: {clip.whisper_results.text}")
 
     def _match_sot_clips_different_language(self, section, clip):

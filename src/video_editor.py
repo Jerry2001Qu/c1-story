@@ -21,7 +21,7 @@ class VideoEditor:
                  output_resolution: Tuple[int, int] = (768, 432),
                  font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40, dub_volume_lufs=-40,
-                 lower_volume_duration=3.0, dub_delay=0.5):
+                 lower_volume_duration=3.0, dub_delay=0.5, error_handler=None):
         self.news_script = news_script
         self.clip_manager = clip_manager
         self.output_resolution = output_resolution
@@ -32,6 +32,7 @@ class VideoEditor:
         self.dub_volume_lufs = dub_volume_lufs
         self.lower_volume_duration = lower_volume_duration
         self.dub_delay = dub_delay
+        self.error_handler = error_handler
 
     def assemble_video(self, output_file: Path = Path("output.mp4")):
         """Assembles the final video from script sections and B-roll."""
@@ -89,6 +90,9 @@ class VideoEditor:
                 speed_factor = clip.duration / new_duration
                 clip = clip.fx(mp.vfx.speedx, speed_factor)
 
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Section {section.id}, dubed SOT is too long. Slowing down SOT with factor {speed_factor}")
+
             # 6. Set new audio
             clip = clip.set_audio(new_audio)
             clip = clip.set_duration(new_duration)
@@ -129,10 +133,12 @@ class VideoEditor:
         if broll_clip.duration < broll_duration:
             speed_factor = broll_clip.duration / broll_duration
             if speed_factor > 0.7:  # Adjust the threshold as needed
-                print(f"Broll {broll_info['id']}: B-ROLL too short, adjusting speed ({speed_factor:.2f})")
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Broll {broll_info['id']} is too short, adjusting speed ({speed_factor:.2f})")
                 broll_clip = broll_clip.fx(mp.vfx.speedx, speed_factor)
             else:
-                print(f"Broll {broll_info['id']}: B-ROLL too short, using full clip")
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Broll {broll_info['id']} is too short, video may freeze.")
 
         broll_clip = broll_clip.subclip(0, min(broll_duration, broll_clip.duration))
         broll_clip = broll_clip.set_duration(broll_duration)

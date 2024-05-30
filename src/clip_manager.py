@@ -95,7 +95,8 @@ class ClipManager:
             if sot_id is None:
                 continue
             if sot_id in used_sot_ids:
-                print(f"WARNING: Two clips were matched to the same sot {sot_id}")
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Two clips were matched to the same sot {sot_id}.")
                 continue
 
             clip = self.get_clip(clip_id)
@@ -156,7 +157,6 @@ class ClipManager:
                         else:
                             clip_dict[key] = val
                 try:
-
                     clip = self.get_clip(str(clip_dict['id']))
                 except StopIteration:
                     print(f"Clip not found with id, {clip_dict['id']}")
