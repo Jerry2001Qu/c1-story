@@ -87,6 +87,6 @@ class AudioProcessor:
             for broll in broll_data["brolls"]:
                 if broll["id"] != "Anchor" and self.clip_manager.get_clip(broll["id"]) is None:
                     if self.error_handler:
-                        self.error_handler.warning(f"WARNING: B-roll {broll["id"]} in Section {section.id} does not exist. Replacing with anchor shot.")
+                        self.error_handler.warning(f"WARNING: B-roll {broll['id']} in Section {section.id} does not exist. Replacing with anchor shot.")
                     broll["id"] = "Anchor"
             section.brolls = broll_data["brolls"]

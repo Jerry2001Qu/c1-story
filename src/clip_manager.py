@@ -87,7 +87,6 @@ class ClipManager:
 
     def match_clips(self):
         sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()})
-        # used_sot_ids = set()
 
         for sot_match in sot_matches["matches"]:
             clip_id = sot_match["clip_id"]
@@ -95,24 +94,18 @@ class ClipManager:
             shotlist_description = sot_match["shotlist_description"]
             if sot_id is None:
                 continue
-            # if sot_id in used_sot_ids:
-            #     if self.error_handler:
-            #         self.error_handler.warning(f"WARNING: Two clips ({clip_id}) were matched to the same sot ({sot_id})")
-            #     continue
 
             clip = self.get_clip(clip_id)
             clip.shot_id = int(sot_id)
             clip.shotlist_description = shotlist_description
             clip.has_quote = 1
 
-            # used_sot_ids.add(sot_id)
-
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
         while i < len(self.clips) - 1:
             current_clip = self.clips[i]
             next_clip = self.clips[i + 1]
-            self.error_handler.warning(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
+            print(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
             if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
                 current_clip = self.combine_clips([current_clip, next_clip])
                 self.clips.pop(i + 1)  # Remove next_clip after combining
@@ -121,7 +114,7 @@ class ClipManager:
             else:
                 if i < len(self.clips) - 2:
                     next_next_clip = self.clips[i + 2]
-                    self.error_handler.warning(f"{current_clip.id}, {next_clip.id}, {next_next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}, {next_next_clip.shot_id}")
+                    print(f"{current_clip.id}, {next_clip.id}, {next_next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}, {next_next_clip.shot_id}")
                     if current_clip.shot_id is not None and current_clip.shot_id == next_next_clip.shot_id:
                         current_clip = self.combine_clips([current_clip, next_clip, next_next_clip])
                         self.clips.pop(i + 2)
@@ -131,6 +124,16 @@ class ClipManager:
                 else:
                     i += 1
             self.error_handler.warning(self.clips)
+        
+        used_sot_ids = set()
+        for clip in self.clips:
+            if clip.shot_id in used_sot_ids:
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Two clips ({clip.id}) were assigned the same SOT ({clip.shot_id}). Removing SOT from this clip.")
+                clip.shot_id = None
+                clip.shotlist_description = None
+                clip.has_quote = None
+            used_sot_ids.add(clip.shot_id)
 
         # Find groups of clips where has_quote is None
         groups = []
