@@ -221,7 +221,7 @@ ID {clip.id}: {clip.whisper_results.english_text}
             except ValueError:
                 if self.error_handler:
                     self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
-            progress_bar.progress(i / (len(self.clips)-1))
+            progress_bar.progress(i / len(self.clips))
         # /STREAMLIT
 
     def describe_clips(self, clips, shotlist, previous_shot_id, next_shot_id) -> Dict:
