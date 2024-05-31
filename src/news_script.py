@@ -260,9 +260,9 @@ class NewsScript:
         self.sections = []
         for id, row in df.iterrows():
             if row["type"] == "ANCHOR":
-                self.sections += [AnchorScriptSection(id, row["text"])]
+                self.sections += [AnchorScriptSection(id+1, row["text"])]
             elif row["type"] == "SOT":
-                self.sections += [SOTScriptSection(id, row["text"], int(row["shot_id"]), row["text"])]
+                self.sections += [SOTScriptSection(id+1, row["text"], int(row["shot_id"]), row["text"])]
             else:
                 print(f"ERROR: Unrecognized section of type: {row['type']}")
         self.generate_lower_thirds()
