@@ -88,7 +88,6 @@ class ClipManager:
     def match_clips(self):
         sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()})
         used_sot_ids = set()
-        combined_clips = []
 
         for sot_match in sot_matches["matches"]:
             clip_id = sot_match["clip_id"]
@@ -107,25 +106,20 @@ class ClipManager:
             clip.has_quote = 1
 
             used_sot_ids.add(sot_id)
-            combined_clips.append(clip)
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
-        self.error_handler.warning(len(combined_clips)-1)
-        while i < len(combined_clips) - 1:
-            current_clip = combined_clips[i]
-            next_clip = combined_clips[i + 1]
-            self.error_handler.warning(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
+        self.error_handler.warning(len(self.clips)-1)
+        while i < len(self.clips) - 1:
+            current_clip = self.clips[i]
+            next_clip = self.clips[i + 1]
             if current_clip.shot_id == next_clip.shot_id:
                 current_clip.file_path = self.combine_clips(current_clip, next_clip)
-                combined_clips.pop(i + 1)  # Remove next_clip after combining
+                self.clips.pop(i + 1)  # Remove next_clip after combining
                 if self.error_handler:
                     self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
             else:
                 i += 1
-
-        # Update self.clips with combined clips
-        self.clips = combined_clips
 
         # Find groups of clips where has_quote is None
         groups = []

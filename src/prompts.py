@@ -14,7 +14,7 @@ os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
 from langchain_core.messages import HumanMessage
 from langchain_anthropic import ChatAnthropic
 from langchain.globals import set_llm_cache
-from langchain.cache import SQLiteCache
+from langchain_community.cache import SQLiteCache
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, XMLOutputParser
 from langchain.prompts import PromptTemplate
 
