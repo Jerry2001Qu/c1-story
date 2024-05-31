@@ -115,6 +115,7 @@ class ClipManager:
             self.error_handler.warning(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
             if current_clip is not None and next_clip is not None and current_clip.shot_id == next_clip.shot_id:
                 current_clip.file_path = self.combine_clips(current_clip, next_clip)
+                next_clip.file_path.unlink()
                 self.clips.pop(i + 1)  # Remove next_clip after combining
                 if self.error_handler:
                     self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
@@ -182,7 +183,7 @@ class ClipManager:
     
     def combine_clips(self, clip1: Clip, clip2: Clip) -> Path:
         """Combines two video clips into one and returns the path to the combined clip."""
-        combined_clip_path = self.clips_folder / f"{clip1.id}_{clip2.id}_combined.mp4"
+        combined_clip_path = clip1.file_path
         clip1_video = clip1.load_video()
         clip2_video = clip2.load_video()
         combined_video = mp.concatenate_videoclips([clip1_video, clip2_video])
