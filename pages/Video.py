@@ -114,7 +114,7 @@ def run():
         output_col_1, output_col_2 = st.columns([1, 2])
         with output_col_1:
             st.subheader("Original Story")
-            st.write(storyline)
+            st.write(storyline+"\n"*20)
         with output_col_2:
             with st.container(height=2300, border=False):
                 st.subheader("Final Story")
