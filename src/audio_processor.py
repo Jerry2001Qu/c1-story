@@ -57,6 +57,9 @@ class AudioProcessor:
             audio_file = self.anchor_audio_folder / f"{section.id}_dub.mp3"
             section.generate_dub(audio_file)
 
+            if self.error_handler:
+                self.error_handler.info(f"Dubbing section {section.id} ({section.language})")
+
     def _add_broll_placements(self):
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""
         full_descriptions_str = ""

@@ -110,7 +110,7 @@ class ClipManager:
                 current_clip = self.combine_clips([current_clip, next_clip])
                 self.clips.pop(i + 1)  # Remove next_clip after combining
                 if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
+                    self.error_handler.info(f"INFO: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
             else:
                 if i < len(self.clips) - 2:
                     next_next_clip = self.clips[i + 2]
@@ -120,7 +120,7 @@ class ClipManager:
                         self.clips.pop(i + 2)
                         self.clips.pop(i + 1)
                         if self.error_handler:
-                            self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})")
+                            self.error_handler.info(f"INFO: Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})")
                     else:
                         i += 1
                 else:
@@ -255,6 +255,7 @@ ID {clip.id}: {clip.whisper_results.english_text}
                 if self.error_handler:
                     self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
             progress_bar.progress(i / len(self.clips))
+        progress_bar.progress(1.0)
         # /STREAMLIT
 
     def describe_clips(self, clips, shotlist, previous_shot_id, next_shot_id) -> Dict:

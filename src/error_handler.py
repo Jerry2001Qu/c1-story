@@ -14,6 +14,10 @@ class ErrorHandler(ABC):
     def warning(self, msg: str) -> None:
         pass
 
+    @abstractmethod
+    def info(self, msg: str) -> None:
+        pass
+
 class StreamlitErrorHandler(ErrorHandler):
 
     def __init__(self, error_bar: st.container):
@@ -24,3 +28,6 @@ class StreamlitErrorHandler(ErrorHandler):
     
     def warning(self, msg: str) -> None:
         self.error_bar.warning(msg, icon="⚠️")
+
+    def info(self, msg: str) -> None:
+        self.error_bar.info(msg, icon="ℹ️")

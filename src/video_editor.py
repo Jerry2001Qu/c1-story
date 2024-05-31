@@ -71,6 +71,9 @@ class VideoEditor:
             # 1. Calculate the time the dub starts
             dub_start_time = self.lower_volume_duration + self.dub_delay
 
+            if dub_start_time > clip.duration:
+                return clip
+
             # 2. Original audio with fadeout and lower volume
             original_audio = clip.audio
             original_audio = mp.concatenate_audioclips([
@@ -91,7 +94,7 @@ class VideoEditor:
                 clip = clip.fx(mp.vfx.speedx, speed_factor)
 
                 if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Section {section.id}, dubed SOT is too long. Slowing down SOT with factor {speed_factor}")
+                    self.error_handler.info(f"INFO: Section {section.id}, dubed SOT is too long. Slowing down SOT with factor {speed_factor}")
 
             # 6. Set new audio
             clip = clip.set_audio(new_audio)
@@ -134,11 +137,11 @@ class VideoEditor:
             speed_factor = broll_clip.duration / broll_duration
             if speed_factor > 0.7:  # Adjust the threshold as needed
                 if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Broll {broll_info['id']} is too short, adjusting speed ({speed_factor:.2f})")
+                    self.error_handler.info(f"INFO: Broll {broll_info['id']} is too short, adjusting speed ({speed_factor:.2f})")
                 broll_clip = broll_clip.fx(mp.vfx.speedx, speed_factor)
             else:
                 if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Broll {broll_info['id']} is too short, video may freeze.")
+                    self.error_handler.info(f"INFO: Broll {broll_info['id']} is too short, video may freeze.")
 
         broll_clip = broll_clip.subclip(0, min(broll_duration, broll_clip.duration))
         broll_clip = broll_clip.set_duration(broll_duration)
