@@ -108,7 +108,7 @@ Please extract the following information from the quote:
 - The verbatim text of what was said
 - The name of the person who said it, title case (if not available, put "Unknown")
 - The title of the person who said it, title case (e.g. "Protester", "Former President", etc. If no title is available, just put "Unknown")
-- The language the quote was spoken in
+- The language the quote was spoken in (English if unspecified)
 
 Provide your extractions in JSON format. Use the ID as a key. For each object use the keys "quote", "name", "title", and "language" for the respective pieces of information.
 Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid.
