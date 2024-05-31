@@ -87,7 +87,7 @@ class ClipManager:
 
     def match_clips(self):
         sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()})
-        used_sot_ids = set()
+        # used_sot_ids = set()
 
         for sot_match in sot_matches["matches"]:
             clip_id = sot_match["clip_id"]
@@ -95,19 +95,17 @@ class ClipManager:
             shotlist_description = sot_match["shotlist_description"]
             if sot_id is None:
                 continue
-            if sot_id in used_sot_ids:
-                if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Two clips ({clip_id}) were matched to the same sot ({sot_id})")
-                continue
+            # if sot_id in used_sot_ids:
+            #     if self.error_handler:
+            #         self.error_handler.warning(f"WARNING: Two clips ({clip_id}) were matched to the same sot ({sot_id})")
+            #     continue
 
             clip = self.get_clip(clip_id)
             clip.shot_id = int(sot_id)
             clip.shotlist_description = shotlist_description
             clip.has_quote = 1
 
-            used_sot_ids.add(sot_id)
-        
-        print(self.clips)
+            # used_sot_ids.add(sot_id)
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
@@ -115,14 +113,24 @@ class ClipManager:
             current_clip = self.clips[i]
             next_clip = self.clips[i + 1]
             self.error_handler.warning(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
-            if current_clip.shot_id is not None and next_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
-                current_clip.file_path = self.combine_clips(current_clip, next_clip)
-                next_clip.file_path.unlink()
+            if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
+                current_clip = self.combine_clips([current_clip, next_clip])
                 self.clips.pop(i + 1)  # Remove next_clip after combining
                 if self.error_handler:
                     self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
             else:
-                i += 1
+                if i < len(self.clips) - 2:
+                    next_next_clip = self.clips[i + 2]
+                    self.error_handler.warning(f"{current_clip.id}, {next_clip.id}, {next_next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}, {next_next_clip.shot_id}")
+                    if current_clip.shot_id is not None and current_clip.shot_id == next_next_clip.shot_id:
+                        current_clip = self.combine_clips([current_clip, next_clip, next_next_clip])
+                        self.clips.pop(i + 2)
+                        self.clips.pop(i + 1)
+                        if self.error_handler:
+                            self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})")
+                else:
+                    i += 1
+            self.error_handler.warning(self.clips)
 
         # Find groups of clips where has_quote is None
         groups = []
@@ -183,14 +191,34 @@ class ClipManager:
                 clip.shotlist_description = clip_dict["description"]
                 clip.has_quote = clip_dict['quote']
     
-    def combine_clips(self, clip1: Clip, clip2: Clip) -> Path:
-        """Combines two video clips into one and returns the path to the combined clip."""
-        combined_clip_path = clip1.file_path
-        clip1_video = clip1.load_video()
-        clip2_video = clip2.load_video()
-        combined_video = mp.concatenate_videoclips([clip1_video, clip2_video])
-        combined_video.write_videofile(str(combined_clip_path))
-        return combined_clip_path
+    def combine_clips(self, clips: List[Clip]) -> Clip:
+        """Combines multiple video clips into a new clip."""
+        if len(clips) == 0:
+            return None
+        if len(clips) == 1:
+            return clips[0]
+
+        # Load all video clips
+        video_clips = [clip.load_video() for clip in clips]
+
+        # Concatenate the video clips
+        combined_video = mp.concatenate_videoclips(video_clips)
+
+        # Generate the new file name
+        new_file_name = "_".join([clip.file_path.stem for clip in clips]) + ".mp4"
+        new_file_path = self.clips_folder / new_file_name
+
+        # Write the combined video to the new file
+        combined_video.write_videofile(str(new_file_path))
+
+        # Delete the original clip files
+        for clip in clips:
+            clip.file_path.unlink()
+
+        # Update the first clip with the new file path and transcribe
+        clips[0].file_path = new_file_path
+        clips[0].transcribe_clip()
+        return clips[0]
 
     def _extract_sots(self) -> str:
         """Extracts and parses soundbites (SOTs) from the shotlist."""
