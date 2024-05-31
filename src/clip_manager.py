@@ -111,11 +111,11 @@ class ClipManager:
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
-        print(len(combined_clips)-1)
+        self.error_handler.warning(len(combined_clips)-1)
         while i < len(combined_clips) - 1:
             current_clip = combined_clips[i]
             next_clip = combined_clips[i + 1]
-            print(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
+            self.error_handler.warning(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
             if current_clip.shot_id == next_clip.shot_id:
                 current_clip.file_path = self.combine_clips(current_clip, next_clip)
                 combined_clips.pop(i + 1)  # Remove next_clip after combining
