@@ -123,13 +123,12 @@ class ClipManager:
                             self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})")
                 else:
                     i += 1
-            self.error_handler.warning(self.clips)
         
         used_sot_ids = set()
         for clip in self.clips:
             if clip.shot_id in used_sot_ids:
                 if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Two clips ({clip.id}) were assigned the same SOT ({clip.shot_id}). Removing SOT from this clip.")
+                    self.error_handler.warning(f"WARNING: Two clips ({clip.id}) were assigned the same SOT ({clip.shot_id}). Removing SOT from the second clip.")
                 clip.shot_id = None
                 clip.shotlist_description = None
                 clip.has_quote = None
