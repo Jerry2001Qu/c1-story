@@ -62,10 +62,10 @@ class VideoEditor:
         """Processes a SOTScriptSection, extracting and resizing the clip."""
         clip = section.clip.load_video()
         clip = resize_image_clip(clip, self.output_resolution)
-        clip = clip.subclip(section.start, min(section.end, clip.duration))
 
-        # Dubbing logic
-        if section.language != Language.from_str("English") and section.dub_audio_file:
+        if section.language == Language.from_str("English") or section.dub_audio_file is None:
+            clip = clip.subclip(section.start, min(section.end, clip.duration))
+        else:
             dub_audio = mp.AudioFileClip(str(section.dub_audio_file))
 
             # 1. Calculate the time the dub starts

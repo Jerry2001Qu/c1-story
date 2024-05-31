@@ -75,7 +75,7 @@ def run():
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"
                 clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"), error_handler=error_handler)
-                script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder)
+                script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder, error_handler=error_handler)
                 st.write("Generating script")
                 script.generate_script()
                 st.write("Generating lower thirds")
