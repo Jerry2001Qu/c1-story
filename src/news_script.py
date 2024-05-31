@@ -110,7 +110,7 @@ class NewsScript:
         # STREAMLIT
         from src.audio_processor import AudioProcessor
         # /STREAMLIT
-        audio_processor = AudioProcessor(self, self.clip_manager, self.folder)
+        audio_processor = AudioProcessor(self, self.clip_manager, self.folder, self.error_handler)
         audio_processor.process_audio_and_broll()
     
     def match_sot_clips(self):

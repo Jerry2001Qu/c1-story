@@ -16,11 +16,12 @@ import moviepy.editor as mp
 class AudioProcessor:
     """Handles audio processing, clip matching, and B-roll placement."""
 
-    def __init__(self, news_script: NewsScript, clip_manager: ClipManager, folder: Path = Path("./")):
+    def __init__(self, news_script: NewsScript, clip_manager: ClipManager, folder: Path = Path("./"), error_handler = None):
         self.news_script = news_script
         self.clip_manager = clip_manager
-
         self.folder = folder
+        self.error_handler = error_handler
+        
         self.anchor_audio_file = folder / "anchor_audio.mp3"
         self.anchor_audio_folder = folder / "audio"
         self.anchor_audio_folder.mkdir(parents=True, exist_ok=True)
@@ -83,4 +84,9 @@ class AudioProcessor:
         for section, broll_data in zip(self.news_script.get_anchor_sections(), parsed_broll_json["sections"]):
             if section.id != broll_data["id"]:
                 print(f"WARNING: IDS DON'T MATCH script: {section.id}, broll: {broll_data['id']}")
+            for broll in broll_data["brolls"]:
+                if broll["id"] != "Anchor" and self.clip_manager.get_clip(broll["id"]) is None:
+                    if self.error_handler:
+                        self.error_handler.warning(f"WARNING: B-roll {broll["id"]} in Section {section.id} does not exist. Replacing with anchor shot.")
+                    broll["id"] = "Anchor"
             section.brolls = broll_data["brolls"]

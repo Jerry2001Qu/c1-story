@@ -294,7 +294,7 @@ Broll clips have a length, so you can't use more than that & have to switch. You
 You may also insert Anchor blocks. These can go on for as long as you want. Place Anchor blocks for at least 10 seconds at the beginning of the whole story to set the scene, and at least 10 seconds at the end of the whole story to conclude. (probably the whole start and end sections)
 This isn't necessary in other sections, just make your best judgement on when the Anchor should be on screen. For example, if there isn't any related broll, or not enough broll, you may choose to switch to the Anchor.
 An Anchor block must be at least 3 seconds long, so don't place it at the very end of a section. Make sure everything flows nicely!
-Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example.
+Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example. Never make up broll clips. If not enough, use the Anchor.
 This will be aired on TV, so select & place clips informatively and dramatically."""]
 
     response = GEMINI.generate_content(content)
