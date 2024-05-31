@@ -70,6 +70,7 @@ class VideoEditor:
 
             # 1. Calculate the time the dub starts
             dub_start_time = self.lower_volume_duration + self.dub_delay
+            dub_end_time = dub_audio.duration + dub_start_time
 
             if dub_start_time > clip.duration:
                 return clip
@@ -88,10 +89,10 @@ class VideoEditor:
             new_audio = mp.CompositeAudioClip([original_audio, delayed_dub_audio])
 
             # 5. Adjust video speed if needed
-            if clip.duration > new_audio.duration:
-                clip = clip.subclip(0, new_audio.duration)
-            elif clip.duration < new_audio.duration:
-                speed_factor = clip.duration / new_audio.duration
+            if clip.duration > dub_end_time:
+                clip = clip.subclip(0, dub_end_time)
+            elif clip.duration < dub_end_time:
+                speed_factor = clip.duration / dub_end_time
                 clip = clip.fx(mp.vfx.speedx, speed_factor)
 
                 if self.error_handler:
@@ -99,7 +100,7 @@ class VideoEditor:
 
             # 6. Set new audio
             clip = clip.set_audio(new_audio)
-            clip = clip.set_duration(new_audio.duration)
+            clip = clip.set_duration(dub_end_time)
 
         return clip
 
