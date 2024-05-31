@@ -88,9 +88,10 @@ class VideoEditor:
             new_audio = mp.CompositeAudioClip([original_audio, delayed_dub_audio])
 
             # 5. Adjust video speed if needed
-            new_duration = max(clip.duration, new_audio.duration)
-            if new_duration > clip.duration:
-                speed_factor = clip.duration / new_duration
+            if clip.duration > new_audio.duration:
+                clip.subclip(0, new_audio.duration)
+            else:
+                speed_factor = clip.duration / new_audio.duration
                 clip = clip.fx(mp.vfx.speedx, speed_factor)
 
                 if self.error_handler:
@@ -98,7 +99,7 @@ class VideoEditor:
 
             # 6. Set new audio
             clip = clip.set_audio(new_audio)
-            clip = clip.set_duration(new_duration)
+            clip = clip.set_duration(new_audio.duration)
 
         return clip
 
