@@ -128,6 +128,8 @@ class ClipManager:
         
         used_sot_ids = set()
         for clip in self.clips:
+            if clip.shot_id is None:
+                continue
             if clip.shot_id in used_sot_ids:
                 if self.error_handler:
                     self.error_handler.warning(f"WARNING: Two clips ({clip.id}) were assigned the same SOT ({clip.shot_id}). Removing SOT from the second clip.")
