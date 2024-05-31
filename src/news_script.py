@@ -120,7 +120,7 @@ class NewsScript:
                 clip = next(clip for clip in self.clip_manager.clips if str(clip.shot_id) == str(section.shot_id))
             except StopIteration:
                 if self.error_handler:
-                    self.error_handler.error(f"ERROR: No clip found for shot ID: {section.shot_id}, this section {section.id} will be omited.")
+                    self.error_handler.warning(f"WARNING: No clip found for shot ID: {section.shot_id}, this section {section.id} will be omited.")
                 section.clip = None
                 continue
             section.clip = clip
