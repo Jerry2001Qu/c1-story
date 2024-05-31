@@ -15,10 +15,10 @@ client = ElevenLabs(
 @st.cache_data(show_spinner=False)
 def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_text=""):
     additional_body_parameters = {}
-    if previous_text:
-        additional_body_parameters['previous_text'] = previous_text
-    if next_text:
-        additional_body_parameters['next_text'] = next_text
+    # if previous_text:
+    #     additional_body_parameters['previous_text'] = previous_text
+    # if next_text:
+    #     additional_body_parameters['next_text'] = next_text
     audio = client.generate(
         text=text,
         voice=Voice(
