@@ -121,6 +121,8 @@ class ClipManager:
                         self.clips.pop(i + 1)
                         if self.error_handler:
                             self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})")
+                    else:
+                        i += 1
                 else:
                     i += 1
         
