@@ -22,12 +22,22 @@ class StreamlitErrorHandler(ErrorHandler):
 
     def __init__(self, error_bar: st.container):
         self.error_bar = error_bar
+        self.previous_msgs = []
     
     def error(self, msg: str) -> None:
+        if msg in self.previous_msgs:
+            return
+        self.previous_msgs += [msg]
         self.error_bar.error(msg, icon="🚨")
     
     def warning(self, msg: str) -> None:
+        if msg in self.previous_msgs:
+            return
+        self.previous_msgs += [msg]
         self.error_bar.warning(msg, icon="⚠️")
 
     def info(self, msg: str) -> None:
+        if msg in self.previous_msgs:
+            return
+        self.previous_msgs += [msg]
         self.error_bar.info(msg, icon="ℹ️")
