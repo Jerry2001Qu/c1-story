@@ -126,7 +126,8 @@ class NewsScript:
             section.clip = clip
 
             if section.language != clip.whisper_results.language:
-                print(f"Language does not match {section.language} (section {section.id}) != {clip.whisper_results.language} (clip {clip.id})")
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Language does not match {section.language} (section {section.id}) != {clip.whisper_results.language} (clip {clip.id})")
 
             if clip.whisper_results.language == Language.from_str("English"):
                 self._match_sot_clips_same_language(section, clip, section.quote)
