@@ -24,6 +24,9 @@ class StreamlitErrorHandler(ErrorHandler):
         self.error_bar = error_bar
         self.previous_msgs = []
     
+    def reset(self) -> None:
+        self.previous_msgs = []
+    
     def error(self, msg: str) -> None:
         if msg in self.previous_msgs:
             return
