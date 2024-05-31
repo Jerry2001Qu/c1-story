@@ -142,7 +142,7 @@ def run():
 
                 st.write("Assembling video")
                 video_output_file = story_folder / "output.mp4"
-                video_editor = VideoEditor(script, clip_manager, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-Regular.ttf"))
+                video_editor = VideoEditor(script, clip_manager, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-Regular.ttf"), error_handler=error_handler)
                 video_editor.assemble_video(output_file=video_output_file)
 
             st.video(str(video_output_file), autoplay=True)
