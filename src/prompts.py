@@ -192,6 +192,7 @@ In a <scratchpad>, think through where it would make the most sense to insert ea
 - Insert the portions of quotations including their descriptions
 - Do not add any transitions between the quotations and the rest of the script
 - Do not change the wording of the news script except to insert the quotations
+- Place quotations in separate paragraphs. You may split paragraphs in the original script.
 
 After planning it out, provide your final response with the quotations inserted into the appropriate parts of the news script inside <response></response> tags."""
 )
