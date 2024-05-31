@@ -89,8 +89,8 @@ class VideoEditor:
 
             # 5. Adjust video speed if needed
             if clip.duration > new_audio.duration:
-                clip.subclip(0, new_audio.duration)
-            else:
+                clip = clip.subclip(0, new_audio.duration)
+            elif clip.duration < new_audio.duration:
                 speed_factor = clip.duration / new_audio.duration
                 clip = clip.fx(mp.vfx.speedx, speed_factor)
 
