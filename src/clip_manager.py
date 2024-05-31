@@ -108,6 +108,8 @@ class ClipManager:
 
             used_sot_ids.add(sot_id)
             combined_clips.append(clip)
+        
+        self.error_handler.warning("HERE!")
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
@@ -118,7 +120,9 @@ class ClipManager:
             if current_clip.shot_id == next_clip.shot_id:
                 current_clip.file_path = self.combine_clips(current_clip, next_clip)
                 combined_clips.pop(i + 1)  # Remove next_clip after combining
-                self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
+                print("Here")
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
             else:
                 i += 1
 
