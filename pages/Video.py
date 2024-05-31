@@ -90,8 +90,8 @@ def run():
                 clip_manager.transcribe_clips()
                 st.write("Matching clips to shotlist")
                 clip_manager.match_clips()
-                # st.write("Generating full descriptions")
-                # clip_manager.generate_full_descriptions(story_title)
+                st.write("Generating full descriptions")
+                clip_manager.generate_full_descriptions(story_title)
                 
                 st.write("Matching sots to clips")
                 script.match_sot_clips()
