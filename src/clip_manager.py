@@ -106,6 +106,8 @@ class ClipManager:
             clip.has_quote = 1
 
             used_sot_ids.add(sot_id)
+        
+        print(self.clips)
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
@@ -113,7 +115,7 @@ class ClipManager:
             current_clip = self.clips[i]
             next_clip = self.clips[i + 1]
             self.error_handler.warning(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
-            if current_clip is not None and next_clip is not None and current_clip.shot_id == next_clip.shot_id:
+            if current_clip.shot_id is not None and next_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
                 current_clip.file_path = self.combine_clips(current_clip, next_clip)
                 next_clip.file_path.unlink()
                 self.clips.pop(i + 1)  # Remove next_clip after combining
