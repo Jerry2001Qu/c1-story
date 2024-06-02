@@ -48,7 +48,7 @@ def run():
         st.session_state["download_run"] = False
         error_handler.reset()
 
-    reuters_id = st.text_input("Reuters ID", value="tag:reuters.com,2024:newsml_RW956402052024RP1:6", on_change=reset)
+    reuters_id = st.text_input("Reuters ID", value="tag:reuters.com,2024:newsml_RW037206052024RP1:5", on_change=reset)
     clean_reuters_id = "".join(filter(lambda x: x.isalnum() or x.isspace(), reuters_id))
     if st.button("Download from Reuters"):
         st.session_state["download_run"] = True
