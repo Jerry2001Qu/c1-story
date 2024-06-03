@@ -138,8 +138,9 @@ class VideoEditor:
         if broll_clip.duration < broll_duration:
             speed_factor = broll_clip.duration / broll_duration
             if speed_factor > 0.7:  # Adjust the threshold as needed
-                if self.error_handler:
-                    self.error_handler.info(f"INFO: Broll {broll_info['id']} is too short, adjusting speed ({speed_factor:.2f})")
+                if speed_factor != 1.0:
+                    if self.error_handler:
+                        self.error_handler.info(f"INFO: Broll {broll_info['id']} is too short, adjusting speed ({speed_factor:.2f})")
                 broll_clip = broll_clip.fx(mp.vfx.speedx, speed_factor)
             else:
                 if self.error_handler:
