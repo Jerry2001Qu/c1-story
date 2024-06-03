@@ -68,6 +68,18 @@ GEMINI = GenerativeModel(model_name="gemini-1.5-pro-preview-0409",
                          generation_config=GENERATION_CONFIG, 
                          safety_settings=SAFETY_CONFIG)
 
+def run_gemini(content):
+    response = GEMINI.generate_content(content)
+    clear_uploaded_blobs()
+    try:
+        text = response.text
+    except ValueError:
+        print(response.prompt_feedback)
+        print(response.candidates[0].finish_reason)
+        print(response.candidates[0].safety_ratings)
+    return text
+
+
 # Google Cloud Storage Setup
 storage_client = storage.Client()
 bucket = storage_client.bucket("gemini-colab")
@@ -216,11 +228,11 @@ Only label descriptions with those in the shotlist exactly. <shot></shot> should
 
     content += ["\n\n", prompt]
 
-    response = GEMINI.generate_content(content)
+    response = run_gemini(content)
 
     clear_uploaded_blobs()
 
-    clips_xml = extract_xml(response.text)
+    clips_xml = extract_xml(response)
     return clips_xml
 
 @st.cache_data(show_spinner=False)
@@ -264,12 +276,12 @@ Describe this video with as much detail as possible. Include timestamps sections
 shot (wide, professional, etc.), & anything else you feel could be relevant to fully understand what is
 happening in this video & making video editing decisions."""]
 
-    response = GEMINI.generate_content(content)
+    response = run_gemini(content)
 
     # print(gemini.count_tokens(content))
     clear_uploaded_blobs()
 
-    return response.text
+    return response
 
 @st.cache_data(show_spinner=False)
 def add_broll(audio_file, full_descriptions_str, section_timings_str):
@@ -297,7 +309,7 @@ An Anchor block must be at least 3 seconds long, so don't place it at the very e
 Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example. Never make up broll clips. If not enough, use the Anchor.
 This will be aired on TV, so select & place clips informatively and dramatically."""]
 
-    response = GEMINI.generate_content(content)
+    response = run_gemini(content)
     clear_uploaded_blobs()
 
-    return response.text
+    return response
