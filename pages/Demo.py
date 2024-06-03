@@ -111,7 +111,7 @@ def run():
         trt = script.get_total_read_time_seconds()
         st.write(f"Estimated TRT: {trt}s")
 
-        st.subheader("Basis facts")
+        st.subheader("Extracted facts")
         st.write(script.facts_list)
 
         st.subheader("Final Story")
