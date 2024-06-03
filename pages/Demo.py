@@ -128,7 +128,7 @@ def run():
             scrollbar=True,
             domLayout='autoHeight'
         )
-        df = AgGrid(df, gridOptions=gb.build(), height=2000, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
+        df = AgGrid(df, gridOptions=gb.build(), height=None, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
         script.from_dataframe(df)
         if st.button("Generate video"):
             with st.status("Running"):
