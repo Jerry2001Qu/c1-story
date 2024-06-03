@@ -177,25 +177,29 @@ class ClipManager:
             shotlist = self.shotlist[shotlist_start_idx:shotlist_end_idx]
 
             # Describe the group
-            clips_xml = self.describe_clips(group, shotlist, previous_shot_id=previous_shot_id, next_shot_id=next_shot_id)
-            for clip_data in clips_xml["response"]:
-                clip_dict = {}
-                for part in clip_data["clip"]:
-                    for key, val in part.items():
-                        if not val:
-                            clip_dict[key] = val
-                        if isinstance(val, str):
-                            clip_dict[key] = val.strip()
-                        else:
-                            clip_dict[key] = val
-                try:
-                    clip = self.get_clip(str(clip_dict['id']))
-                except StopIteration:
-                    print(f"Clip not found with id, {clip_dict['id']}")
-                    continue
-                clip.shot_id = clip_dict['shot']
-                clip.shotlist_description = clip_dict["description"]
-                clip.has_quote = clip_dict['quote']
+            try:
+                clips_xml = self.describe_clips(group, shotlist, previous_shot_id=previous_shot_id, next_shot_id=next_shot_id)
+                for clip_data in clips_xml["response"]:
+                    clip_dict = {}
+                    for part in clip_data["clip"]:
+                        for key, val in part.items():
+                            if not val:
+                                clip_dict[key] = val
+                            if isinstance(val, str):
+                                clip_dict[key] = val.strip()
+                            else:
+                                clip_dict[key] = val
+                    try:
+                        clip = self.get_clip(str(clip_dict['id']))
+                    except StopIteration:
+                        print(f"Clip not found with id, {clip_dict['id']}")
+                        continue
+                    clip.shot_id = clip_dict['shot']
+                    clip.shotlist_description = clip_dict["description"]
+                    clip.has_quote = clip_dict['quote']
+            except ValueError:
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Could not match clips, likely content blocked by Gemini. ({group})")
     
     def combine_clips(self, clips: List[Clip]) -> Clip:
         """Combines multiple video clips into a new clip."""

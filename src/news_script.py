@@ -3,7 +3,7 @@
 # STREAMLIT
 from src.clip_manager import ClipManager, Clip
 from src.prompts import run_chain, run_chain_json, \
-                        get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain
+                        get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, facts_chain
 from src.language import Language
 from src.tts import TTS
 # /STREAMLIT
@@ -90,6 +90,9 @@ class NewsScript:
         for section in self.sections:
             result += f"\n\n{section.__repr__()}"
         return result
+    
+    def generate_facts(self):
+        self.facts_list = run_chain(facts_chain, {"SCRIPT": self.storyline, "SHOTLIST": self.shotlist})
     
     def generate_script(self):
         sots = self._extract_sots()

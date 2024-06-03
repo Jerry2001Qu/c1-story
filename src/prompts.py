@@ -60,6 +60,7 @@ Here is the script:
 Write a summary for each section. The first section summary should summarize the key story. Keep summaries short, less than 40 characters.
 Put the output in <response></response> tags."""
 )
+# /STREAMLIT
 
 facts_prompt = PromptTemplate.from_template(
 """Give me a complete list of facts from this story.
@@ -76,7 +77,6 @@ Here is the shotlist:
 
 Return a numbered list with the most important facts at the start. Try to capture every fact in the script & shotlist. Put your response in <response></response> tags."""
 )
-# /STREAMLIT
 
 get_sot_prompt = PromptTemplate.from_template(
 """I'm trying to extract shots with quotations from a shotlist.
@@ -406,6 +406,7 @@ Put your response in <response></response> tags."""
 )
 
 get_sot_chain = get_sot_prompt | opus
+facts_chain = facts_prompt | opus
 parse_sot_chain = parse_sot_prompt | opus
 reformat_chain = reformat_prompt | opus
 sot_chain = sot_prompt | opus
