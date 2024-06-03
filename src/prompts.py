@@ -418,11 +418,19 @@ match_sot_chain = match_sot_prompt | opus
 language_to_iso_chain = language_to_iso_prompt | opus
 match_clip_to_sots_chain = match_clip_to_sots_prompt | opus
 
+from sqlalchemy.exc import OperationalError
+
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
 
 def run_chain(chain, params):
-    response_raw = chain.invoke(params).content
+    try:
+        response_raw = chain.invoke(params).content
+    except OperationalError:
+        cache = SQLiteCache(database_path="langchain.db")
+        set_llm_cache(cache)
+        response_raw = chain.invoke(params).content
+        
     response_xml = extract_xml(response_raw)
     return response_xml['response'].strip()
 
