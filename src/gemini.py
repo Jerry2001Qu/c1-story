@@ -206,7 +206,10 @@ Here are the clips:
 These clips are between shot {previous_shot_id} and shot {next_shot_id}
 """]
 
-    content += ["\nShotlist:\n", shotlist]
+    if shotlist:
+        content += ["\nShotlist:\n", shotlist]
+    else:
+        print("ERROR: No shotlist")
 
     prompt = f"""Please match each clip with its shot in the shotlist.
 Each clip should be in the same order, but shots may be matched to multiple adjacent clips. You can skip to the right shot if need be.
@@ -216,6 +219,8 @@ Generally just fill it with shots based on order, but if a clip really doesn't m
 Only label descriptions with those in the shotlist exactly. <shot></shot> should just be the number. <id></id> should be what I gave you, in a form like 001. Output XML in <response></response> tags"""
 
     content += ["\n\n", prompt]
+
+    content = [part for part in content if part is not None]
 
     response = GEMINI.generate_content(content)
 
@@ -264,6 +269,8 @@ This footage is valuable for illustrating the escalation of a protest. It could 
 Describe this video with as much detail as possible. Include timestamps sections of the video. If possible, please give comments on people, location, timing,
 shot (wide, professional, etc.), & anything else you feel could be relevant to fully understand what is
 happening in this video & making video editing decisions."""]
+    
+    content = [part for part in content if part is not None]
 
     response = GEMINI.generate_content(content)
 
@@ -297,6 +304,8 @@ This isn't necessary in other sections, just make your best judgement on when th
 An Anchor block must be at least 3 seconds long, so don't place it at the very end of a section. Make sure everything flows nicely!
 Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example. Never make up broll clips. If not enough, use the Anchor.
 This will be aired on TV, so select & place clips informatively and dramatically."""]
+    
+    content = [part for part in content if part is not None]
 
     response = GEMINI.generate_content(content)
     clear_uploaded_blobs()
