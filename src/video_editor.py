@@ -117,6 +117,10 @@ class VideoEditor:
                 broll_clip = self._load_and_process_broll(broll_info)
             broll_clips.append(broll_clip)
 
+        if not broll_clips:
+            if self.error_handler:
+                self.error_handler.warning(f"Anchor section {section.id} had no broll. Skipping section in final video.")
+            return None
         combined_broll = mp.concatenate_videoclips(broll_clips, method="compose")
         voiceover_audio = mp.AudioFileClip(str(section.anchor_audio_file))
 
