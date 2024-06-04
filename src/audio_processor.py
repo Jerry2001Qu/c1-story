@@ -7,6 +7,8 @@ from src.news_script import NewsScript, AnchorScriptSection, is_type
 from src.tts import TTS
 from src.gemini import add_broll
 from src.language import Language
+
+import streamlit as st
 # /STREAMLIT
 
 from pathlib import Path
@@ -28,8 +30,11 @@ class AudioProcessor:
 
     def process_audio_and_broll(self):
         """Processes audio for anchor sections, and adds B-roll."""
+        st.write("Generating anchor audio")
         self._process_anchor_audio()
+        st.write("Generating SOT translations")
         self._generate_sot_translations()
+        st.write("Adding broll placements")
         self._add_broll_placements()
 
     def _process_anchor_audio(self):
