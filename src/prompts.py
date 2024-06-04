@@ -359,7 +359,7 @@ And here is the text in another language to find the matching substring in:
 </other_language>
 
 Your resulting substring should be contiguous & be taken exactly from the other language. It should be in that other language.
-Put your response in <response></response> tags."""
+If this doesn't match any language name, return Unknown. Put your response in <response></response> tags."""
 )
 
 language_to_iso_prompt = PromptTemplate.from_template(

@@ -128,22 +128,26 @@ class NewsScript:
         """Matches SOTScriptSections with corresponding clips from ClipManager."""
         for section in self.get_sot_sections():
             try:
-                clip = next(clip for clip in self.clip_manager.clips if str(clip.shot_id) == str(section.shot_id))
-            except StopIteration:
-                if self.error_handler:
-                    self.error_handler.warning(f"WARNING: No clip found for shot ID: {section.shot_id}, this section {section.id} will be omited.")
-                section.clip = None
-                continue
-            section.clip = clip
+                try:
+                    clip = next(clip for clip in self.clip_manager.clips if str(clip.shot_id) == str(section.shot_id))
+                except StopIteration:
+                    if self.error_handler:
+                        self.error_handler.warning(f"WARNING: No clip found for shot ID: {section.shot_id}, this section {section.id} will be omited.")
+                    section.clip = None
+                    continue
+                section.clip = clip
 
-            if section.language != clip.whisper_results.language:
-                if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Language does not match {section.language} (section {section.id}) != {clip.whisper_results.language} (clip {clip.id})")
+                if section.language != clip.whisper_results.language:
+                    if self.error_handler:
+                        self.error_handler.warning(f"WARNING: Language does not match {section.language} (section {section.id}) != {clip.whisper_results.language} (clip {clip.id})")
 
-            if clip.whisper_results.language == Language.from_str("English"):
-                self._match_sot_clips_same_language(section, clip, section.quote)
-            else:
-                self._match_sot_clips_different_language(section, clip)
+                if clip.whisper_results.language == Language.from_str("English"):
+                    self._match_sot_clips_same_language(section, clip, section.quote)
+                else:
+                    self._match_sot_clips_different_language(section, clip)
+            except Exception as e:
+                if self.error_handler:
+                    self.error_handler.warning(f"WARNING: Problem when matching section {section.id}. {e}")
 
     def _match_sot_clips_same_language(self, section, clip, quote):
         timestamps = fuzzy_match(quote, clip.whisper_results)
