@@ -115,21 +115,23 @@ def run():
         st.write(script.facts_list)
 
         st.subheader("Final Story")
-        df = script.to_dataframe()
-        gb = GridOptionsBuilder.from_dataframe(df)
-        gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
-        gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
-        gb.configure_column("shot_id", width=50, editable=True)
 
-        gb.configure_grid_options(
-            rowDragManaged=True,
-            animateRows=True,
-            rowHeight=60,
-            scrollbar=True,
-            domLayout='autoHeight'
-        )
-        df = AgGrid(df, gridOptions=gb.build(), height=None, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
-        script.from_dataframe(df)
+        with st.container(height=500):
+            df = script.to_dataframe()
+            gb = GridOptionsBuilder.from_dataframe(df)
+            gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
+            gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
+            gb.configure_column("shot_id", width=50, editable=True)
+
+            gb.configure_grid_options(
+                rowDragManaged=True,
+                animateRows=True,
+                rowHeight=60,
+                scrollbar=True,
+                domLayout='autoHeight'
+            )
+            df = AgGrid(df, gridOptions=gb.build(), height=None, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
+            script.from_dataframe(df)
         if st.button("Generate video"):
             with st.status("Running"):
                 st.write("Generating audio & broll")
