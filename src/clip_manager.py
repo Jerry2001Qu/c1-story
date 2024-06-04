@@ -105,7 +105,6 @@ class ClipManager:
         while i < len(self.clips) - 1:
             current_clip = self.clips[i]
             next_clip = self.clips[i + 1]
-            print(f"{current_clip.id}, {next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}")
             if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
                 current_clip = self.combine_clips([current_clip, next_clip])
                 self.clips.pop(i + 1)  # Remove next_clip after combining
@@ -114,7 +113,6 @@ class ClipManager:
             else:
                 if i < len(self.clips) - 2:
                     next_next_clip = self.clips[i + 2]
-                    print(f"{current_clip.id}, {next_clip.id}, {next_next_clip.id}: {current_clip.shot_id}, {next_clip.shot_id}, {next_next_clip.shot_id}")
                     if current_clip.shot_id is not None and current_clip.shot_id == next_next_clip.shot_id:
                         current_clip = self.combine_clips([current_clip, next_clip, next_next_clip])
                         self.clips.pop(i + 2)

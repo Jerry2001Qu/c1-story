@@ -72,7 +72,7 @@ def run():
     if st.session_state["run"]:
         print(reuters_id)
         quick_script = st.expander("Quick Script")
-        with st.status("Running"):
+        with st.status("Running", expanded=True):
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"
                 clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"), error_handler=error_handler)
