@@ -116,7 +116,7 @@ def run():
 
         st.subheader("Final Story")
 
-        with st.container(height=500):
+        with st.container(height=800):
             df = script.to_dataframe()
             gb = GridOptionsBuilder.from_dataframe(df)
             gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, editable=True)
