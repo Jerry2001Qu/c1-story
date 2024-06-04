@@ -66,9 +66,9 @@ class SOTScriptSection(ScriptSection):
         else:
             return ""
     
-    def generate_dub(self, audio_file: Path):
+    def generate_dub(self, audio_file: Path, voice_id: str = "9f8o652aaiVK5HavyCf1"):
         self.dub_audio_file = audio_file
-        TTS(self.quote, str(audio_file), "9f8o652aaiVK5HavyCf1")
+        TTS(self.quote, str(audio_file), voice_id=voice_id)
 
 class NewsScript:
     """Represents the entire news script."""

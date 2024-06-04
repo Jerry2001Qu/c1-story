@@ -31,9 +31,19 @@ def run():
                 shutil.rmtree(folder)
         
         error_bar = st.container()
-    error_handler = StreamlitErrorHandler(error_bar)
 
     st.write("# Channel 1 Demo")
+    
+    anchor_name = st.selectbox("Anchor", ("Kristyn", "Daniel"))
+    anchor_map = {
+        "Kristyn": ("LHgN09QqKzsRsniiMpww", "9f8o652aaiVK5HavyCf1"),
+        "Daniel": ("9f8o652aaiVK5HavyCf1", "LHgN09QqKzsRsniiMpww"),
+    }
+    anchor_voice_id, voiceover_voice_id = anchor_map[anchor_name]
+
+    verbosity = st.toggle("Show output", value=True)
+
+    st.divider()
 
     if "run" not in st.session_state:
         st.session_state["run"] = False
@@ -47,6 +57,8 @@ def run():
         st.session_state["ran"] = False
         st.session_state["download_run"] = False
         error_handler.reset()
+
+    error_handler = StreamlitErrorHandler(error_bar, verbosity)
 
     reuters_id = st.text_input("Reuters ID", value="tag:reuters.com,2024:newsml_RW635429052024RP1:5", on_change=reset)
     clean_reuters_id = "".join(filter(lambda x: x.isalnum() or x.isspace(), reuters_id))
@@ -74,7 +86,7 @@ def run():
         with st.status("Running"):
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"
-                clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"), error_handler=error_handler)
+                clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"), anchor_voice_id, voiceover_voice_id, has_splash_screen=False, error_handler=error_handler)
                 script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder, error_handler=error_handler)
                 st.write("Splitting video")
                 clip_manager.split_video_into_clips()

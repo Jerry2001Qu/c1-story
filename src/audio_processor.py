@@ -45,7 +45,7 @@ class AudioProcessor:
                 audio_file = self.anchor_audio_folder / f"{section.id}.mp3"
                 previous_text = self.news_script.sections[i - 1].text if i > 0 else ""
                 next_text = self.news_script.sections[i + 1].text if i < len(self.news_script.sections) - 1 else ""
-                TTS(section.text, str(audio_file), previous_text=previous_text, next_text=next_text)
+                TTS(section.text, str(audio_file), voice_id=self.clip_manager.anchor_voice_id, previous_text=previous_text, next_text=next_text)
                 audio_clip = mp.AudioFileClip(str(audio_file))
                 section.anchor_audio_file = audio_file
                 section.anchor_audio_clip = audio_clip
@@ -63,7 +63,7 @@ class AudioProcessor:
             if section.language == Language.from_str("english"):
                 continue
             audio_file = self.anchor_audio_folder / f"{section.id}_dub.mp3"
-            section.generate_dub(audio_file)
+            section.generate_dub(audio_file, voice_id=self.clip_manager.get_voiceover_voice_id())
 
             if self.error_handler:
                 self.error_handler.stream_status(f"Dubbing section {section.id} ({section.language.name})", audio=audio_file)

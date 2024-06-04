@@ -22,8 +22,9 @@ class ErrorHandler(ABC):
 
 class StreamlitErrorHandler(ErrorHandler):
 
-    def __init__(self, error_bar: st.container):
+    def __init__(self, error_bar: st.container, verbosity: bool):
         self.error_bar = error_bar
+        self.verbosity = verbosity
         self.previous_msgs = []
     
     def reset(self) -> None:
@@ -48,6 +49,8 @@ class StreamlitErrorHandler(ErrorHandler):
         self.error_bar.info(msg, icon="ℹ️")
     
     def stream_status(self, msg: str, title: str = None, video: Path = None, audio: Path = None) -> None:
+        if not self.verbosity:
+            return
         if msg in self.previous_msgs:
             return
         self.previous_msgs += [msg]
