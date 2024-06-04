@@ -17,10 +17,11 @@ def is_folder_empty(folder_path: Path) -> bool:
 class Clip:
     """Represents a single video clip."""
 
-    def __init__(self, clip_id: str, clip_file: Path, clips_folder: Path):
+    def __init__(self, clip_id: str, clip_file: Path, clips_folder: Path, error_handler = None):
         self.id = clip_id
         self.file_path = clip_file
         self.clips_folder = clips_folder
+        self.error_handler = error_handler
 
         self.shot_id: Optional[int] = None
         self.shotlist_description: Optional[str] = None
@@ -38,6 +39,9 @@ class Clip:
     def transcribe_clip(self):
         """Performs speech recognition on the clip's audio."""
         self.whisper_results = WhisperResults.from_file(self.file_path)
+        if self.error_handler:
+            if self.whisper_results.no_speech_prob < 0.3:
+                self.error_handler.stream_status(self.whisper_results.english_text, "Identified Speech", self.file_path)
 
     def generate_full_description(self, story_title: str):
         """Generates a detailed description of the clip."""
@@ -79,9 +83,11 @@ class ClipManager:
             if status != 0:
                 if self.error_handler:
                     self.error_handler.error(f"ERROR: Splitting video into clips failed with code: {status}")
+        if self.error_handler:
+            self.error_handler.info(f"Detected {len(list(self.clips_folder.glob('*.mp4')))} clips")
 
     def load_clips(self):
-        self.clips = [Clip(file.stem, file, self.clips_folder) for file in sorted(self.clips_folder.glob("*.mp4"))]
+        self.clips = [Clip(file.stem, file, self.clips_folder, error_handler=self.error_handler) for file in sorted(self.clips_folder.glob("*.mp4"))]
         if self.has_splash_screen:
             self.clips = self.clips[1:]
 
@@ -94,7 +100,7 @@ class ClipManager:
             shotlist_description = sot_match["shotlist_description"]
             if sot_id is None:
                 continue
-
+            
             clip = self.get_clip(clip_id)
             clip.shot_id = int(sot_id)
             clip.shotlist_description = shotlist_description
@@ -266,6 +272,8 @@ ID {clip.id}: {clip.whisper_results.english_text}
                 if exception:
                     if self.error_handler:
                         self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
+                if self.error_handler:
+                    self.error_handler.stream_status(clip.full_description, f"Analyzing clip {clip.id}", clip.file_path)
                 progress_bar.progress((i + 1) / len(self.clips))
         progress_bar.progress(1.0)
         # /STREAMLIT

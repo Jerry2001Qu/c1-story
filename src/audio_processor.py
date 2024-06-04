@@ -51,6 +51,9 @@ class AudioProcessor:
                 section.anchor_audio_clip = audio_clip
                 audio_clips.append(audio_clip)
 
+                if self.error_handler:
+                    self.error_handler.stream_status(section.text, "Generating anchor audio", audio=audio_file)
+
         anchor_audio = mp.concatenate_audioclips(audio_clips)
         anchor_audio.write_audiofile(str(self.anchor_audio_file), logger=None)
     
@@ -63,7 +66,7 @@ class AudioProcessor:
             section.generate_dub(audio_file)
 
             if self.error_handler:
-                self.error_handler.info(f"Dubbing section {section.id} ({section.language})")
+                self.error_handler.stream_status(f"Dubbing section {section.id} ({section.language.name})", audio=audio_file)
 
     def _add_broll_placements(self):
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""
@@ -86,6 +89,9 @@ class AudioProcessor:
 
         broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
         parsed_broll_json = run_chain_json(parse_broll_chain, {"SECTIONS": sections_str, "BROLL_PLACEMENTS": broll_placements})
+
+        if self.error_handler:
+            self.error_handler.stream_status(broll_placements, "Placing BROLL")
 
         if len(self.news_script.get_anchor_sections()) != len(parsed_broll_json["sections"]):
             print(f"WARNING: SECTION LENGTHS DONT MATCH script: {len(self.news_script.get_anchor_sections())}, loglines: {len(parsed_broll_json['sections'])}")

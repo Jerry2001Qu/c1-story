@@ -93,11 +93,17 @@ class NewsScript:
     
     def generate_facts(self):
         self.facts_list = run_chain(facts_chain, {"SCRIPT": self.storyline, "SHOTLIST": self.shotlist})
+        if self.error_handler:
+            self.error_handler.stream_status(self.facts_list, "Generating list of facts")
     
     def generate_script(self):
         sots = self._extract_sots()
         reformated_story = self._reformat_story()
+        if self.error_handler:
+            self.error_handler.stream_status(reformated_story, "Writing story")
         story_with_sots = self._insert_sots_into_story(reformated_story, sots)
+        if self.error_handler:
+            self.error_handler.stream_status(story_with_sots, "Inserted SOTs")
         self._parse_script(story_with_sots, sots)
 
         self.sots = sots
@@ -105,6 +111,8 @@ class NewsScript:
     
     def generate_lower_thirds(self):
         self.headline = self._generate_headline()
+        if self.error_handler:
+            self.error_handler.stream_status(self.headline, "Generating headline")
         self._generate_loglines()
         self._generate_bylines()
     
@@ -142,6 +150,8 @@ class NewsScript:
         if timestamps:
             section.start = timestamps[0].start
             section.end = timestamps[-1].end + 0.5
+            if self.error_handler:
+                self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
         else:
             if clip.whisper_results.has_speech:
                 section.start = clip.whisper_results.timestamps[0].start
