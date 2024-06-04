@@ -419,6 +419,8 @@ language_to_iso_chain = language_to_iso_prompt | opus
 match_clip_to_sots_chain = match_clip_to_sots_prompt | opus
 
 from sqlalchemy.exc import OperationalError
+import time
+from anthropic import APIError
 
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
@@ -433,6 +435,25 @@ def run_chain(chain, params):
         
     response_xml = extract_xml(response_raw)
     return response_xml['response'].strip()
+
+def run_chain(chain, params, max_retries=3, retry_delay=5):
+    """Runs the LangChain chain with retry logic."""
+    retries = 0
+    while retries <= max_retries:
+        try:
+            response_raw = chain.invoke(params).content
+            response_xml = extract_xml(response_raw)
+            return response_xml['response'].strip()
+        except APIError as e: 
+            if e.status_code == 529 and retries < max_retries: 
+                print(f"Server overloaded, retrying in {retry_delay} seconds...")
+                retries += 1
+                time.sleep(retry_delay)
+            elif retries < max_retries:
+                retries += 1
+                time.sleep(retry_delay)
+            else:
+                raise e  # Re-raise if retries exceeded
 
 def run_chain_json(chain, params):
     response = run_chain(chain, params)
