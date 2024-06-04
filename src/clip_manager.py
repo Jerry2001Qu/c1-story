@@ -261,13 +261,13 @@ ID {clip.id}: {clip.whisper_results.english_text}
         
         # STREAMLIT
         progress_bar = st.progress(0.0)
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
             future_to_clip = {executor.submit(generate_description, clip): clip for clip in self.clips}
             for i, future in enumerate(as_completed(future_to_clip)):
                 clip, exception = future.result()
                 if exception:
                     if self.error_handler:
-                        self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini. {exception}")
+                        self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
                 progress_bar.progress((i + 1) / len(self.clips))
         progress_bar.progress(1.0)
         # /STREAMLIT
