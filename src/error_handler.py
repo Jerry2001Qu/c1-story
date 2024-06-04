@@ -23,30 +23,39 @@ class ErrorHandler(ABC):
 class StreamlitErrorHandler(ErrorHandler):
 
     def __init__(self, error_bar: st.container, verbosity: bool):
-        self.error_bar = error_bar
+        self.error_bar = error_bar.empty()
         self.verbosity = verbosity
         self.previous_msgs = []
+        self.latest = error_bar
     
     def reset(self) -> None:
         self.previous_msgs = []
+        self.error_bar.empty()
+    
+    def get_container(self) -> None:
+        first = self.latest.container()
+        second = self.latest.empty()
+
+        self.latest = first
+        return second
     
     def error(self, msg: str) -> None:
         if msg in self.previous_msgs:
             return
         self.previous_msgs += [msg]
-        self.error_bar.error(msg, icon="🚨")
+        self.get_container().error(msg, icon="🚨")
     
     def warning(self, msg: str) -> None:
         if msg in self.previous_msgs:
             return
         self.previous_msgs += [msg]
-        self.error_bar.warning(msg, icon="⚠️")
+        self.get_container().warning(msg, icon="⚠️")
 
     def info(self, msg: str) -> None:
         if msg in self.previous_msgs:
             return
         self.previous_msgs += [msg]
-        self.error_bar.info(msg, icon="ℹ️")
+        self.get_container().info(msg, icon="ℹ️")
     
     def stream_status(self, msg: str, title: str = None, video: Path = None, audio: Path = None) -> None:
         if not self.verbosity:
@@ -60,7 +69,7 @@ class StreamlitErrorHandler(ErrorHandler):
                 yield word + " "
                 time.sleep(0.02)
 
-        container = self.error_bar.container(border=True)
+        container = self.get_container().container(border=True)
         if title:
             container.header(title)
         if video:
