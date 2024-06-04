@@ -40,14 +40,18 @@ class VideoEditor:
         # STREAMLIT
         progress_bar = st.progress(0.0)
         for i, section in enumerate(self.news_script.sections):
-            if is_type(section, SOTScriptSection):
-                if section.clip is not None:
-                    video_clips.append(self._process_sot_section(section))
-            elif is_type(section, AnchorScriptSection):
-                video_clips.append(self._process_anchor_section(section))
-            else:
-                print(f"ERROR: Unknown section type: {type(section)}")
-            progress_bar.progress(i / (len(self.news_script.sections)-1))
+            try:
+                if is_type(section, SOTScriptSection):
+                    if section.clip is not None:
+                        video_clips.append(self._process_sot_section(section))
+                elif is_type(section, AnchorScriptSection):
+                    video_clips.append(self._process_anchor_section(section))
+                else:
+                    print(f"ERROR: Unknown section type: {type(section)}")
+                progress_bar.progress(i / (len(self.news_script.sections)-1))
+            except Exception as e:
+                if self.error_handler:
+                    self.error_handler.warning(f"Error when assembling section {section.id}: {e}")
 
         logline = self.news_script.get_anchor_sections()[0].logline
         concat_video = mp.concatenate_videoclips(video_clips, method="compose")
