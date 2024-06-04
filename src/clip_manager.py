@@ -97,40 +97,48 @@ class ClipManager:
         sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()})
 
         for sot_match in sot_matches["matches"]:
-            clip_id = sot_match["clip_id"]
-            sot_id = sot_match["sot_id"]
-            shotlist_description = sot_match["shotlist_description"]
-            if sot_id is None:
-                continue
-            
-            clip = self.get_clip(clip_id)
-            clip.shot_id = int(sot_id)
-            clip.shotlist_description = shotlist_description
-            clip.has_quote = 1
+            try:
+                clip_id = sot_match["clip_id"]
+                sot_id = sot_match["sot_id"]
+                shotlist_description = sot_match["shotlist_description"]
+                if sot_id is None:
+                    continue
+                
+                clip = self.get_clip(clip_id)
+                clip.shot_id = int(sot_id)
+                clip.shotlist_description = shotlist_description
+                clip.has_quote = 1
+            except Exception as e:
+                if self.error_handler:
+                    self.error_handler.error(f"ERROR: {e}")
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
         while i < len(self.clips) - 1:
-            current_clip = self.clips[i]
-            next_clip = self.clips[i + 1]
-            if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
-                current_clip = self.combine_clips([current_clip, next_clip])
-                self.clips.pop(i + 1)  # Remove next_clip after combining
-                if self.error_handler:
-                    self.error_handler.info(f"INFO: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
-            else:
-                if i < len(self.clips) - 2:
-                    next_next_clip = self.clips[i + 2]
-                    if current_clip.shot_id is not None and current_clip.shot_id == next_next_clip.shot_id:
-                        current_clip = self.combine_clips([current_clip, next_clip, next_next_clip])
-                        self.clips.pop(i + 2)
-                        self.clips.pop(i + 1)
-                        if self.error_handler:
-                            self.error_handler.info(f"INFO: Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})")
+            try:
+                current_clip = self.clips[i]
+                next_clip = self.clips[i + 1]
+                if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
+                    current_clip = self.combine_clips([current_clip, next_clip])
+                    self.clips.pop(i + 1)  # Remove next_clip after combining
+                    if self.error_handler:
+                        self.error_handler.info(f"INFO: Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})")
+                else:
+                    if i < len(self.clips) - 2:
+                        next_next_clip = self.clips[i + 2]
+                        if current_clip.shot_id is not None and current_clip.shot_id == next_next_clip.shot_id:
+                            current_clip = self.combine_clips([current_clip, next_clip, next_next_clip])
+                            self.clips.pop(i + 2)
+                            self.clips.pop(i + 1)
+                            if self.error_handler:
+                                self.error_handler.info(f"INFO: Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})")
+                        else:
+                            i += 1
                     else:
                         i += 1
-                else:
-                    i += 1
+            except Exception as e:
+                if self.error_handler:
+                    self.error_handler.error(f"ERROR: {e}")
         
         used_sot_ids = set()
         for clip in self.clips:
@@ -159,53 +167,57 @@ class ClipManager:
 
         # Describe each group with shot_id of previous and next clip
         for group in groups:
-            # Get the shot_id of the previous and next clip
-            previous_shot_id = None
-            next_shot_id = None
-            if group:  # Check if group is not empty
-                group_start_index = self.clips.index(group[0])
-                if group_start_index > 0:
-                    previous_shot_id = self.clips[group_start_index - 1].shot_id
-                group_end_index = self.clips.index(group[-1])
-                if group_end_index < len(self.clips) - 1:
-                    next_shot_id = self.clips[group_end_index + 1].shot_id
-
-            shotlist_start_idx = 0
-            if previous_shot_id is not None:
-                shotlist_start_idx = self.shotlist.find(f"{previous_shot_id+1}. ")
-                if shotlist_start_idx == -1:
-                    shotlist_start_idx = 0
-            shotlist_end_idx = len(self.shotlist)
-            if next_shot_id is not None:
-                shotlist_end_idx = self.shotlist.find(f"{next_shot_id}. ")
-                if shotlist_end_idx == -1:
-                    shotlist_end_idx = len(self.shotlist)
-            shotlist = self.shotlist[shotlist_start_idx:shotlist_end_idx]
-
-            # Describe the group
             try:
-                clips_xml = self.describe_clips(group, shotlist, previous_shot_id=previous_shot_id, next_shot_id=next_shot_id)
-                for clip_data in clips_xml["response"]:
-                    clip_dict = {}
-                    for part in clip_data["clip"]:
-                        for key, val in part.items():
-                            if not val:
-                                clip_dict[key] = val
-                            if isinstance(val, str):
-                                clip_dict[key] = val.strip()
-                            else:
-                                clip_dict[key] = val
-                    try:
-                        clip = self.get_clip(str(clip_dict['id']))
-                    except StopIteration:
-                        print(f"Clip not found with id, {clip_dict['id']}")
-                        continue
-                    clip.shot_id = clip_dict['shot']
-                    clip.shotlist_description = clip_dict["description"]
-                    clip.has_quote = clip_dict['quote']
-            except ValueError:
+                # Get the shot_id of the previous and next clip
+                previous_shot_id = None
+                next_shot_id = None
+                if group:  # Check if group is not empty
+                    group_start_index = self.clips.index(group[0])
+                    if group_start_index > 0:
+                        previous_shot_id = self.clips[group_start_index - 1].shot_id
+                    group_end_index = self.clips.index(group[-1])
+                    if group_end_index < len(self.clips) - 1:
+                        next_shot_id = self.clips[group_end_index + 1].shot_id
+
+                shotlist_start_idx = 0
+                if previous_shot_id is not None:
+                    shotlist_start_idx = self.shotlist.find(f"{previous_shot_id+1}. ")
+                    if shotlist_start_idx == -1:
+                        shotlist_start_idx = 0
+                shotlist_end_idx = len(self.shotlist)
+                if next_shot_id is not None:
+                    shotlist_end_idx = self.shotlist.find(f"{next_shot_id}. ")
+                    if shotlist_end_idx == -1:
+                        shotlist_end_idx = len(self.shotlist)
+                shotlist = self.shotlist[shotlist_start_idx:shotlist_end_idx]
+
+                # Describe the group
+                try:
+                    clips_xml = self.describe_clips(group, shotlist, previous_shot_id=previous_shot_id, next_shot_id=next_shot_id)
+                    for clip_data in clips_xml["response"]:
+                        clip_dict = {}
+                        for part in clip_data["clip"]:
+                            for key, val in part.items():
+                                if not val:
+                                    clip_dict[key] = val
+                                if isinstance(val, str):
+                                    clip_dict[key] = val.strip()
+                                else:
+                                    clip_dict[key] = val
+                        try:
+                            clip = self.get_clip(str(clip_dict['id']))
+                        except StopIteration:
+                            print(f"Clip not found with id, {clip_dict['id']}")
+                            continue
+                        clip.shot_id = clip_dict['shot']
+                        clip.shotlist_description = clip_dict["description"]
+                        clip.has_quote = clip_dict['quote']
+                except ValueError:
+                    if self.error_handler:
+                        self.error_handler.warning(f"WARNING: Could not match clips, likely content blocked by Gemini. ({group})")
+            except Exception as e:
                 if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Could not match clips, likely content blocked by Gemini. ({group})")
+                    self.error_handler.error(f"ERROR: {e}")
     
     def combine_clips(self, clips: List[Clip]) -> Clip:
         """Combines multiple video clips into a new clip."""
@@ -243,7 +255,11 @@ class ClipManager:
 
     def transcribe_clips(self):
         for clip in self.clips:
-            clip.transcribe_clip()
+            try:
+                clip.transcribe_clip()
+            except Exception as e:
+                if self.error_handler:
+                    self.error_handler.error(f"ERROR: {e}")
 
     def get_quotes_str(self):
         output = ""
