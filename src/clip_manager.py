@@ -250,15 +250,25 @@ ID {clip.id}: {clip.whisper_results.english_text}
         return output
 
     def generate_full_descriptions(self, story_title: str):
-        # STREAMLIT
-        progress_bar = st.progress(0.0)
-        for i, clip in enumerate(self.clips):
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        def generate_description(clip):
             try:
                 clip.generate_full_description(story_title)
-            except ValueError:
-                if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
-            progress_bar.progress(i / len(self.clips))
+                return (clip, None)
+            except ValueError as e:
+                return (clip, e)
+        
+        # STREAMLIT
+        progress_bar = st.progress(0.0)
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_clip = {executor.submit(generate_description, clip): clip for clip in self.clips}
+            for i, future in enumerate(as_completed(future_to_clip)):
+                clip, exception = future.result()
+                if exception:
+                    if self.error_handler:
+                        self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
+                progress_bar.progress((i + 1) / len(self.clips))
         progress_bar.progress(1.0)
         # /STREAMLIT
 

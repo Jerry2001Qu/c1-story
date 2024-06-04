@@ -268,7 +268,7 @@ happening in this video & making video editing decisions."""]
     response = GEMINI.generate_content(content)
 
     # print(gemini.count_tokens(content))
-    clear_uploaded_blobs()
+    # clear_uploaded_blobs()
 
     return response.text
 
