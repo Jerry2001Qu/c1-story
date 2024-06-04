@@ -267,7 +267,7 @@ ID {clip.id}: {clip.whisper_results.english_text}
                 clip, exception = future.result()
                 if exception:
                     if self.error_handler:
-                        self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini.")
+                        self.error_handler.warning(f"WARNING: Could not generate full description for clip {clip.id}, likely content blocked by Gemini. {exception}")
                 progress_bar.progress((i + 1) / len(self.clips))
         progress_bar.progress(1.0)
         # /STREAMLIT
