@@ -138,7 +138,6 @@ def run():
             gb.configure_grid_options(
                 rowDragManaged=True,
                 animateRows=True,
-                rowHeight=60,
                 scrollbar=True,
                 domLayout='autoHeight'
             )
