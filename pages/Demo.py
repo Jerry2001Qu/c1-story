@@ -114,6 +114,9 @@ def run():
             else:
                 clip_manager = st.session_state["clip_manager"]
                 script = st.session_state["script"]
+
+                clip_manager.error_handler = error_handler
+                script.error_handler = error_handler
         
         st.session_state["ran"] = True
 
