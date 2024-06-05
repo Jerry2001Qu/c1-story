@@ -31,10 +31,16 @@ class AudioProcessor:
     def process_audio_and_broll(self):
         """Processes audio for anchor sections, and adds B-roll."""
         st.write("Generating anchor audio")
+        if self.error_handler:
+            self.error_handler.info("Generating anchor audio")
         self._process_anchor_audio()
         st.write("Generating SOT translations")
+        if self.error_handler:
+            self.error_handler.info("Generating SOT translations")
         self._generate_sot_translations()
         st.write("Adding broll placements")
+        if self.error_handler:
+            self.error_handler.info("Adding broll placements")
         self._add_broll_placements()
 
     def _process_anchor_audio(self):
@@ -78,12 +84,16 @@ class AudioProcessor:
 
         sections_str = ""
         section_start = 0
-        for section in self.news_script.sections:
+        for i, section in enumerate(self.news_script.sections):
             if is_type(section, AnchorScriptSection):
                 section_id = section.id
                 section_duration = section.anchor_audio_clip.duration
                 section_end = section_start + section_duration
                 sections_str += f"Section {section_id}: {section_start} - {section_end}\n"
+                if i == 0:
+                    sections_str += f"Anchor must be shown till atleast 5s.\n"
+                if i == len(self.news_script.sections)-1:
+                    sections_str += f"Anchor must be shown at or before {section_end-5}s till end.\n"
                 sections_str += f"{section.text}\n"
                 section_start = section_end
 
@@ -104,3 +114,21 @@ class AudioProcessor:
                         self.error_handler.warning(f"WARNING: B-roll {broll['id']} in Section {section.id} does not exist. Replacing with anchor shot.")
                     broll["id"] = "Anchor"
             section.brolls = broll_data["brolls"]
+        
+        for section in self.news_script.get_anchor_sections():
+            for i, broll in enumerate(section.brolls):
+                broll_duration = broll["end"] - broll["start"]
+                if broll["id"] == "Anchor":
+                    if broll_duration < 2.0:
+                        if self.error_handler:
+                            self.error_handler.warning(f"Anchor placement in section {section.id} is too short ({broll_duration}). Removing clip.")
+                        if len(section.brolls) > i+1:
+                            section.brolls[i+1]["start"] = broll["start"]
+                        del section.brolls[i]
+                else:
+                    if broll_duration < 1.0:
+                        if self.error_handler:
+                            self.error_handler.warning(f"Broll placement in section {section.id} is too short ({broll_duration}). Removing clip.")
+                        if len(section.brolls) > i+1:
+                            section.brolls[i+1]["start"] = broll["start"]
+                        del section.brolls[i]

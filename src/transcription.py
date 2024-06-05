@@ -8,7 +8,7 @@ import streamlit as st
 
 from dataclasses import dataclass
 from typing import List
-from pathlib import Path
+from pathlib import Path, PosixPath
 
 from openai import OpenAI
 
@@ -19,6 +19,12 @@ class Word:
     word: str
     start: float
     end: float
+
+    def get_adjusted_start(self, threshold=2.0):
+        if self.end - self.start < threshold:
+            return self.start
+        else:
+            return self.end - 2.0
 
 @dataclass
 class WhisperResults:
@@ -71,7 +77,7 @@ class WhisperResults:
 
         return cls(text, timestamps, min_no_speech_prob, has_speech, language, english_text)
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
 def openai_transcribe(abs_file_path: Path):
     return openai_client.audio.transcriptions.create(
             file=abs_file_path,

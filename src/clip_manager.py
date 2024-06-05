@@ -63,13 +63,14 @@ class Clip:
 class ClipManager:
     """Manages video clips, including splitting, description, and speech recognition."""
 
-    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str, anchor_image_path: Path, anchor_voice_id: str, voiceover_voice_id: str, has_splash_screen: bool = False, error_handler = None):
+    def __init__(self, video_file_path: Path, clips_folder: Path, shotlist: str, anchor_image_path: Path, anchor_voice_id: str, voiceover_voice_id: str, anchor_avatar_id: str, has_splash_screen: bool = False, error_handler = None):
         self.video_file_path = video_file_path
         self.clips_folder = clips_folder
         self.shotlist = shotlist
         self.anchor_image_path = anchor_image_path
         self.anchor_voice_id = anchor_voice_id
         self.voiceover_voice_id = voiceover_voice_id
+        self.anchor_avatar_id = anchor_avatar_id
         self.has_splash_screen = has_splash_screen
         self.error_handler = error_handler
         self.clips: List[Clip] = []
@@ -315,3 +316,6 @@ ID {clip.id}: {clip.whisper_results.english_text}
     
     def get_voiceover_voice_id(self):
         return self.voiceover_voice_id
+    
+    def get_anchor_avatar_id(self):
+        return self.anchor_avatar_id

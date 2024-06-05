@@ -4,6 +4,7 @@
 from src.clip_manager import ClipManager
 from src.news_script import NewsScript, AnchorScriptSection, SOTScriptSection, is_type
 from src.language import Language
+from src.heygen import generate_heygen_video
 import streamlit as st
 # /STREAMLIT
 
@@ -18,12 +19,15 @@ class VideoEditor:
     """Handles video editing, including assembling clips and B-roll."""
 
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
+                 live_anchor: bool, test_mode: bool, 
                  output_resolution: Tuple[int, int] = (768, 432),
                  font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40, dub_volume_lufs=-40,
                  lower_volume_duration=3.0, dub_delay=0.5, error_handler=None):
         self.news_script = news_script
         self.clip_manager = clip_manager
+        self.live_anchor = live_anchor
+        self.test_mode = test_mode
         self.output_resolution = output_resolution
         self.font = font
         self.font_size = font_size
@@ -71,6 +75,7 @@ class VideoEditor:
         if section.language == Language.from_str("English") or section.dub_audio_file is None:
             clip = clip.subclip(section.start, min(section.end, clip.duration))
         else:
+            clip = clip.subclip(section.start)
             dub_audio = mp.AudioFileClip(str(section.dub_audio_file))
 
             # 1. Calculate the time the dub starts
@@ -107,17 +112,14 @@ class VideoEditor:
             clip = clip.set_audio(new_audio)
             clip = clip.set_duration(dub_end_time)
 
-        return clip
+        return clip.subclip(0, clip.duration - 0.1)
 
     def _process_anchor_section(self, section: AnchorScriptSection) -> mp.VideoFileClip:
         """Processes an AnchorScriptSection, assembling B-roll and audio."""
         broll_clips = []
         for broll_info in section.brolls:
             if broll_info["id"] == "Anchor":
-                broll_clip = self.clip_manager.get_anchor_image_clip()
-                broll_duration = broll_info['end'] - broll_info['start']
-                broll_clip = broll_clip.set_duration(broll_duration)
-                broll_clip = resize_image_clip(broll_clip, self.output_resolution)
+                broll_clip = self._load_and_process_anchor(broll_info, section)
             else:
                 broll_clip = self._load_and_process_broll(broll_info)
             broll_clips.append(broll_clip)
@@ -139,15 +141,33 @@ class VideoEditor:
             else:
                 if self.error_handler:
                     self.error_handler.info(f"INFO: Brolls in section {section.id} are too short, adding Anchor shot")
-                anchor_clip = self.clip_manager.get_anchor_image_clip()
-                anchor_duration = voiceover_audio.duration - combined_broll.duration
-                anchor_clip = anchor_clip.set_duration(anchor_duration)
-                anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
+                anchor_clip = self._load_and_process_anchor({"start": combined_broll.duration, "end": voiceover_audio.duration}, section)
                 combined_broll = mp.concatenate_videoclips([combined_broll, anchor_clip], method="compose")
 
         combined_broll = combined_broll.set_audio(voiceover_audio)
         combined_broll = combined_broll.set_duration(voiceover_audio.duration)
-        return combined_broll
+
+        return combined_broll.subclip(0, combined_broll.duration - 0.1)
+    
+    def _load_and_process_anchor(self, broll_info: Dict, section: AnchorScriptSection) -> mp.VideoFileClip:
+        if self.live_anchor:
+            anchor_video_file = self.clip_manager.clips_folder / f"{section.id}_anchor.mp4"
+            generate_heygen_video(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=self.test_mode)
+            if self.error_handler:
+                self.error_handler.stream_status(section.text, title="Generated anchor video", video=anchor_video_file)
+            anchor_clip = mp.VideoFileClip(str(anchor_video_file))
+
+            anchor_start = broll_info['start']
+            anchor_end = broll_info['end']
+
+            anchor_clip = anchor_clip.subclip(anchor_start, anchor_end)
+            anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
+        else:
+            anchor_clip = self.clip_manager.get_anchor_image_clip()
+            duration = broll_info['end'] - broll_info['start']
+            anchor_clip = anchor_clip.set_duration(duration)
+            anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
+        return anchor_clip
 
     def _load_and_process_broll(self, broll_info: Dict) -> mp.VideoFileClip:
         """Loads, processes (resizing, speed adjustment), and returns a B-roll clip."""
@@ -183,7 +203,7 @@ class VideoEditor:
         logo_logline_padding = 2
 
         # Calculate logline dimensions based on video resolution and padding
-        logline_height = int(output_height * 0.1)  # 10% of video height
+        logline_height = int(output_height * 0.138)  # 10% of video height
         logline_width = output_width - self.logline_padding * 2
         if self.logo_path:
             logline_width -= logline_height
@@ -194,7 +214,7 @@ class VideoEditor:
 
         # 1. Create a white background ImageClip
         bg_clip = (
-            mp.ColorClip(size=(logline_width, logline_height), color=(255, 255, 255))
+            mp.ColorClip(size=(logline_width, logline_height), color=(255, 255, 255, 255 * 0.9))
             .set_position(
                 (logline_x, logline_y)
             )
@@ -202,7 +222,7 @@ class VideoEditor:
         )
 
         # 2. Create text ImageClip
-        text_clip = self._create_text_clip(logline_text, logline_width, logline_height)
+        text_clip = self._create_text_clip(logline_text.upper(), logline_width, logline_height)
         text_clip = text_clip.set_position(
             (logline_x, logline_y)
         ).set_duration(clip.duration)
@@ -211,7 +231,7 @@ class VideoEditor:
         if self.logo_path:
             logo = (
                 mp.ImageClip(str(self.logo_path))
-                .set_opacity(0.8)
+                .set_opacity(1.0)
                 .resize(height=logline_height)
                 .set_position(
                     (logline_x + logline_width + logo_logline_padding, logline_y)
@@ -234,7 +254,7 @@ class VideoEditor:
         if self.font_size:
             font_size = self.font_size
         else:
-            font_size = height // 2
+            font_size = height // 1.8
         if not self.font:
             font = ImageFont.load_default()
         else:
@@ -243,7 +263,7 @@ class VideoEditor:
         # Get text size, adjust height, calculate position
         text_bbox = draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
-        text_height = int((text_bbox[3] - text_bbox[1]) * 3 / 2)  # Adjust height
+        text_height = int((text_bbox[3] - text_bbox[1]) * 2)  # Adjust height
         text_x = self.logline_padding // 3
         text_y = (height - text_height) // 2
 

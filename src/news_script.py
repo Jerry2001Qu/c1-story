@@ -114,7 +114,21 @@ class NewsScript:
         if self.error_handler:
             self.error_handler.stream_status(self.headline, "Generating headline")
         self._generate_loglines()
+        if self.error_handler:
+            self.error_handler.stream_status(self.get_loglines(), "Generating loglines")
         self._generate_bylines()
+        if self.error_handler:
+            self.error_handler.stream_status(self.get_bylines(), "Generating bylines")
+    
+    def get_loglines(self):
+        sections = [section for section in self.sections if is_type(section, AnchorScriptSection) and section.logline]
+        loglines = [f"{section.id}: {section.logline}" for section in sections]
+        return "\n\n".join(loglines)
+    
+    def get_bylines(self):
+        sections = [section for section in self.sections if is_type(section, SOTScriptSection)]
+        bylines = [f"{section.id}: {section.get_byline()}" for section in sections]
+        return "\n\n".join(bylines)
     
     def generate_audio_and_broll(self):
         """Generates audio, matches clips, and adds B-roll placements."""
@@ -152,13 +166,13 @@ class NewsScript:
     def _match_sot_clips_same_language(self, section, clip, quote):
         timestamps = fuzzy_match(quote, clip.whisper_results)
         if timestamps:
-            section.start = timestamps[0].start
+            section.start = timestamps[0].get_adjusted_start()
             section.end = timestamps[-1].end + 0.5
             if self.error_handler:
                 self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
         else:
             if clip.whisper_results.has_speech:
-                section.start = clip.whisper_results.timestamps[0].start
+                section.start = clip.whisper_results.timestamps[0].get_adjusted_start()
                 section.end = clip.whisper_results.timestamps[-1].end
                 if self.error_handler:
                     self.error_handler.warning(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}")

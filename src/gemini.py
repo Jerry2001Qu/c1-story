@@ -16,19 +16,16 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file_path
 
 from src.prompts import extract_xml
 from src.clip_manager import Clip
+from src.gcp import upload_to_gcs_part, clear_uploaded_blobs
 # /STREAMLIT
 
-import random
-import string
-from typing import Union, Tuple, Dict, List
-from pathlib import Path
-import functools
+from typing import Tuple, Dict, List
+from pathlib import Path, PosixPath
 
-from google.cloud import storage
 import vertexai
 from vertexai.generative_models import (GenerationConfig, GenerativeModel,
                                          HarmBlockThreshold, HarmCategory,
-                                         Part, SafetySetting)
+                                         SafetySetting)
 
 import moviepy.editor as mp
 from PIL import Image
@@ -67,50 +64,6 @@ SAFETY_CONFIG = [
 GEMINI = GenerativeModel(model_name="gemini-1.5-pro-preview-0409", 
                          generation_config=GENERATION_CONFIG, 
                          safety_settings=SAFETY_CONFIG)
-
-
-# Google Cloud Storage Setup
-storage_client = storage.Client()
-bucket = storage_client.bucket("gemini-colab")
-blobs = []  # Store uploaded blobs for later cleanup
-
-def upload_to_gcs(local_file_path: Union[str, Path]) -> Part:
-    """Uploads a file to Google Cloud Storage and returns a Vertex AI Part.
-
-    Args:
-        local_file_path: Path to the local file to upload.
-
-    Returns:
-        A Vertex AI Part representing the uploaded file.
-    """
-    local_file_path = Path(local_file_path)
-    random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
-    extension = local_file_path.suffix
-    blob_name = random_string + extension
-    blob = bucket.blob(blob_name)
-    blob.upload_from_filename(local_file_path)
-
-    global blobs
-    blobs.append(blob)
-
-    uri = f"gs://{bucket.name}/{blob_name}"
-    mime_types = {
-        ".mp4": "video/mp4",
-        ".mp3": "audio/mpeg",
-        ".jpg": "image/jpeg",
-    }
-    mime_type = mime_types.get(extension) 
-    if not mime_type:
-        raise ValueError(f"Unsupported file extension: {extension}")
-
-    return Part.from_uri(uri, mime_type=mime_type)
-
-def clear_uploaded_blobs():
-    """Deletes blobs that were uploaded to Google Cloud Storage."""
-    global blobs
-    for blob in blobs:
-        blob.delete()
-    blobs.clear()
 
 def extract_frame(input_file: Path, time: float, output_file: Path) -> None:
     """Extracts a frame from a video at a specific time and saves it as an image.
@@ -196,7 +149,7 @@ Here are the clips:
         frame_file, audio_file = extract_middle_frame_and_audio(clip.file_path)
 
         content += ["<clip>\n"]
-        content += [f"ID {name}:", upload_to_gcs(frame_file), upload_to_gcs(audio_file)]
+        content += [f"ID {name}:", upload_to_gcs_part(frame_file), upload_to_gcs_part(audio_file)]
         content += [f"Clip has speech with transcript: {clip.whisper_results.english_text}" if clip.whisper_results.has_speech else "Clip may not have speech"]
         content += ["\n</clip>"]
         content += ["\n\n"]
@@ -234,7 +187,7 @@ def full_description(clip_file, description, title):
     content = []
     content += ["Video clip:"]
 
-    content += [upload_to_gcs(clip_file)]
+    content += [upload_to_gcs_part(clip_file)]
 
     if title:
         content += ["This clip is from a video about: ", title]
@@ -279,12 +232,12 @@ happening in this video & making video editing decisions."""]
 
     return response.text
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
 def add_broll(audio_file, full_descriptions_str, section_timings_str):
     content = []
     content += ["You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling for a TV audience."]
     content += ["Here are the broll descriptions: ", f"<broll>{full_descriptions_str}</broll>\n\n"]
-    content += ["Here is the audio clip: ", upload_to_gcs(audio_file)]
+    content += ["Here is the audio clip: ", upload_to_gcs_part(audio_file)]
     content += ["Here are section timings: ", f"<section_timings>{section_timings_str}</section_timings>\n\n"]
     content += ["Here is an example: ", """<example>
 **Section 1: 0 - 11.96**
@@ -297,9 +250,9 @@ Transcript: Activists in Canada...
 </example>\n\n"""]
     content += ["""Please listen to the audio clip carefully, its script should match the section timings. I have given you <broll></broll> clips and want you to place them in the Audio clip.
 Each broll clip has a Max duration which you should copy into the list, ex (max 10 seconds).
-Give me timestamps for when you want a broll clip to start and end. Always fill each section with brolls till the end.
+Give me timestamps for when you want a broll clip to start and end. Always fill each section with brolls till the end. But don't go beyond each section. You must end clip timings at the section end time!
 Broll clips have a length, so you can't use more than that & have to switch. You don't have to use the entire Broll clip. Aim to switch around 6 seconds or sooner. Switching creates a more intense experience.
-You may also insert Anchor blocks. These can go on for as long as you want. Place Anchor blocks for at least 10 seconds at the beginning of the whole story to set the scene, and at least 10 seconds at the end of the whole story to conclude. (probably the whole start and end sections)
+You may also insert Anchor blocks. These can go on for as long as you want. Place Anchor blocks for at least 5 seconds at the beginning of the whole story to set the scene, and at least 5 seconds at the end of the whole story to conclude. (probably the whole start and end sections. If the section is at the start or end of the whole story, you will be told so in <section_timings> with a message like "Anchor must be shown...")
 This isn't necessary in other sections, just make your best judgement on when the Anchor should be on screen. For example, if there isn't any related broll, or not enough broll, you may choose to switch to the Anchor.
 An Anchor block must be at least 3 seconds long, so don't place it at the very end of a section. Make sure everything flows nicely!
 Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example. Never make up broll clips. If not enough, use the Anchor.

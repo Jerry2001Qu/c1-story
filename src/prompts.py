@@ -136,8 +136,10 @@ reformat_prompt = PromptTemplate.from_template(
 """I'm producing a television news segment.  I'd like to reformat a news story I wrote so it
 can be spoken by an on camera news anchor. Please don't change any of the facts of
 my original story text at all, and please don't change the wording at all.  Just reformat it
-so a TV news anchor could easily read it aloud.  Any dates need to be formatted so
-they can be read aloud. For example, May 1st instead of May 1.
+so a TV news anchor could easily read it aloud.
+
+- Any dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
+- Remove any parentheses and the contained text.
 
 Here is the story:
 <story>
@@ -187,7 +189,7 @@ In a <scratchpad>, think through where it would make the most sense to insert ea
 
 - Keep the quotations short, cutting out portions if needed to keep them concise. No more than 1 or 2 sentences.
 - Spread the quotations throughout the story
-- You may start the story with a quotation if it makes sense to do so
+- You may start the story with an English quotation if it makes sense to do so. But don't with a non-English quotation
 - Do not end the story with a quotation
 - Insert the portions of quotations including their descriptions
 - Do not add any transitions between the quotations and the rest of the script
@@ -241,9 +243,16 @@ Here is the script:
 {SCRIPT}
 </script>
 
-Each paragraph should become a section. Some paragraphs are quotes. These should be matched with quotes from the shotlist & add a shot_id.
-There may not be any quotes. Only put speech in the quote field, no emotes like (laughs). Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid.
-Ensure the order remains the same between all paragraphs (SOT & ANCHOR). Don't move all the SOTs to the end. Put the output in <response></response> tags"""
+ - Each paragraph should become a section
+ - Some paragraphs are quotes. These should be matched with quotes from the shotlist & add a shot_id
+ - There may not be any quotes
+ - Only put speech in the quote field, no emotes like (laughs)
+ - For quotes, always remove or replace parentheses/brackets and the contained text. For example this should be fully removed: (local time / 0200EST). Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ.
+ - Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid
+ - Ensure the order remains the same between all paragraphs (SOT & ANCHOR)
+ - Don't move all the SOTs to the end
+
+Put the output in <response></response> tags"""
 )
 
 logline_prompt = PromptTemplate.from_template(
@@ -253,7 +262,7 @@ logline_prompt = PromptTemplate.from_template(
 {SECTIONS}
 </sections>
 
-For each section, write a logline/summary sentence that is no more than 40 characters long. Capture the key point of the section concisely.
+For each section, write a logline/summary sentence that is no more than 40 characters long. Capture the key point of the section concisely and densely! Only use acronyms that are commonly known. Don't too many acronyms (2 max).
 
 Return your response as a JSON object with a list of sections. Each section object should have an "id" field containing the section number (e.g. 0, 2, etc.)
 and a "logline" field containing the logline/summary you wrote for that section.
