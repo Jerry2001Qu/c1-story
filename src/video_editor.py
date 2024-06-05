@@ -129,6 +129,22 @@ class VideoEditor:
         combined_broll = mp.concatenate_videoclips(broll_clips, method="compose")
         voiceover_audio = mp.AudioFileClip(str(section.anchor_audio_file))
 
+        if combined_broll.duration < voiceover_audio.duration:
+            speed_factor = combined_broll.duration / voiceover_audio.duration
+            if speed_factor > 0.7:
+                if speed_factor < 0.99:
+                    if self.error_handler:
+                        self.error_handler.info(f"INFO: Brolls in section {section.id} are too short, adjusting speed ({speed_factor:.2f})")
+                combined_broll = combined_broll.fx(mp.vfx.speedx, speed_factor)
+            else:
+                if self.error_handler:
+                    self.error_handler.info(f"INFO: Brolls in section {section.id} are too short, adding Anchor shot")
+                anchor_clip = self.clip_manager.get_anchor_image_clip()
+                anchor_duration = voiceover_audio.duration - combined_broll.duration
+                anchor_clip = anchor_clip.set_duration(anchor_duration)
+                anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
+                combined_broll = mp.concatenate_videoclips([combined_broll, anchor_clip], method="compose")
+
         combined_broll = combined_broll.set_audio(voiceover_audio)
         combined_broll = combined_broll.set_duration(voiceover_audio.duration)
         return combined_broll
@@ -146,8 +162,8 @@ class VideoEditor:
 
         if broll_clip.duration < broll_duration:
             speed_factor = broll_clip.duration / broll_duration
-            if speed_factor > 0.7:  # Adjust the threshold as needed
-                if speed_factor != 1.0:
+            if speed_factor > 0.7:
+                if speed_factor < 0.99:
                     if self.error_handler:
                         self.error_handler.info(f"INFO: Broll {broll_info['id']} is too short, adjusting speed ({speed_factor:.2f})")
                 broll_clip = broll_clip.fx(mp.vfx.speedx, speed_factor)
