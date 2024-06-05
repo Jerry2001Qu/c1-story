@@ -45,7 +45,8 @@ class VideoEditor:
                     if section.clip is not None:
                         video_clips.append(self._process_sot_section(section))
                 elif is_type(section, AnchorScriptSection):
-                    video_clips.append(self._process_anchor_section(section))
+                    if section.text:
+                        video_clips.append(self._process_anchor_section(section))
                 else:
                     print(f"ERROR: Unknown section type: {type(section)}")
                 progress_bar.progress(i / (len(self.news_script.sections)-1))
