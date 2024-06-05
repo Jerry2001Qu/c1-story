@@ -276,6 +276,8 @@ class NewsScript:
     def from_dataframe(self, df):
         self.sections = []
         for id, row in df.iterrows():
+            if not row["text"]:
+                continue
             if row["type"] == "ANCHOR":
                 self.sections += [AnchorScriptSection(id+1, row["text"])]
             elif row["type"] == "SOT":
