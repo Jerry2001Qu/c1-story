@@ -425,22 +425,17 @@ from anthropic import APIError
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
 
-def run_chain(chain, params):
-    try:
-        response_raw = chain.invoke(params).content
-    except OperationalError:
-        cache = SQLiteCache(database_path="langchain.db")
-        set_llm_cache(cache)
-        response_raw = chain.invoke(params).content
-        
-    response_xml = extract_xml(response_raw)
-    return response_xml['response'].strip()
-
 def run_chain(chain, params, max_retries=3, retry_delay=5):
     """Runs the LangChain chain with retry logic."""
     retries = 0
     while retries <= max_retries:
         try:
+            response_raw = chain.invoke(params).content
+            response_xml = extract_xml(response_raw)
+            return response_xml['response'].strip()
+        except OperationalError:
+            cache = SQLiteCache(database_path="langchain.db")
+            set_llm_cache(cache)
             response_raw = chain.invoke(params).content
             response_xml = extract_xml(response_raw)
             return response_xml['response'].strip()
