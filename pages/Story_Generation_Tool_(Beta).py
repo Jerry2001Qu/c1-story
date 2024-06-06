@@ -49,9 +49,13 @@ def run():
     ]
     anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_idx]
 
-    verbosity = st.toggle("Show output", value=True)
-    live_anchor = st.toggle("Live anchor", value=True)
-    test_mode = st.toggle("WTM", value=True)
+    verbosity = st.toggle("Show Output", value=True)
+    live_anchor = st.toggle("Live Anchor", value=True)
+    high_res_anchor = st.toggle("High Res Anchor", value=True)
+    test_mode = not high_res_anchor
+
+    languages = ["English", "Spanish", "French", "German", "Polish", "Italian", "Portuguese", "Russian", "Arabic", "Dutch", "Swedish", "Norwegian", "Turkish", "Japanese", "Korean", "Filipino", "Tamil", "Indonesian", "Greek", "Chinese"]
+    language = st.selectbox("Generate Story In:", languages)
 
     st.divider()
 
@@ -70,9 +74,9 @@ def run():
 
     error_handler = StreamlitErrorHandler(error_bar, verbosity)
 
-    reuters_id = st.text_input("Reuters ID", value="tag:reuters.com,2024:newsml_RW635429052024RP1:5", on_change=reset)
+    reuters_id = st.text_input("Story Asset ID (Paste Here)", value="tag:reuters.com,2024:newsml_RW635429052024RP1:5", on_change=reset)
     clean_reuters_id = "".join(filter(lambda x: x.isalnum() or x.isspace(), reuters_id))
-    if st.button("Download from Reuters"):
+    if st.button("Download Story Assets"):
         st.session_state["download_run"] = True
     
     if st.session_state["download_run"]:
@@ -88,7 +92,7 @@ def run():
         st.write(storyline)
         st.write(shotlist)
     
-        if st.button("Generate script"):
+        if st.button("Generate Script"):
             st.session_state["run"] = True
 
     if st.session_state["run"]:
@@ -145,7 +149,7 @@ def run():
         trt = script.get_total_read_time_seconds()
         st.write(f"Estimated TRT: {trt}s")
 
-        st.subheader("Extracted facts")
+        st.subheader("Extracted Facts")
         st.write(script.facts_list)
 
         st.subheader("Final Story")
@@ -173,7 +177,7 @@ def run():
                 st.warning(f"SOT Section {section.id}'s transcript did not contain the given quote. Adding all detected speech.")
             if section.match_type == "CLIP":
                 st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
-        if st.button("Generate video"):
+        if st.button("Generate Video"):
             with st.status("Running"):
                 st.write("Generating audio & broll")
                 error_handler.info("Generating audio & broll")
