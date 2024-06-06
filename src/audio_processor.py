@@ -117,6 +117,15 @@ class AudioProcessor:
             section.brolls = broll_data["brolls"]
         
         for section in self.news_script.get_anchor_sections():
+            duration = section.anchor_audio_clip.duration
+            for i, broll in enumerate(section.brolls[:]):
+                if broll["start"] > duration:
+                    del section.brolls[i]
+            for broll in section.brolls:
+                if broll["end"] > duration:
+                    broll["end"] = duration
+        
+        for section in self.news_script.get_anchor_sections():
             for i, broll in enumerate(section.brolls):
                 broll_duration = broll["end"] - broll["start"]
                 if broll["id"] == "Anchor":

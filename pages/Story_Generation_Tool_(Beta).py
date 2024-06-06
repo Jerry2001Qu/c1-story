@@ -188,6 +188,9 @@ def run():
                 video_output_file = story_folder / "output.mp4"
                 video_editor = VideoEditor(script, clip_manager, live_anchor=live_anchor, test_mode=test_mode, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
                 video_editor.assemble_video(output_file=video_output_file)
+            
+            with st.expander("Details"):
+                st.write(script.sections)
 
             st.video(str(video_output_file), autoplay=True)
 

@@ -13,6 +13,7 @@ from abc import ABC
 from pathlib import Path
 import moviepy.editor as mp
 import pandas as pd
+import pprint
 
 class ScriptSection(ABC):
     """Represents a single section of the news script."""
@@ -33,7 +34,9 @@ class AnchorScriptSection(ScriptSection):
         self.brolls: Optional[List] = None
     
     def __repr__(self):
-        return f"""{self.text}"""
+        return f"""{self.text}
+
+{pprint.pformat(self.brolls)}"""
 
 
 class SOTScriptSection(ScriptSection):
