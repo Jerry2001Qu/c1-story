@@ -12,6 +12,7 @@ import streamlit as st
 # /STREAMLIT
 
 from pathlib import Path
+import pprint
 
 import moviepy.editor as mp
 
@@ -157,7 +158,7 @@ class AudioProcessor:
                                 self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Leaving gap of {broll['end'] - broll['start']}s")
                         else:
                             if self.error_handler:
-                                self.error_handler.stream_status(section.brolls, f"Broll {broll['id']} in section {section.id} filled")
+                                self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
                         del section.brolls[i]
                 else:
                     if broll_duration < 1.0:
@@ -198,5 +199,5 @@ class AudioProcessor:
                                 self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Leaving gap of {broll['end'] - broll['start']}s")
                         else:
                             if self.error_handler:
-                                self.error_handler.stream_status(section.brolls, f"Broll {broll['id']} in section {section.id} filled")
+                                self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
                         del section.brolls[i]
