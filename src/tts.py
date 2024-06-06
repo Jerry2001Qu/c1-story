@@ -30,8 +30,9 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
         text=text,
         voice=Voice(
             voice_id=voice_id, # 9f8o652aaiVK5HavyCf1 daniel
-            settings=VoiceSettings(stability=0.3, similarity_boost=0.5, style=0.5, use_speaker_boost=True)
+            settings=VoiceSettings(stability=1.0, similarity_boost=0.0, style=0.3, use_speaker_boost=False)
         ),
+        model="eleven_multilingual_v2",
         request_options={
             "additional_body_parameters": additional_body_parameters
         }

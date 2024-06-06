@@ -58,7 +58,7 @@ class VideoEditor:
                 if self.error_handler:
                     self.error_handler.warning(f"Error when assembling section {section.id}: {e}")
 
-        logline = self.news_script.get_anchor_sections()[0].logline
+        logline = self.news_script.headline
         concat_video = mp.concatenate_videoclips(video_clips, method="compose")
         final_video = self._add_logline(concat_video, logline)
 

@@ -154,12 +154,17 @@ class AudioProcessor:
                                         next_broll["start"] -= added_time
                                         broll["end"] = next_broll["start"]
                         if broll["end"] != broll["start"]:
+                            if i-1 >= 0:
+                                section.brolls[i-1]["end"] = broll["end"]
+                            else:
+                                section.brolls[i+1]["start"] = broll["start"]
                             if self.error_handler:
-                                self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Leaving gap of {broll['end'] - broll['start']}s")
+                                self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Surrounding clips will be slowed")
+                                del section.brolls[i]
                         else:
                             if self.error_handler:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
-                        del section.brolls[i]
+                            del section.brolls[i]
                 else:
                     if broll_duration < 1.0:
                         if self.error_handler:
@@ -195,9 +200,14 @@ class AudioProcessor:
                                         next_broll["start"] -= added_time
                                         broll["end"] = next_broll["start"]
                         if broll["end"] != broll["start"]:
+                            if i-1 >= 0:
+                                section.brolls[i-1]["end"] = broll["end"]
+                            else:
+                                section.brolls[i+1]["start"] = broll["start"]
                             if self.error_handler:
-                                self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Leaving gap of {broll['end'] - broll['start']}s")
+                                self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Surrounding clips will be slowed")
+                                del section.brolls[i]
                         else:
                             if self.error_handler:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
-                        del section.brolls[i]
+                            del section.brolls[i]

@@ -171,7 +171,6 @@ def run():
             script.from_dataframe(df)
 
         for section in script.get_sot_sections():
-            print(section.match_type)
             if not section.clip:
                 st.warning(f"SOT Section {section.id} could not be matched to a clip. Skipping section.")
             if section.match_type == "SPEECH":
