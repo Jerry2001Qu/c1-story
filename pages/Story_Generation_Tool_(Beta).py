@@ -20,9 +20,12 @@ from src.prompts import cache
 def run():
     st.set_page_config(
         page_title="Channel 1",
-        page_icon="👋",
+        page_icon="./assets/favicon.png",
         layout="wide"
     )
+
+    st.logo("./assets/logo.png")
+    st.title("Story Generation Tool (Beta)")
 
     with st.sidebar:
         if st.button("Clear caches"):
@@ -32,8 +35,6 @@ def run():
                 shutil.rmtree(folder)
         
         error_bar = st.container()
-
-    st.write("# Channel 1 Demo")
 
     anchor_imgs = ["assets/EDDIE-square.png", "assets/Kristen-square.png", "assets/DANIEL-square.png", "assets/MIRANDA-square.png"]
     anchor_names = ["Eddie", "Kristen", "Daniel", "Miranda"]
