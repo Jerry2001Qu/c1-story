@@ -51,7 +51,7 @@ def run():
 
     verbosity = st.toggle("Show output", value=True)
     live_anchor = st.toggle("Live anchor", value=True)
-    test_mode = st.toggle("Test mode", value=True)
+    test_mode = st.toggle("WTM", value=True)
 
     st.divider()
 
