@@ -41,7 +41,7 @@ class Clip:
         self.whisper_results = WhisperResults.from_file(self.file_path)
         if self.error_handler:
             if self.whisper_results.no_speech_prob < 0.3:
-                self.error_handler.stream_status(self.whisper_results.english_text, "Identified Speech", self.file_path)
+                self.error_handler.stream_status(self.whisper_results.english_text, f"Identified Speech ({self.id})", self.file_path)
 
     def generate_full_description(self, story_title: str):
         """Generates a detailed description of the clip."""
@@ -123,7 +123,7 @@ class ClipManager:
                     current_clip = self.combine_clips([current_clip, next_clip])
                     self.clips.pop(i + 1)  # Remove next_clip after combining
                     if self.error_handler:
-                        self.error_handler.stream_status(current_clip.whisper_results.english_text, "Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
+                        self.error_handler.stream_status(current_clip.whisper_results.english_text, f"Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
                 else:
                     if i < len(self.clips) - 2:
                         next_next_clip = self.clips[i + 2]
@@ -132,7 +132,7 @@ class ClipManager:
                             self.clips.pop(i + 2)
                             self.clips.pop(i + 1)
                             if self.error_handler:
-                                self.error_handler.stream_status(current_clip.whisper_results.english_text, "Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
+                                self.error_handler.stream_status(current_clip.whisper_results.english_text, f"Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
                         else:
                             i += 1
                     else:
