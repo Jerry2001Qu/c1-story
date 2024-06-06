@@ -122,13 +122,75 @@ class AudioProcessor:
                     if broll_duration < 2.0:
                         if self.error_handler:
                             self.error_handler.warning(f"Anchor placement in section {section.id} is too short ({broll_duration}). Removing clip.")
+                        if i-1 >= 0:
+                            last_broll = section.brolls[i-1]
+                            if last_broll["id"] == "Anchor":
+                                last_broll["end"] = broll["end"]
+                                broll["start"] = broll["end"]
+                            else:
+                                last_broll_clip = self.clip_manager.get_clip(last_broll["id"])
+                                if last_broll_clip is not None:
+                                    last_broll_duration = last_broll["end"] - last_broll["start"]
+                                    if last_broll_duration < last_broll_clip.duration:
+                                        available_time = last_broll_clip.duration - last_broll_duration
+                                        needed_time = broll["end"] - broll["start"]
+                                        added_time = min(available_time, needed_time)
+                                        last_broll["end"] += added_time
+                                        broll["start"] = last_broll["end"]
                         if len(section.brolls) > i+1:
-                            section.brolls[i+1]["start"] = broll["start"]
+                            next_broll = section.brolls[i+1]
+                            if next_broll["id"] == "Anchor":
+                                next_broll["start"] = broll["start"]
+                                broll["end"] = broll["start"]
+                            else:
+                                next_broll_clip = self.clip_manager.get_clip(next_broll["id"])
+                                if next_broll_clip is not None:
+                                    next_broll_duration = next_broll["end"] - next_broll["start"]
+                                    if next_broll_duration < next_broll_clip.duration:
+                                        available_time = next_broll_clip.duration - next_broll_duration
+                                        needed_time = broll["end"] - broll["start"]
+                                        added_time = min(available_time, needed_time)
+                                        next_broll["start"] -= added_time
+                                        broll["end"] = next_broll["start"]
+                        if broll["end"] != broll["start"]:
+                            if self.error_handler:
+                                self.error_handler.warning(f"Broll {broll['id']} in section {section['id']} could not be filled. Leaving gap of {broll['end'] - broll['start']}s")
                         del section.brolls[i]
                 else:
                     if broll_duration < 1.0:
                         if self.error_handler:
                             self.error_handler.warning(f"Broll placement in section {section.id} is too short ({broll_duration}). Removing clip.")
+                        if i-1 >= 0:
+                            last_broll = section.brolls[i-1]
+                            if last_broll["id"] == "Anchor":
+                                last_broll["end"] = broll["end"]
+                                broll["start"] = broll["end"]
+                            else:
+                                last_broll_clip = self.clip_manager.get_clip(last_broll["id"])
+                                if last_broll_clip is not None:
+                                    last_broll_duration = last_broll["end"] - last_broll["start"]
+                                    if last_broll_duration < last_broll_clip.duration:
+                                        available_time = last_broll_clip.duration - last_broll_duration
+                                        needed_time = broll["end"] - broll["start"]
+                                        added_time = min(available_time, needed_time)
+                                        last_broll["end"] += added_time
+                                        broll["start"] = last_broll["end"]
                         if len(section.brolls) > i+1:
-                            section.brolls[i+1]["start"] = broll["start"]
+                            next_broll = section.brolls[i+1]
+                            if next_broll["id"] == "Anchor":
+                                next_broll["start"] = broll["start"]
+                                broll["end"] = broll["start"]
+                            else:
+                                next_broll_clip = self.clip_manager.get_clip(next_broll["id"])
+                                if next_broll_clip is not None:
+                                    next_broll_duration = next_broll["end"] - next_broll["start"]
+                                    if next_broll_duration < next_broll_clip.duration:
+                                        available_time = next_broll_clip.duration - next_broll_duration
+                                        needed_time = broll["end"] - broll["start"]
+                                        added_time = min(available_time, needed_time)
+                                        next_broll["start"] -= added_time
+                                        broll["end"] = next_broll["start"]
+                        if broll["end"] != broll["start"]:
+                            if self.error_handler:
+                                self.error_handler.warning(f"Broll {broll['id']} in section {section['id']} could not be filled. Leaving gap of {broll['end'] - broll['start']}s")
                         del section.brolls[i]

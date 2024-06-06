@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
+from streamlit_image_select import image_select
 
 from src.dataloader import ReutersAPIDataLoader
 from src.clip_manager import ClipManager
@@ -33,13 +34,19 @@ def run():
         error_bar = st.container()
 
     st.write("# Channel 1 Demo")
+
+    anchor_imgs = ["assets/EDDIE-square.png", "assets/Kristen-square.png", "assets/DANIEL-square.png", "assets/MIRANDA-square.png"]
+    anchor_names = ["Eddie", "Kristen", "Daniel", "Miranda"]
     
-    anchor_name = st.selectbox("Anchor", ("Eddie", "Daniel"))
-    anchor_map = {
-        "Eddie": ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
-        "Daniel": ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
-    }
-    anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_name]
+    anchor_idx = image_select("Choose an Anchor", anchor_imgs, anchor_names, return_value="index", use_container_width=False)
+
+    anchor_map = [
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
+    ]
+    anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_idx]
 
     verbosity = st.toggle("Show output", value=True)
     live_anchor = st.toggle("Live anchor", value=True)
@@ -156,6 +163,14 @@ def run():
             )
             df = AgGrid(df, gridOptions=gb.build(), height=2000, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
             script.from_dataframe(df)
+
+            for section in script.get_sot_sections():
+                if not section.clip:
+                    st.warning(f"SOT Section {section.id} could not be matched to a clip. Skipping section.")
+                if section.match_type == "SPEECH":
+                    st.warning(f"SOT Section {section.id}'s transcript did not contain the given quote. Adding all detected speech.")
+                if section.match_type == "CLIP":
+                    st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
         if st.button("Generate video"):
             with st.status("Running"):
                 st.write("Generating audio & broll")

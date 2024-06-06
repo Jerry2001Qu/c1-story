@@ -18,6 +18,7 @@ onnxruntime
 readtime
 streamlit-aggrid
 st-annotated-text
+streamlit-image-select
 google-cloud-storage
 google-cloud-aiplatform
 pillow
