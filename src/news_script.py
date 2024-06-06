@@ -276,6 +276,10 @@ class NewsScript:
     def _generate_headline(self):
         """Generates a headline for the news script."""
         headline = run_chain(headline_chain, {"SCRIPT": self.text_script})
+        while len(headline) > 45:
+            if self.error_handler:
+                self.error_handler.info(f"Headline was too long, shortening: {headline}")
+            headline = run_chain(headline_chain, {"SCRIPT": self.text_script + f"\n\nOld headline was '{headline}'. This is too long."})
         return headline
     
     def get_total_read_time_seconds(self):
