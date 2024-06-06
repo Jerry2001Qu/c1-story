@@ -286,7 +286,7 @@ ID {clip.id}: {clip.whisper_results.english_text}
         
         # STREAMLIT
         progress_bar = st.progress(0.0)
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=10) as executor:
             future_to_clip = {executor.submit(generate_description, clip): clip for clip in self.clips}
             for i, future in enumerate(as_completed(future_to_clip)):
                 clip, exception = future.result()
