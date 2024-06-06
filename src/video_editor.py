@@ -189,7 +189,8 @@ class VideoEditor:
                 broll_clip = broll_clip.fx(mp.vfx.speedx, speed_factor)
             else:
                 if self.error_handler:
-                    self.error_handler.info(f"INFO: Broll {broll_info['id']} is too short, video may freeze.")
+                    self.error_handler.info(f"INFO: Broll {broll_info['id']} is too short, video will be slow ({speed_factor:.2f}).")
+                broll_clip = broll_clip.fx(mp.vfx.speedx, speed_factor)
 
         broll_clip = broll_clip.subclip(0, min(broll_duration, broll_clip.duration))
         broll_clip = broll_clip.set_duration(broll_duration)
