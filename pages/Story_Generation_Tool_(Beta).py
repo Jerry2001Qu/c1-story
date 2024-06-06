@@ -25,7 +25,8 @@ def run():
     )
 
     st.logo("./assets/logo.png")
-    st.title("Story Generation Tool (Beta)")
+    st.image("./assets/story-gen-header.png", width=600)
+    # st.title("Story Generation Tool (Beta)")
 
     with st.sidebar:
         if st.button("Clear caches"):
@@ -49,8 +50,8 @@ def run():
     ]
     anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_idx]
 
-    verbosity = st.toggle("Show Output", value=True)
-    live_anchor = st.toggle("Live Anchor", value=True)
+    verbosity = st.toggle("Display Generation Data", value=True)
+    live_anchor = st.toggle("Motion Anchor", value=True)
     high_res_anchor = st.toggle("High Res Anchor", value=True)
     test_mode = not high_res_anchor
 

@@ -371,6 +371,24 @@ Your resulting substring should be contiguous & be taken exactly from the other 
 If this doesn't match any language name, return Unknown. Put your response in <response></response> tags."""
 )
 
+match_hard_sot_prompt = PromptTemplate.from_template(
+"""Your task is to fuzzy find a quote within a larger transcript. The transcript is automatically generated while the quote is 
+a human written. Therefore, they will not match word for word.
+
+Here is the quote to match:
+<quote>
+{QUOTE}
+</quote>
+
+And here is the larger transcript to find the matching substring in:
+<transcript>
+{TRANSCRIPT}
+</transcript>
+
+Your resulting fuzzy match should be contiguous & be taken exactly from the transcript. Try to obtain as much of the quote as 
+possible. If there is no fuzzy match, return Unknown. Put your final response in <response></response> tags."""
+)
+
 language_to_iso_prompt = PromptTemplate.from_template(
 """Your task is to convert a given language name to its corresponding ISO 639-1 language code.
 
@@ -424,6 +442,7 @@ logline_chain = logline_prompt | opus
 headline_chain = headline_prompt | opus
 parse_broll_chain = parse_broll_prompt | opus
 match_sot_chain = match_sot_prompt | opus
+match_hard_sot_chain = match_hard_sot_prompt | opus
 language_to_iso_chain = language_to_iso_prompt | opus
 match_clip_to_sots_chain = match_clip_to_sots_prompt | opus
 

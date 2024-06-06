@@ -3,7 +3,7 @@
 # STREAMLIT
 from src.clip_manager import ClipManager, Clip
 from src.prompts import run_chain, run_chain_json, \
-                        get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, facts_chain
+                        get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, match_hard_sot_chain, facts_chain
 from src.language import Language
 from src.tts import TTS
 # /STREAMLIT
@@ -173,20 +173,29 @@ class NewsScript:
             if self.error_handler:
                 self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
         else:
-            if clip.whisper_results.has_speech:
-                section.start = clip.whisper_results.timestamps[0].get_adjusted_start()
-                section.end = clip.whisper_results.timestamps[-1].end
-                section.match_type = "SPEECH"
+            matched_quote = run_chain(match_hard_sot_chain, {"QUOTE": quote, "TRANSCRIPT": clip.whisper_results.text})
+            timestamps = fuzzy_match(matched_quote, clip.whisper_results)
+            if timestamps:
+                section.start = timestamps[0].get_adjusted_start()
+                section.end = timestamps[-1].end + 0.5
+                section.match_type = "SUCCESS"
                 if self.error_handler:
-                    self.error_handler.warning(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
-                print(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                    self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
             else:
-                section.start = 0.0
-                section.end = clip.load_video().duration
-                section.match_type = "CLIP"
-                if self.error_handler:
-                    self.error_handler.warning(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
-                print(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                if clip.whisper_results.has_speech:
+                    section.start = clip.whisper_results.timestamps[0].get_adjusted_start()
+                    section.end = clip.whisper_results.timestamps[-1].end
+                    section.match_type = "SPEECH"
+                    if self.error_handler:
+                        self.error_handler.warning(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                    print(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                else:
+                    section.start = 0.0
+                    section.end = clip.load_video().duration
+                    section.match_type = "CLIP"
+                    if self.error_handler:
+                        self.error_handler.warning(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                    print(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, quote: {quote}, whisper: {clip.whisper_results.text}")
 
     def _match_sot_clips_different_language(self, section, clip):
         english_str = section.quote
