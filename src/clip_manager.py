@@ -23,6 +23,8 @@ class Clip:
         self.clips_folder = clips_folder
         self.error_handler = error_handler
 
+        self.duration = self.load_video().duration
+
         self.shot_id: Optional[int] = None
         self.shotlist_description: Optional[str] = None
         self.has_quote: Optional[bool] = None
