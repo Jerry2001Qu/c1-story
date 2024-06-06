@@ -40,7 +40,7 @@ class Clip:
         """Performs speech recognition on the clip's audio."""
         self.whisper_results = WhisperResults.from_file(self.file_path)
         if self.error_handler:
-            if self.whisper_results.no_speech_prob < 0.3:
+            if self.whisper_results.no_speech_prob < 0.5:
                 self.error_handler.stream_status(self.whisper_results.english_text, f"Identified Speech ({self.id})", self.file_path)
 
     def generate_full_description(self, story_title: str):
