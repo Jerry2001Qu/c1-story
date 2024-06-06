@@ -77,7 +77,13 @@ class WhisperResults:
 
         return cls(text, timestamps, min_no_speech_prob, has_speech, language, english_text)
 
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
+import hashlib
+
+def sha256sum(file):
+    with open(file, 'rb', buffering=0) as f:
+        return hashlib.file_digest(f, 'sha256').hexdigest()
+
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: sha256sum})
 def openai_transcribe(abs_file_path: Path):
     return openai_client.audio.transcriptions.create(
             file=abs_file_path,
