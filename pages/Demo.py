@@ -164,14 +164,14 @@ def run():
             df = AgGrid(df, gridOptions=gb.build(), height=2000, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
             script.from_dataframe(df)
 
-            for section in script.get_sot_sections():
-                print(section.match_type)
-                if not section.clip:
-                    st.warning(f"SOT Section {section.id} could not be matched to a clip. Skipping section.")
-                if section.match_type == "SPEECH":
-                    st.warning(f"SOT Section {section.id}'s transcript did not contain the given quote. Adding all detected speech.")
-                if section.match_type == "CLIP":
-                    st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
+        for section in script.get_sot_sections():
+            print(section.match_type)
+            if not section.clip:
+                st.warning(f"SOT Section {section.id} could not be matched to a clip. Skipping section.")
+            if section.match_type == "SPEECH":
+                st.warning(f"SOT Section {section.id}'s transcript did not contain the given quote. Adding all detected speech.")
+            if section.match_type == "CLIP":
+                st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
         if st.button("Generate video"):
             with st.status("Running"):
                 st.write("Generating audio & broll")
