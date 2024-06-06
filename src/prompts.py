@@ -296,11 +296,12 @@ headline_prompt = PromptTemplate.from_template(
 
 Please read the story script carefully. Then, in a <brainstorming> tag, come up with 3-5 potential headlines for this story. The headlines should:
 - Summarize the key points of the story
-- Be concise (aim for around 40 characters or less), and content dense
+- Be concise (MUST BE between 35 and 48 characters), and content dense
 - Be written in an attention-grabbing style that would make readers want to click on the story
 - Is informative over all else
+- Be in title case
 
-After brainstorming potential headlines, select the one you think is best and output it in <response></response> tag. The headline should be in title case."""
+After brainstorming potential headlines, select the one you think is best (count each character count) and output it in <response></response> tag."""
 )
 
 parse_broll_prompt = PromptTemplate.from_template(
