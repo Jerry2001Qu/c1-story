@@ -12,9 +12,10 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import moviepy.editor as mp
-import moviepy.audio.fx.all as afx
+from moviepy.audio.fx.audio_loop import audio_loop
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+from functools import partial
 
 class VideoEditor:
     """Handles video editing, including assembling clips and B-roll."""
@@ -67,8 +68,10 @@ class VideoEditor:
         if self.music:
             final_video = self._add_background_music(final_video)
 
-        st.write("Outputing final video file")
-        final_video.write_videofile(str(output_file), fps=24, threads=8,
+        st.write("Rendering final video file")
+        if self.error_handler:
+            self.error_handler.info("Rendering final video")
+        final_video.write_videofile(str(output_file), fps=24, threads=1,
                                     logger=None)
         # /STREAMLIT
 
@@ -289,7 +292,7 @@ class VideoEditor:
     def _add_background_music(self, video: mp.VideoClip) -> mp.VideoClip:
         background_music = mp.AudioFileClip(str(self.music_file))
         background_music = cap_loudness_audio_clip(background_music, -40)
-        background_music = afx.audio_loop(background_music, duration=video.duration)
+        background_music = audio_loop(background_music, duration=video.duration)
         return video.set_audio(mp.CompositeAudioClip([video.audio, background_music]))
 
 import moviepy.editor as mp
@@ -319,19 +322,14 @@ def resize_image_clip(image_clip, target_resolution):
     return cropped_clip
 
 def cap_loudness(clip: mp.VideoFileClip, max_lufs=-30):
-    audio_data = np.array(list(clip.audio.iter_frames(fps=48000)))
-
-    meter = pyln.Meter(rate=48000, block_size=min(0.4, clip.duration)) # block_size must not exceed clip duration
-    current_loudness = meter.integrated_loudness(audio_data)
-    if current_loudness < max_lufs:
-        return clip
-
-    adjustment_factor = 10 ** ((max_lufs - current_loudness) / 20)
-    adjusted_audio = clip.audio.volumex(adjustment_factor)
+    adjusted_audio = cap_loudness_audio_clip(clip.audio)
     return clip.set_audio(adjusted_audio)
 
 def cap_loudness_audio_clip(clip: mp.AudioFileClip, max_lufs=-30):
-    audio_data = np.array(list(clip.iter_frames(fps=48000)))
+    clip.to_soundarray = partial(to_soundarray, clip)
+    audio_data = clip.to_soundarray(fps=48000)
+    if audio_data.ndim > 1:
+        audio_data = audio_data.mean(axis=1)
 
     meter = pyln.Meter(rate=48000, block_size=min(0.4, clip.duration)) # block_size must not exceed clip duration
     current_loudness = meter.integrated_loudness(audio_data)
@@ -341,3 +339,58 @@ def cap_loudness_audio_clip(clip: mp.AudioFileClip, max_lufs=-30):
     adjustment_factor = 10 ** ((max_lufs - current_loudness) / 20)
     adjusted_audio = clip.volumex(adjustment_factor)
     return adjusted_audio
+
+from moviepy.decorators import requires_duration
+
+@requires_duration
+def to_soundarray(
+    self, tt=None, fps=None, quantize=False, nbytes=2, buffersize=50000
+):
+    """
+    Transforms the sound into an array that can be played by pygame
+    or written in a wav file. See ``AudioClip.preview``.
+
+    Parameters
+    ------------
+
+    fps
+        Frame rate of the sound for the conversion.
+        44100 for top quality.
+
+    nbytes
+        Number of bytes to encode the sound: 1 for 8bit sound,
+        2 for 16bit, 4 for 32bit sound.
+
+    """
+    if fps is None:
+        fps = self.fps
+
+    stacker = np.vstack if self.nchannels == 2 else np.hstack
+    max_duration = 1.0 * buffersize / fps
+    if tt is None:
+        if self.duration > max_duration:
+            return stacker(
+                tuple(
+                    self.iter_chunks(
+                        fps=fps, quantize=quantize, nbytes=2, chunksize=buffersize
+                    )
+                )
+            )
+        else:
+            tt = np.arange(0, self.duration, 1.0 / fps)
+    """
+    elif len(tt)> 1.5*buffersize:
+        nchunks = int(len(tt)/buffersize+1)
+        tt_chunks = np.array_split(tt, nchunks)
+        return stacker([self.to_soundarray(tt=ttc, buffersize=buffersize, fps=fps,
+                                    quantize=quantize, nbytes=nbytes)
+                            for ttc in tt_chunks])
+    """
+    snd_array = self.get_frame(tt)
+
+    if quantize:
+        snd_array = np.maximum(-0.99, np.minimum(0.99, snd_array))
+        inttype = {1: "int8", 2: "int16", 4: "int32"}[nbytes]
+        snd_array = (2 ** (8 * nbytes - 1) * snd_array).astype(inttype)
+
+    return snd_array

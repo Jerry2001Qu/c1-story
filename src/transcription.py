@@ -3,6 +3,7 @@
 # STREAMLIT
 from src.constants import OPENAI_API_KEY
 from src.language import Language
+from src.hashing import sha256sum
 import streamlit as st
 # /STREAMLIT
 
@@ -67,23 +68,20 @@ class WhisperResults:
         elif language == Language.from_str("english"):
             english_text = text
         else:
-            translation = openai_client.audio.translations.create(
-                file=file,
-                model="whisper-1",
-                response_format="json",
-            )
-            english_text = translation.text
-
+            english_text = openai_translate(file.resolve())
 
         return cls(text, timestamps, min_no_speech_prob, has_speech, language, english_text)
 
-# import hashlib
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: sha256sum})
+def openai_translate(abs_file_path: Path):
+    translation = openai_client.audio.translations.create(
+        file=abs_file_path,
+        model="whisper-1",
+        response_format="json",
+    )
+    return translation.text
 
-# def sha256sum(file):
-#     with open(file, 'rb', buffering=0) as f:
-#         return hashlib.file_digest(f, 'sha256').hexdigest()
-
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: sha256sum})
 def openai_transcribe(abs_file_path: Path):
     return openai_client.audio.transcriptions.create(
             file=abs_file_path,

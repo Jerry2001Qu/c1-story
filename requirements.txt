@@ -13,7 +13,7 @@ pyloudnorm
 fuzzysearch
 torch
 torchaudio
-moviepy
+moviepy==1.0.3
 onnxruntime
 readtime
 streamlit-aggrid

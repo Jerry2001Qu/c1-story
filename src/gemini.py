@@ -17,6 +17,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file_path
 from src.prompts import extract_xml
 from src.clip_manager import Clip
 from src.gcp import upload_to_gcs_part, clear_uploaded_blobs
+from src.hashing import sha256sum
 # /STREAMLIT
 
 from typing import Tuple, Dict, List
@@ -232,7 +233,7 @@ happening in this video & making video editing decisions."""]
 
     return response.text
 
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: sha256sum})
 def add_broll(audio_file, full_descriptions_str, section_timings_str):
     content = []
     content += ["You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling for a TV audience."]
