@@ -70,13 +70,13 @@ class AudioProcessor:
     def _generate_sot_translations(self):
         """Generates dubbed translations for non-English SOT"""
         for section in self.news_script.get_sot_sections():
-            if section.language == Language.from_str("english"):
+            if section.clip.whisper_results.language == Language.from_str("english"):
                 continue
             audio_file = self.anchor_audio_folder / f"{section.id}_dub.mp3"
             section.generate_dub(audio_file, voice_id=self.clip_manager.get_voiceover_voice_id())
 
             if self.error_handler:
-                self.error_handler.stream_status(f"Dubbing section {section.id} ({section.language.name})", audio=audio_file)
+                self.error_handler.stream_status(f"Dubbing section {section.id} ({section.clip.whisper_results.language.name})", audio=audio_file)
 
     def _add_broll_placements(self):
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""

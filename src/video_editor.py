@@ -78,7 +78,7 @@ class VideoEditor:
         clip = section.clip.load_video()
         clip = resize_image_clip(clip, self.output_resolution)
 
-        if section.language == Language.from_str("English") or section.dub_audio_file is None:
+        if section.clip.whisper_results.language == Language.from_str("English") or section.dub_audio_file is None:
             clip = clip.subclip(section.start, min(section.end, clip.duration))
         else:
             clip = clip.subclip(section.start)
