@@ -58,16 +58,17 @@ class StreamlitErrorHandler(ErrorHandler):
         self.get_container().info(msg, icon="ℹ️")
     
     def stream_status(self, msg: str, title: str = None, video: Path = None, audio: Path = None) -> None:
-        if not self.verbosity:
-            return
         if msg in self.previous_msgs:
             return
         self.previous_msgs += [msg]
         
         def stream(msg: str):
-            for word in msg.split(" "):
-                yield word + " "
-                time.sleep(0.02)
+            if self.verbosity:
+                for word in msg.split(" "):
+                    yield word + " "
+                    time.sleep(0.02)
+            else:
+                return msg
 
         container = self.get_container().container(border=True)
         if title:
