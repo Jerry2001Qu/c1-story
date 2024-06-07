@@ -2,6 +2,7 @@
 from src.gcp import upload_to_gcs_url, clear_uploaded_blobs
 from src.constants import HEYGEN_API_KEY
 from src.hashing import sha256sum
+from src.error_handler import ErrorHandler
 
 import streamlit as st
 # /STREAMLIT
@@ -25,7 +26,7 @@ def get_heygen_avatars():
     else:
         raise Exception(f"Error fetching avatars: {response.status_code} - {response.text}")
 
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: sha256sum})
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: sha256sum, ErrorHandler: lambda x: "A"})
 def generate_heygen_video(local_audio_file_path: Path, transcript: str, avatar_id: str, output_path: Path, avatar_style: str = 'normal', test: bool = True, error_handler=None):
     # Upload the local audio file to GCP and get the URL
     audio_url = upload_to_gcs_url(local_audio_file_path, "public-heygen-assets")
