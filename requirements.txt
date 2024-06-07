@@ -25,3 +25,4 @@ google-cloud-aiplatform
 pillow
 pycountry
 pyinstrument
+psutil
