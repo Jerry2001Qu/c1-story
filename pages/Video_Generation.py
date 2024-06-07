@@ -23,9 +23,9 @@ def run():
     logline = st.text_input("Logline", value="N. Korea's Balloon Attack Sparks War Fears")
 
     if st.button("Run"):
-        video_editor = VideoEditor(None, None, None, None, None, None)
+        video_editor = VideoEditor(None, None, None, None, None, None, font=Path("./assets/Khand-SemiBold.ttf"))
         final_clip = video_editor._add_logline(clip, logline)
-        final_clip.write_videofile(final_clip_file)
+        final_clip.write_videofile(final_clip_file, logger=None)
 
         st.video(final_clip_file)
 

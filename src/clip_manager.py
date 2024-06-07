@@ -240,7 +240,7 @@ class ClipManager:
         new_file_path = self.clips_folder / new_file_name
 
         # Write the combined video to the new file
-        combined_video.write_videofile(str(new_file_path))
+        combined_video.write_videofile(str(new_file_path), logger=None)
 
         # Delete the original clip files
         for clip in clips:

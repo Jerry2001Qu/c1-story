@@ -60,7 +60,7 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
             audio_clips += [end_pad_clip]
         
         audio_clip = mp.concatenate_audioclips(audio_clips)
-    audio_clip.write_audiofile(str(filename))
+    audio_clip.write_audiofile(str(filename), logger=None)
 
 @st.cache_data(show_spinner=False, hash_funcs={Voice: lambda x: x.dict(), PosixPath: lambda x: str(x.resolve())})
 def TTS_voice(text, filename, voice: Voice, previous_text="", next_text="", start_padding=0, end_padding=0):
@@ -95,4 +95,4 @@ def TTS_voice(text, filename, voice: Voice, previous_text="", next_text="", star
             audio_clips += [end_pad_clip]
         
         audio_clip = mp.concatenate_audioclips(audio_clips)
-    audio_clip.write_audiofile(str(filename))
+    audio_clip.write_audiofile(str(filename), logger=None)

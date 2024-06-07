@@ -100,7 +100,7 @@ def extract_middle_frame_and_audio(input_file: Path) -> Tuple[Path, Path]:
 
         # Extract audio
         if not audio_output.exists():
-            video.audio.write_audiofile(str(audio_output))
+            video.audio.write_audiofile(str(audio_output), logger=None)
 
     return frame_output, audio_output 
 

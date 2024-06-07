@@ -23,7 +23,7 @@ class VideoEditor:
                  live_anchor: bool, test_mode: bool, music: bool,
                  music_file: Path,
                  output_resolution: Tuple[int, int] = (768, 432),
-                 font: Path = None, font_size=None, logo_path: Path = None,
+                 font: Path = None, logo_path: Path = None,
                  logline_padding=40, dub_volume_lufs=-40,
                  lower_volume_duration=1.5, dub_delay=0.5, error_handler=None):
         self.news_script = news_script
@@ -34,7 +34,6 @@ class VideoEditor:
         self.music_file = music_file
         self.output_resolution = output_resolution
         self.font = font
-        self.font_size = font_size
         self.logo_path = logo_path
         self.logline_padding = logline_padding
         self.dub_volume_lufs = dub_volume_lufs
@@ -257,22 +256,30 @@ class VideoEditor:
         text_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_image)
 
+        def get_font_size_for_height(font_path, desired_height):
+            font_size = 1
+            font = ImageFont.truetype(font_path, font_size)
+            text_bbox = draw.textbbox((0, 0), "H", font=font)
+            while text_bbox[3] - text_bbox[1] < desired_height:
+                font_size += 1
+                font = ImageFont.truetype(font_path, font_size)
+                text_bbox = draw.textbbox((0, 0), "H", font=font)
+            return font_size - 1
+
         # Load the font
-        if self.font_size:
-            font_size = self.font_size
-        else:
-            font_size = height // 1.8
         if not self.font:
             font = ImageFont.load_default()
         else:
-            font = ImageFont.truetype(str(self.font), font_size)
+            font_path = str(self.font)
+            font_size = get_font_size_for_height(font_path, int(height * 0.4))
+            font = ImageFont.truetype(font_path, font_size)
 
         # Get text size, adjust height, calculate position
         text_bbox = draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
-        text_height = int((text_bbox[3] - text_bbox[1]) * 1.8)  # Adjust height
+        text_height = text_bbox[3] - text_bbox[1]
         text_x = self.logline_padding // 3
-        text_y = (height - text_height) // 2
+        text_y = -text_bbox[1] + (height - text_height) // 2
 
         # Draw the text
         draw.text((text_x, text_y), text, font=font, fill=(0, 0, 0, 255))
