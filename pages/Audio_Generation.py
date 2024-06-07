@@ -22,7 +22,7 @@ def run():
 
     if st.button("Generate"):
         audio_file = Path("/tmp/audio.mp3")
-        TTS(text, str(audio_file), start_padding=start_padding, end_padding=end_padding)
+        TTS(text, str(audio_file), voice_id="yELTnbNFhESclGsoYVTM", start_padding=start_padding, end_padding=end_padding)
         st.audio(str(audio_file), format="audio/mpeg")
 
 if __name__ == "__main__":
