@@ -19,7 +19,9 @@ readtime
 streamlit-aggrid
 st-annotated-text
 streamlit-image-select
+streamlit-profiler=0.2.2
 google-cloud-storage
 google-cloud-aiplatform
 pillow
 pycountry
+pyinstrument

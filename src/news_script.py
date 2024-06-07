@@ -135,14 +135,6 @@ class NewsScript:
         bylines = [f"{section.id}: {section.get_byline()}" for section in sections]
         return "\n\n".join(bylines)
     
-    def generate_audio_and_broll(self):
-        """Generates audio, matches clips, and adds B-roll placements."""
-        # STREAMLIT
-        from src.audio_processor import AudioProcessor
-        # /STREAMLIT
-        audio_processor = AudioProcessor(self, self.clip_manager, self.folder, self.error_handler)
-        audio_processor.process_audio_and_broll()
-    
     def match_sot_clips(self):
         """Matches SOTScriptSections with corresponding clips from ClipManager."""
         for section in self.get_sot_sections():
