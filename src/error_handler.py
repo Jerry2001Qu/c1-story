@@ -68,7 +68,7 @@ class StreamlitErrorHandler(ErrorHandler):
                     yield word + " "
                     time.sleep(0.02)
             else:
-                return msg
+                yield msg
 
         container = self.get_container().container(border=True)
         if title:
