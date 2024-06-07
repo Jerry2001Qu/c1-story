@@ -43,10 +43,10 @@ def run():
     anchor_idx = image_select("Choose an Anchor", anchor_imgs, anchor_names, return_value="index", use_container_width=False)
 
     anchor_map = [
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "4c10e2d75ddd4169819b61c0289af17d"),
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
+        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
     ]
     anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_idx]
 
