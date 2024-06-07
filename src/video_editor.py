@@ -71,7 +71,7 @@ class VideoEditor:
         st.write("Rendering final video file")
         if self.error_handler:
             self.error_handler.info("Rendering final video")
-        final_video.write_videofile(str(output_file), fps=24, threads=1,
+        final_video.write_videofile(str(output_file), fps=24, threads=8,
                                     logger=None)
         # /STREAMLIT
 
