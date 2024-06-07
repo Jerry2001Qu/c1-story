@@ -295,7 +295,7 @@ headline_prompt = PromptTemplate.from_template(
 </script>
 
 <original_headline>
-{SAMPLE_HEADLINE}
+{ORIGINAL_HEADLINE}
 </original_headline>
 
 Please read the story script carefully. Then, in a <brainstorming> tag, come up with 3-5 potential headlines for this story. The headlines should:
