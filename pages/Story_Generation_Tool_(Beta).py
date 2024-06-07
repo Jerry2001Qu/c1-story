@@ -53,6 +53,7 @@ def run():
     verbosity = st.toggle("Display Generation Data", value=True)
     live_anchor = st.toggle("Motion Anchor", value=True)
     high_res_anchor = st.toggle("High Res Anchor", value=True)
+    music = st.toggle("Add Music", value=True)
     test_mode = not high_res_anchor
 
     languages = ["English", "Spanish", "French", "German", "Polish", "Italian", "Portuguese", "Russian", "Arabic", "Dutch", "Swedish", "Norwegian", "Turkish", "Japanese", "Korean", "Filipino", "Tamil", "Indonesian", "Greek", "Chinese"]
@@ -186,7 +187,7 @@ def run():
                 st.write("Assembling video")
                 error_handler.info("Assembling video")
                 video_output_file = story_folder / "output.mp4"
-                video_editor = VideoEditor(script, clip_manager, live_anchor=live_anchor, test_mode=test_mode, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
+                video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
                 video_editor.assemble_video(output_file=video_output_file)
             
             with st.expander("Details"):

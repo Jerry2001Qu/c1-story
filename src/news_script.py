@@ -310,6 +310,7 @@ class NewsScript:
     def from_dataframe(self, df):
         self.sections = []
         for id, row in df.iterrows():
+            id = int(id)
             if not row["text"]:
                 continue
             if row["type"] == "ANCHOR":

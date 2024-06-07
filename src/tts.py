@@ -10,6 +10,8 @@ from elevenlabs import Voice, VoiceSettings
 
 from pathlib import Path, PosixPath
 
+import moviepy.editor as mp
+
 client = ElevenLabs(
     api_key=ELEVENLABS_API_KEY
 )
@@ -19,8 +21,11 @@ def get_voice_ids():
     voices = client.voices.get_all()
     return voices.voices
 
+def create_silent_audio_clip(duration: float) -> mp.ColorClip:
+    return mp.AudioClip(lambda t: 0, duration=duration)
+
 @st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
-def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_text=""):
+def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_text="", start_padding=0, end_padding=0):
     additional_body_parameters = {}
     # if previous_text:
     #     additional_body_parameters['previous_text'] = previous_text
@@ -38,10 +43,24 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
         }
     )
 
-    with open(filename, 'wb') as file:
+    tmp_file = "/tmp/tmp.mp3"
+    with open(tmp_file, 'wb') as file:
         for chunk in audio:
             if chunk:
                 file.write(chunk)
+    
+    audio_clip = mp.AudioFileClip(tmp_file)
+    audio_clip = audio_clip.subclip(0.1, audio_clip.duration - 0.1)
+
+    if start_padding:
+        start_pad_clip = create_silent_audio_clip(start_padding)
+        audio_clips = [start_pad_clip, audio_clip]
+        if end_padding:
+            end_pad_clip = create_silent_audio_clip(end_padding)
+            audio_clips += [end_pad_clip]
+        
+        audio_clip = mp.concatenate_audioclips(audio_clips)
+    audio_clip.write_audiofile(str(filename))
 
 @st.cache_data(show_spinner=False, hash_funcs={Voice: lambda x: x.dict(), PosixPath: lambda x: str(x.resolve())})
 def TTS_voice(text, filename, voice: Voice, previous_text="", next_text=""):

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import moviepy.editor as mp
+import moviepy.audio.fx.all as afx
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
@@ -19,15 +20,18 @@ class VideoEditor:
     """Handles video editing, including assembling clips and B-roll."""
 
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
-                 live_anchor: bool, test_mode: bool, 
+                 live_anchor: bool, test_mode: bool, music: bool,
+                 music_file: Path,
                  output_resolution: Tuple[int, int] = (768, 432),
                  font: Path = None, font_size=None, logo_path: Path = None,
                  logline_padding=40, dub_volume_lufs=-40,
-                 lower_volume_duration=3.0, dub_delay=0.5, error_handler=None):
+                 lower_volume_duration=1.0, dub_delay=0.2, error_handler=None):
         self.news_script = news_script
         self.clip_manager = clip_manager
         self.live_anchor = live_anchor
         self.test_mode = test_mode
+        self.music = music
+        self.music_file = music_file
         self.output_resolution = output_resolution
         self.font = font
         self.font_size = font_size
@@ -61,6 +65,8 @@ class VideoEditor:
         logline = self.news_script.headline
         concat_video = mp.concatenate_videoclips(video_clips, method="compose")
         final_video = self._add_logline(concat_video, logline)
+        if self.music:
+            final_video = self._add_background_music(final_video)
 
         st.write("Outputing final video file")
         final_video.write_videofile(str(output_file), fps=24, threads=8,
@@ -264,7 +270,7 @@ class VideoEditor:
         # Get text size, adjust height, calculate position
         text_bbox = draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
-        text_height = int((text_bbox[3] - text_bbox[1]) * 2)  # Adjust height
+        text_height = int((text_bbox[3] - text_bbox[1]) * 1.8)  # Adjust height
         text_x = self.logline_padding // 3
         text_y = (height - text_height) // 2
 
@@ -272,6 +278,12 @@ class VideoEditor:
         draw.text((text_x, text_y), text, font=font, fill=(0, 0, 0, 255))
 
         return mp.ImageClip(np.array(text_image))
+    
+    def _add_background_music(self, video: mp.VideoClip) -> mp.VideoClip:
+        background_music = mp.AudioFileClip(str(self.music_file))
+        background_music = cap_loudness_audio_clip(background_music, -30)
+        background_music = afx.audio_loop(background_music, duration=video.duration)
+        return video.set_audio(mp.CompositeAudioClip([video.audio, background_music]))
 
 import moviepy.editor as mp
 import pyloudnorm as pyln
