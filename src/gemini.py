@@ -233,7 +233,7 @@ happening in this video & making video editing decisions."""]
 
     return response.text
 
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: sha256sum})
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
 def add_broll(audio_file, full_descriptions_str, section_timings_str):
     content = []
     content += ["You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling for a TV audience."]
