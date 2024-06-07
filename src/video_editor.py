@@ -281,7 +281,7 @@ class VideoEditor:
     
     def _add_background_music(self, video: mp.VideoClip) -> mp.VideoClip:
         background_music = mp.AudioFileClip(str(self.music_file))
-        background_music = cap_loudness_audio_clip(background_music, -30)
+        background_music = cap_loudness_audio_clip(background_music, -40)
         background_music = afx.audio_loop(background_music, duration=video.duration)
         return video.set_audio(mp.CompositeAudioClip([video.audio, background_music]))
 

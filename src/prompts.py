@@ -294,11 +294,16 @@ headline_prompt = PromptTemplate.from_template(
 {SCRIPT}
 </script>
 
+<original_headline>
+{SAMPLE_HEADLINE}
+</original_headline>
+
 Please read the story script carefully. Then, in a <brainstorming> tag, come up with 3-5 potential headlines for this story. The headlines should:
 - Summarize the key points of the story
 - Be concise (MUST BE between 35 and 45 characters including spaces), and content dense
 - Be written in an attention-grabbing style that would make readers want to click on the story
 - Is informative over all else
+- Be unique to the specifics of this story ('Missiles fired in Cuba' is better than 'Fighting in Cuba')
 - Be in title case
 
 Count each character count while brainstorming potential headlines. Then select the one you think is best and output it in <response></response> tags."""

@@ -77,10 +77,11 @@ class SOTScriptSection(ScriptSection):
 class NewsScript:
     """Represents the entire news script."""
     
-    def __init__(self, storyline: str, shotlist: str, clip_manager: ClipManager, folder: Path = Path("./"), error_handler = None):
+    def __init__(self, storyline: str, shotlist: str, clip_manager: ClipManager, dataloader, folder: Path = Path("./"), error_handler = None):
         self.storyline = storyline
         self.shotlist = shotlist
         self.clip_manager = clip_manager
+        self.dataloader = dataloader
         self.folder = folder
         self.error_handler = error_handler
 
@@ -275,11 +276,11 @@ class NewsScript:
 
     def _generate_headline(self):
         """Generates a headline for the news script."""
-        headline = run_chain(headline_chain, {"SCRIPT": self.text_script})
+        headline = run_chain(headline_chain, {"SCRIPT": self.text_script, "ORIGINAL_HEADLINE": self.dataloader.get_story_title()})
         while len(headline) > 45:
             if self.error_handler:
                 self.error_handler.info(f"Headline was too long, shortening: {headline}")
-            headline = run_chain(headline_chain, {"SCRIPT": self.text_script + f"\n\nOld headline was '{headline}'. This is too long."})
+            headline = run_chain(headline_chain, {"SCRIPT": self.text_script + f"\n\nOld headline was '{headline}'. This is too long.", "ORIGINAL_HEADLINE": self.dataloader.get_story_title()})
         return headline
     
     def get_total_read_time_seconds(self):

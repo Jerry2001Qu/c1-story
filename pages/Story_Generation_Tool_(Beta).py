@@ -103,7 +103,7 @@ def run():
             if not st.session_state["ran"]:
                 clips_folder = story_folder / "clips"
                 clip_manager = ClipManager(video_file_path, clips_folder, shotlist, Path("./assets/anchor-default.png"), anchor_voice_id, voiceover_voice_id, anchor_avatar_id, has_splash_screen=False, error_handler=error_handler)
-                script = NewsScript(storyline, shotlist, clip_manager, folder=story_folder, error_handler=error_handler)
+                script = NewsScript(storyline, shotlist, clip_manager, dataloader, folder=story_folder, error_handler=error_handler)
                 st.write("Splitting video")
                 error_handler.info("Splitting video")
                 clip_manager.split_video_into_clips()
