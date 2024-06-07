@@ -67,7 +67,7 @@ class StreamlitErrorHandler(ErrorHandler):
         def stream(msg: str):
             for word in msg.split(" "):
                 yield word + " "
-                time.sleep(0.02)
+                time.sleep(0.01)
 
         container = self.get_container().container(border=True)
         if title:
