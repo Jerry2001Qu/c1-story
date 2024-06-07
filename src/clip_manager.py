@@ -83,7 +83,7 @@ class ClipManager:
         if is_folder_empty(self.clips_folder):
             from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
-            status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=True,
+            status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=False,
                             output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
             if status != 0:
                 if self.error_handler:
