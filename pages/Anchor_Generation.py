@@ -26,6 +26,7 @@ def run():
     text = st.text_area("Text")
     voice = st.selectbox("Voice", get_voice_ids(), format_func=lambda x: x.name)
     avatar = st.selectbox("Avatar", get_heygen_avatars(), format_func=lambda x: x["avatar_name"])
+    test = st.toggle("Test Mode", True)
     
     if st.button("Generate"):
         audio_file = Path("/tmp/audio.mp3")
@@ -33,7 +34,7 @@ def run():
         st.audio(str(audio_file), format="audio/mpeg")
 
         video_file = Path("/tmp/video.mp4")
-        generate_heygen_video(audio_file, text, avatar["avatar_id"], video_file, error_handler=error_handler)
+        generate_heygen_video(audio_file, text, avatar["avatar_id"], video_file, error_handler=error_handler, test=test)
         st.video(str(video_file))
 
 if __name__ == "__main__":

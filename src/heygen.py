@@ -87,11 +87,11 @@ def generate_heygen_video(local_audio_file_path: Path, transcript: str, avatar_i
             clear_uploaded_blobs()
             raise Exception(f"Video generation failed: {status_data.get('error')}")
         elif status_data["status"] in ["processing", "pending"]:
-            if error_handler:
-                if status_data["status"] == "processing":
-                    error_handler.info("Heygen processing...")
-                if status_data["status"] == "pending":
-                    error_handler.info("Heygen in queue...")
+            # if error_handler:
+            #     if status_data["status"] == "processing":
+            #         error_handler.info("Heygen processing...")
+            #     if status_data["status"] == "pending":
+            #         error_handler.info("Heygen in queue...")
             time.sleep(10)  # Wait before polling again
         else:
             time.sleep(10)
