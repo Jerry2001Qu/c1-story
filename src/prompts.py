@@ -440,19 +440,19 @@ If the clip matches an sot, copy it's description from the sots list, otherwise 
 Put your response in <response></response> tags."""
 )
 
-get_sot_chain = get_sot_prompt | opus
-facts_chain = facts_prompt | opus
-parse_sot_chain = parse_sot_prompt | opus
-reformat_chain = reformat_prompt | opus
-sot_chain = sot_prompt | opus
-parse_chain = parse_prompt | opus
-logline_chain = logline_prompt | opus
-headline_chain = headline_prompt | opus
-parse_broll_chain = parse_broll_prompt | opus
-match_sot_chain = match_sot_prompt | opus
-match_hard_sot_chain = match_hard_sot_prompt | opus
-language_to_iso_chain = language_to_iso_prompt | opus
-match_clip_to_sots_chain = match_clip_to_sots_prompt | opus
+get_sot_chain = (get_sot_prompt | opus).with_config({"run_name": "get_sots"})
+facts_chain = (facts_prompt | opus).with_config({"run_name": "generate_facts"})
+parse_sot_chain = (parse_sot_prompt | opus).with_config({"run_name": "parse_sots"})
+reformat_chain = (reformat_prompt | opus).with_config({"run_name": "reformat_script"})
+sot_chain = (sot_prompt | opus).with_config({"run_name": "add_sots"})
+parse_chain = (parse_prompt | opus).with_config({"run_name": "parse_script"})
+logline_chain = (logline_prompt | opus).with_config({"run_name": "logline"})
+headline_chain = (headline_prompt | opus).with_config({"run_name": "headline"})
+parse_broll_chain = (parse_broll_prompt | opus).with_config({"run_name": "parse_broll"})
+match_sot_chain = (match_sot_prompt | opus).with_config({"run_name": "match_sot"})
+match_hard_sot_chain = (match_hard_sot_prompt | opus).with_config({"run_name": "match_hard_sot"})
+language_to_iso_chain = (language_to_iso_prompt | opus).with_config({"run_name": "language_to_iso"})
+match_clip_to_sots_chain = (match_clip_to_sots_prompt | opus).with_config({"run_name": "match_clip_to_sots"})
 
 from sqlalchemy.exc import OperationalError
 import time
