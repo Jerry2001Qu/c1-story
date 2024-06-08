@@ -5,6 +5,7 @@ import streamlit as st
 from abc import ABC, abstractmethod
 import time
 from pathlib import Path
+import random
 
 class ErrorHandler(ABC):
 
@@ -24,6 +25,8 @@ class StreamlitErrorHandler(ErrorHandler):
 
     def __init__(self, error_bar: st.container, verbosity: bool):
         self.error_bar = error_bar.empty()
+        for _ in range(random.randint(0, 10)):
+            self.error_bar = error_bar.empty()
         self.verbosity = verbosity
         self.previous_msgs = []
         self.latest = error_bar
