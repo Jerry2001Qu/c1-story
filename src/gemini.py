@@ -17,7 +17,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file_path
 from src.prompts import extract_xml
 from src.clip_manager import Clip
 from src.gcp import upload_to_gcs_part, clear_uploaded_blobs
-from src.hashing import sha256sum
+from src.hashing import sha256sum, hash_audio_file
 # /STREAMLIT
 
 from typing import Tuple, Dict, List
@@ -183,7 +183,7 @@ Only label descriptions with those in the shotlist exactly. <shot></shot> should
     clips_xml = extract_xml(response.text)
     return clips_xml
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file})
 def full_description(clip_file, description, title):
     content = []
     content += ["Video clip:"]
@@ -233,7 +233,7 @@ happening in this video & making video editing decisions."""]
 
     return response.text
 
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file})
 def add_broll(audio_file, full_descriptions_str, section_timings_str):
     content = []
     content += ["You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling for a TV audience."]
