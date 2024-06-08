@@ -11,3 +11,9 @@ def sha256sum(file: PosixPath):
 
 def hash_audio_file(path: PosixPath):
     return str(path.resolve()) + str(mp.AudioFileClip(str(path)).duration)
+
+def hash_ignore(_):
+    return 0
+
+def hash_absolute_path(path: PosixPath):
+    return str(path.resolve())

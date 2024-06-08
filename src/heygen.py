@@ -1,7 +1,7 @@
 # STREAMLIT
 from src.gcp import upload_to_gcs_url, clear_uploaded_blobs
 from src.constants import HEYGEN_API_KEY
-from src.hashing import sha256sum, hash_audio_file
+from src.hashing import sha256sum, hash_audio_file, hash_ignore, hash_absolute_path
 from src.error_handler import ErrorHandler
 
 import streamlit as st
@@ -26,8 +26,8 @@ def get_heygen_avatars():
     else:
         raise Exception(f"Error fetching avatars: {response.status_code} - {response.text}")
 
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file})
-def generate_heygen_video(local_audio_file_path: Path, transcript: str, avatar_id: str, output_path: Path, avatar_style: str = 'normal', test: bool = True, _error_handler=None):
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_absolute_path, ErrorHandler: hash_ignore})
+def generate_heygen_video(local_audio_file_path: Path, transcript: str, avatar_id: str, output_path: Path, avatar_style: str = 'normal', test: bool = True, error_handler=None):
     # Upload the local audio file to GCP and get the URL
     audio_url = upload_to_gcs_url(local_audio_file_path, "public-heygen-assets")
     
@@ -87,11 +87,11 @@ def generate_heygen_video(local_audio_file_path: Path, transcript: str, avatar_i
             clear_uploaded_blobs()
             raise Exception(f"Video generation failed: {status_data.get('error')}")
         elif status_data["status"] in ["processing", "pending"]:
-            if _error_handler:
+            if error_handler:
                 if status_data["status"] == "processing":
-                    _error_handler.stream_status("Heygen processing...")
+                    error_handler.stream_status("Heygen processing...")
                 if status_data["status"] == "pending":
-                    _error_handler.stream_status("Heygen in queue...")
+                    error_handler.stream_status("Heygen in queue...")
             time.sleep(10)  # Wait before polling again
         else:
             time.sleep(10)
