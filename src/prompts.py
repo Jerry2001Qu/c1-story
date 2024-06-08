@@ -487,7 +487,6 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
             else:
                 raise e  # Re-raise if retries exceeded
 
-@st.cache_data(show_spinner=False)
 def run_chain_json(chain, params):
     response = run_chain(chain, params)
     return JsonOutputParser().invoke(response)
