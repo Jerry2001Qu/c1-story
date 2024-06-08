@@ -5,6 +5,7 @@ LOGGER = get_logger(__name__)
 
 from src.tts import TTS_voice, get_voice_ids
 from src.heygen import generate_heygen_video, get_heygen_avatars
+from src.error_handler import StreamlitErrorHandler
 
 from pathlib import Path
 
@@ -14,6 +15,11 @@ def run():
         page_icon="👋",
         layout="wide"
     )
+    
+    with st.sidebar:
+        error_bar = st.container()
+    
+    error_handler = StreamlitErrorHandler(error_bar, True)
 
     st.write("# Channel 1 Demo")
 
@@ -27,7 +33,7 @@ def run():
         st.audio(str(audio_file), format="audio/mpeg")
 
         video_file = Path("/tmp/video.mp4")
-        generate_heygen_video(audio_file, text, avatar["avatar_id"], video_file)
+        generate_heygen_video(audio_file, text, avatar["avatar_id"], video_file, error_handler=error_handler)
         st.video(str(video_file))
 
 if __name__ == "__main__":
