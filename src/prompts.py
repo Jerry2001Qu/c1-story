@@ -461,7 +461,7 @@ from anthropic import APIError
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
 
-def run_chain(chain, params, max_retries=3, retry_delay=5):
+def run_chain(chain, params, max_retries=3, retry_delay=5, error_handler=None):
     """Runs the LangChain chain with retry logic."""
     retries = 0
     while retries <= max_retries:
@@ -469,7 +469,9 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
             response_raw = chain.invoke(params).content
             response_xml = extract_xml(response_raw)
             return response_xml['response'].strip()
-        except OperationalError:
+        except OperationalError as e:
+            if error_handler:
+                error_handler.warning(f"Error while running chain {chain}. {e}")
             cache = SQLiteCache(database_path="langchain.db")
             set_llm_cache(cache)
             response_raw = chain.invoke(params).content
@@ -486,6 +488,6 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
             else:
                 raise e  # Re-raise if retries exceeded
 
-def run_chain_json(chain, params):
-    response = run_chain(chain, params)
+def run_chain_json(chain, params, error_handler=None):
+    response = run_chain(chain, params, error_handler=error_handler)
     return JsonOutputParser().invoke(response)

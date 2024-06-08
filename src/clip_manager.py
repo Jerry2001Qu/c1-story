@@ -97,7 +97,7 @@ class ClipManager:
             self.clips = self.clips[1:]
 
     def match_clips(self):
-        sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()})
+        sot_matches = run_chain_json(match_clip_to_sots_chain, {"SOTS": self._extract_sots(), "CLIPS_WITH_TRANSCRIPTS": self.get_quotes_str()}, error_handler=self.error_handler)
 
         for sot_match in sot_matches["matches"]:
             try:
