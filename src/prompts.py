@@ -458,6 +458,8 @@ match_clip_to_sots_chain = (match_clip_to_sots_prompt | opus).with_config({"run_
 from sqlalchemy.exc import OperationalError
 import time
 from anthropic import APIError
+from src.hashing import hash_chain
+from langchain_core.runnables.base import RunnableBinding
 
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
@@ -487,6 +489,7 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
             else:
                 raise e  # Re-raise if retries exceeded
 
+@st.cache_data(show_spinner=False, hash_funcs={RunnableBinding: hash_chain})
 def run_chain_json(chain, params):
     response = run_chain(chain, params)
     return JsonOutputParser().invoke(response)

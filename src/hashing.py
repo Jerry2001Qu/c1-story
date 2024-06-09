@@ -1,6 +1,7 @@
 import hashlib
 from pathlib import Path, PosixPath
 import moviepy.editor as mp
+from langchain_core.runnables.base import RunnableBinding
 
 def sha256sum(file: PosixPath):
     if file.exists():
@@ -17,3 +18,6 @@ def hash_ignore(_):
 
 def hash_absolute_path(path: PosixPath):
     return str(path.resolve())
+
+def hash_chain(chain: RunnableBinding):
+    return chain.config.get("run_name")
