@@ -37,7 +37,7 @@ def run():
     )
 
     st.logo("./assets/logo.png")
-    st.image("./assets/story-gen-header.png", width=600)
+    # st.image("./assets/story-gen-header.png", width=600)
     # st.title("Story Generation Tool (Beta)")
 
     with st.sidebar:
