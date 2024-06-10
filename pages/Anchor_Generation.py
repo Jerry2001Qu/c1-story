@@ -4,7 +4,7 @@ from streamlit.logger import get_logger
 LOGGER = get_logger(__name__)
 
 from src.tts import TTS_voice, get_voice_ids
-from src.heygen import generate_heygen_video, get_heygen_avatars
+from src.heygen import animate_anchor, get_heygen_avatars
 from src.error_handler import StreamlitErrorHandler
 
 from pathlib import Path
@@ -34,7 +34,7 @@ def run():
         st.audio(str(audio_file), format="audio/mpeg")
 
         video_file = Path("/tmp/video.mp4")
-        generate_heygen_video(audio_file, text, avatar["avatar_id"], video_file, error_handler=error_handler, test=test)
+        animate_anchor(audio_file, text, avatar["avatar_id"], video_file, error_handler=error_handler, test=test)
         st.video(str(video_file))
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
 from src.clip_manager import ClipManager
 from src.news_script import NewsScript, AnchorScriptSection, SOTScriptSection, is_type
 from src.language import Language
-from src.heygen import generate_heygen_video
+from src.heygen import animate_anchor
 import streamlit as st
 # /STREAMLIT
 
@@ -160,7 +160,7 @@ class VideoEditor:
     def _load_and_process_anchor(self, broll_info: Dict, section: AnchorScriptSection) -> mp.VideoFileClip:
         if self.live_anchor:
             anchor_video_file = self.news_script.folder / f"{section.id}_anchor.mp4"
-            generate_heygen_video(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=self.test_mode, error_handler=self.error_handler)
+            animate_anchor(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=self.test_mode, error_handler=self.error_handler)
             if self.error_handler:
                 self.error_handler.stream_status(section.text, title="Generated anchor video", video=anchor_video_file)
             anchor_clip = mp.VideoFileClip(str(anchor_video_file))
