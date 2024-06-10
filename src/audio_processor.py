@@ -84,7 +84,7 @@ class AudioProcessor:
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""
         full_descriptions_str = ""
         for clip in self.clip_manager.clips:
-            if not any(section.clip == clip for section in self.news_script.get_sot_sections() if section.clip is not None):
+            if not clip.has_quote:
                 duration = clip.load_video().duration
                 full_descriptions_str += f"<clip{clip.id}>\n{clip.full_description}\n\nMax duration: {duration} seconds\n</clip{clip.id}>\n"
 
