@@ -174,7 +174,7 @@ class AudioProcessor:
                                 section.brolls[i+1]["start"] = broll["start"]
                             if self.error_handler:
                                 self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Surrounding clips will be slowed")
-                                del section.brolls[i]
+                            del section.brolls[i]
                         else:
                             if self.error_handler:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
@@ -220,7 +220,7 @@ class AudioProcessor:
                                 section.brolls[i+1]["start"] = broll["start"]
                             if self.error_handler:
                                 self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Surrounding clips will be slowed")
-                                del section.brolls[i]
+                            del section.brolls[i]
                         else:
                             if self.error_handler:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")

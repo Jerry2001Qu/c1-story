@@ -244,7 +244,7 @@ def add_broll(audio_file, full_descriptions_str, section_timings_str):
 **Section 1: 0 - 11.96**
 Transcript: Activists in Canada...
 
-* **Anchor:** 0.00 - 6.24 - We start on an Anchor to introduce the story and set the scene.
+* **Anchor (max 10 seconds):** 0.00 - 6.24 - We start on an Anchor to introduce the story and set the scene.
 * **Clip 008 (max 10 seconds):** 6.24 - 7.56 - The image of a national flag acts as a transition.
 * **Clip 020 (max 12 seconds):** 7.56 - 9.82 - This clip shows fireworks being launched, visually illustrating the audio description of fireworks.
 * **Clip 002 (max 4 seconds):** 9.82 - 11.96 - End the section with...
@@ -253,7 +253,7 @@ Transcript: Activists in Canada...
 Each broll clip has a Max duration which you should copy into the list, ex (max 10 seconds).
 Give me timestamps for when you want a broll clip to start and end. Always fill each section with brolls till the end. But don't go beyond each section. You must end clip timings at the section end time!
 Broll clips have a length, so you can't use more than that & have to switch. You don't have to use the entire Broll clip. Aim to switch around 6 seconds or sooner. Switching creates a more intense experience.
-You may also insert Anchor blocks. These can go on for as long as you want. Place Anchor blocks for at least 5 seconds at the beginning of the whole story to set the scene, and at least 5 seconds at the end of the whole story to conclude. (probably the whole start and end sections. If the section is at the start or end of the whole story, you will be told so in <section_timings> with a message like "Anchor must be shown...")
+You may also insert Anchor blocks. These should be max 10 seconds. Place Anchor blocks for at least 5 seconds at the beginning of the whole story to set the scene, and at least 5 seconds at the end of the whole story to conclude. (probably the whole start and end sections. If the section is at the start or end of the whole story, you will be told so in <section_timings> with a message like "Anchor must be shown...")
 This isn't necessary in other sections, just make your best judgement on when the Anchor should be on screen. For example, if there isn't any related broll, or not enough broll, you may choose to switch to the Anchor.
 An Anchor block must be at least 3 seconds long, so don't place it at the very end of a section. Make sure everything flows nicely!
 Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example. Never make up broll clips. If not enough, use the Anchor.

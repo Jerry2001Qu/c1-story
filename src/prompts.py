@@ -306,6 +306,7 @@ Please read the story script carefully. Then, in a <brainstorming> tag, come up 
 - Is informative over all else
 - Be unique to the specifics of this story ('Missiles fired in Cuba' is better than 'Fighting in Cuba')
 - Be in title case
+- Spell out numbers (Two instead of 2)
 
 Count each character count while brainstorming potential headlines. Then select the one you think is best and output it in <response></response> tags."""
 )
