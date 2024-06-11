@@ -6,6 +6,13 @@ LOGGER = get_logger(__name__)
 from pathlib import Path
 import shutil
 
+# Download and setup FFmpeg
+from src.ffmpeg import download_ffmpeg
+
+if "switched_ffmpeg" not in st.session_state:
+    download_ffmpeg()
+    st.session_state["switched_ffmpeg"] = True
+
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from streamlit_image_select import image_select
 
