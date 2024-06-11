@@ -237,7 +237,7 @@ def run():
                 st.session_state["video_ran"] = True
                 
                 with st.expander("Details"):
-                    st.write(script.sections)
+                    st.write(script)
 
                 st.video(str(video_output_file), autoplay=True)
 

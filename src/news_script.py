@@ -59,7 +59,9 @@ class SOTScriptSection(ScriptSection):
         self.dub_audio_file: Optional[Path] = None
     
     def __repr__(self):
-        return f"""SOT ({self.get_byline() if self.is_interview() else "No byline"}): {self.quote}"""
+        return f"""SOT ({self.get_byline() if self.is_interview() else "No byline"}): {self.quote}
+
+CLIP {self.clip.id}: {self.start} - {self.end}"""
 
     def is_interview(self):
         return self.name != "Unknown"
