@@ -25,7 +25,7 @@ def download_ffmpeg():
     os.chmod(ffmpeg_bin, 0o755)
 
     # Move FFmpeg binary to /usr/bin/ffmpeg
-    subprocess.run(['sudo', 'mv', ffmpeg_bin, '/usr/bin/ffmpeg'])
+    # subprocess.run(['sudo', 'mv', ffmpeg_bin, '/usr/bin/ffmpeg'])
 
     # Set the FFMPEG_BINARY environment variable
-    os.environ['FFMPEG_BINARY'] = '/usr/bin/ffmpeg'
+    os.environ['FFMPEG_BINARY'] = ffmpeg_bin
