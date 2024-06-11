@@ -50,7 +50,7 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
                 file.write(chunk)
     
     audio_clip = mp.AudioFileClip(tmp_file)
-    audio_clip = audio_clip.subclip(0.1, audio_clip.duration - 0.1)
+    audio_clip = audio_clip.subclip(0, audio_clip.duration - 0.1)
 
     if start_padding:
         start_pad_clip = create_silent_audio_clip(start_padding)
@@ -85,7 +85,7 @@ def TTS_voice(text, filename, voice: Voice, previous_text="", next_text="", star
                 file.write(chunk)
     
     audio_clip = mp.AudioFileClip(tmp_file)
-    audio_clip = audio_clip.subclip(0.1, audio_clip.duration - 0.1)
+    audio_clip = audio_clip.subclip(0, audio_clip.duration - 0.1)
 
     if start_padding:
         start_pad_clip = create_silent_audio_clip(start_padding)
