@@ -61,9 +61,10 @@ class StreamlitErrorHandler(ErrorHandler):
         self.get_container().info(msg, icon="ℹ️")
     
     def stream_status(self, msg: str, title: str = None, video: Path = None, audio: Path = None) -> None:
-        if msg in self.previous_msgs:
+        _hash = msg + (title if title else "")
+        if _hash in self.previous_msgs:
             return
-        self.previous_msgs += [msg]
+        self.previous_msgs += [_hash]
         
         def stream(msg: str):
             if self.verbosity:

@@ -4,6 +4,7 @@ from streamlit.logger import get_logger
 LOGGER = get_logger(__name__)
 
 from src.transcription import WhisperResults
+from src.news_script import fuzzy_match
 
 from pathlib import Path
 
@@ -26,13 +27,17 @@ def run():
         with st.expander("Uploaded video"):
             st.video("video.mp4")
 
-        whisper = WhisperResults.from_file(Path("video.mp4"))
+            whisper = WhisperResults.from_file(Path("video.mp4"))
 
-        st.write(f"{whisper.has_speech=}, {whisper.language=}, {whisper.no_speech_prob=}")
+            st.write(f"{whisper.has_speech=}, {whisper.language=}, {whisper.no_speech_prob=}")
 
-        st.write(whisper.english_text)
-        st.write(whisper.text)
-        st.write(whisper.timestamps)
+            st.write(whisper.english_text)
+            st.write(whisper.text)
+            st.write(whisper.timestamps)
+
+    quote = st.text_area("Quote")
+    if quote:
+        st.write(fuzzy_match(quote, whisper))
 
 if __name__ == "__main__":
     run()

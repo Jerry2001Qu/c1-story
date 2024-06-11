@@ -103,17 +103,23 @@ class ClipManager:
             try:
                 clip_id = sot_match["clip_id"]
                 sot_id = sot_match["sot_id"]
-                shotlist_description = sot_match["shotlist_description"]
+                # shotlist_description = sot_match["shotlist_description"]
                 if sot_id is None:
                     continue
                 
                 clip = self.get_clip(clip_id)
                 clip.shot_id = int(sot_id)
-                clip.shotlist_description = shotlist_description
+                # clip.shotlist_description = shotlist_description
                 clip.has_quote = 1
             except Exception as e:
                 if self.error_handler:
                     self.error_handler.error(f"ERROR: {e}")
+        
+        if self.error_handler:
+            sot_matches_str = ""
+            for clip in self.clips:
+                sot_matches_str += f"{clip.id}: {clip.shot_id}\n"
+            self.error_handler.stream_status(sot_matches_str)
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
@@ -122,6 +128,7 @@ class ClipManager:
                 current_clip = self.clips[i]
                 next_clip = self.clips[i + 1]
                 if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
+                    print(f"Combining clips {current_clip.id}, {next_clip.id}")
                     current_clip = self.combine_clips([current_clip, next_clip])
                     self.clips.pop(i + 1)  # Remove next_clip after combining
                     if self.error_handler:
@@ -141,7 +148,8 @@ class ClipManager:
                         i += 1
             except Exception as e:
                 if self.error_handler:
-                    self.error_handler.error(f"ERROR: {e}")
+                    self.error_handler.error(f"ERROR: {e.with_traceback()}")
+                print(e.with_traceback())
         
         used_sot_ids = set()
         for clip in self.clips:
@@ -232,8 +240,10 @@ class ClipManager:
         # Load all video clips
         video_clips = [clip.load_video() for clip in clips]
 
+        print([clip.duration for clip in video_clips])
+
         # Concatenate the video clips
-        combined_video = mp.concatenate_videoclips(video_clips)
+        combined_video = mp.concatenate_videoclips(video_clips, method="compose")
 
         # Generate the new file name
         new_file_name = "_".join([clip.file_path.stem for clip in clips]) + ".mp4"

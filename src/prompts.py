@@ -432,8 +432,7 @@ Return a JSON in a format like:
    "matches": [
       {{
          "clip_id": <clip_id>,
-         "sot_id": <sot_id>,
-         "shotlist_description": <sot_description>
+         "sot_id": <sot_id>
       }},
       ...
    ]
@@ -441,7 +440,6 @@ Return a JSON in a format like:
 </example>
 
 The transcript from a clip should match the quote from a sot to match. If a clip doesn't match any sot, set sot_id to None.
-If the clip matches an sot, copy it's description from the sots list, otherwise None.
 Put your response in <response></response> tags."""
 )
 
