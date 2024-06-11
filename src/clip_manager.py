@@ -11,8 +11,8 @@ from typing import List, Dict, Optional
 import moviepy.editor as mp
 import traceback
 
-def is_folder_empty(folder_path: Path) -> bool:
-    return not any(folder_path.iterdir())
+def folder_has_no_videos(folder_path: Path) -> bool:
+    return not list(folder_path.glob("*.mp4"))
 
 class Clip:
     """Represents a single video clip."""
@@ -80,7 +80,7 @@ class ClipManager:
     def split_video_into_clips(self):
         """Splits the main video into clips based on scene detection."""
         self.clips_folder.mkdir(parents=True, exist_ok=True)
-        if is_folder_empty(self.clips_folder):
+        if folder_has_no_videos(self.clips_folder):
             from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=1))
             status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=False,
@@ -123,35 +123,32 @@ class ClipManager:
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
-        while i < len(self.clips) - 1:
-            try:
+        combined_clips = []
+
+        while i < len(self.clips):
+            current_clip = self.clips[i]
+            group = [current_clip]
+            
+            while i + 1 < len(self.clips) and (self.clips[i + 1].shot_id == current_clip.shot_id or (i + 2 < len(self.clips) and self.clips[i + 2].shot_id == current_clip.shot_id)):
+                if self.clips[i + 1].shot_id == current_clip.shot_id:
+                    group.append(self.clips[i + 1])
+                    i += 1
+                elif i + 2 < len(self.clips) and self.clips[i + 2].shot_id == current_clip.shot_id:
+                    group.extend([self.clips[i + 1], self.clips[i + 2]])
+                    i += 2
                 current_clip = self.clips[i]
-                next_clip = self.clips[i + 1]
-                if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
-                    current_clip = self.combine_clips([current_clip, next_clip])
-                    self.clips.pop(i + 1)  # Remove next_clip after combining
-                    if self.error_handler:
-                        self.error_handler.stream_status(f"Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
-                else:
-                    if i < len(self.clips) - 2:
-                        next_next_clip = self.clips[i + 2]
-                        if current_clip.shot_id is not None and current_clip.shot_id == next_next_clip.shot_id:
-                            current_clip = self.combine_clips([current_clip, next_clip, next_next_clip])
-                            self.clips.pop(i + 2)
-                            self.clips.pop(i + 1)
-                            if self.error_handler:
-                                self.error_handler.stream_status(f"Combined adjacent clips ({current_clip.id}, {next_clip.id}, {next_next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
-                        else:
-                            i += 1
-                    else:
-                        i += 1
-            except Exception as e:
+            
+            if len(group) > 1:
+                combined_clip = self.combine_clips(group)
+                combined_clips.append(combined_clip)
                 if self.error_handler:
-                    self.error_handler.error(f"ERROR: {traceback.format_exc()}")
-        
-        for clip in self.clips:
-            if not clip.whisper_results:
-                clip.transcribe_clip()
+                    self.error_handler.stream_status(combined_clip.whisper_results.english_text, f"Combined clips ({combined_clip.id}) with same sot ({current_clip.shot_id})", video=combined_clip.file_path)
+            else:
+                combined_clips.append(current_clip)
+            
+            i += 1
+
+        self.clips = combined_clips
         
         used_sot_ids = set()
         for clip in self.clips:
@@ -262,7 +259,7 @@ class ClipManager:
         # Update the first clip with the new file path and transcribe
         clips[0].id = new_id
         clips[0].file_path = new_file_path
-        clips[0].whisper_results = None
+        clips[0].transcribe_clip()
         return clips[0]
 
     def _extract_sots(self) -> str:

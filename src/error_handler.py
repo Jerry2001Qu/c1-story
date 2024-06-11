@@ -25,8 +25,14 @@ class StreamlitErrorHandler(ErrorHandler):
 
     def __init__(self, error_bar: st.container, verbosity: bool):
         self.error_bar = error_bar.empty()
-        for _ in range(random.randint(0, 10)):
+        if "flip" not in st.session_state:
+            st.session_state["flip"] = 1
+        for _ in range(st.session_state["flip"]):
             self.error_bar = error_bar.empty()
+        if st.session_state["flip"] == 1:
+            st.session_state["flip"] = 2
+        else:
+            st.session_state["flip"] = 1
         self.verbosity = verbosity
         self.previous_msgs = []
         self.latest = error_bar
