@@ -347,6 +347,8 @@ def split_into_words_by_language(text, language):
     return text.split()
 
 def fuzzy_match(quote, whisper_results):
+    if prep_text(quote) == prep_text(whisper_results.text):
+        return whisper_results.timestamps
     fuzzy = find_near_matches(prep_text(quote), prep_text(whisper_results.text), max_l_dist=int(len(quote) / 5))
     if not fuzzy:
         return None
