@@ -248,7 +248,8 @@ class ClipManager:
         combined_video = mp.concatenate_videoclips(video_clips, method="compose")
 
         # Generate the new file name
-        new_file_name = "_".join([clip.file_path.stem for clip in clips]) + ".mp4"
+        new_id = "_".join([clip.file_path.stem for clip in clips])
+        new_file_name = new_id + ".mp4"
         new_file_path = self.clips_folder / new_file_name
 
         # Write the combined video to the new file
@@ -259,6 +260,7 @@ class ClipManager:
             clip.file_path.unlink()
 
         # Update the first clip with the new file path and transcribe
+        clips[0].id = new_id
         clips[0].file_path = new_file_path
         clips[0].whisper_results = None
         return clips[0]
