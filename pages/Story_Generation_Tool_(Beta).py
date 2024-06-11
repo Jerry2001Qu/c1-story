@@ -178,11 +178,11 @@ def run():
 
             with st.container(height=800):
                 df = script.to_dataframe()
-                df = df[["type", "text", "shot_id"]]
                 gb = GridOptionsBuilder.from_dataframe(df)
                 gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, autoHeight=True, editable=True)
-                gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
                 gb.configure_column("shot_id", width=50, autoHeight=True, editable=True)
+                gb.configure_column("name", width=50, autoHeight=True, editable=True)
+                gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
 
                 gb.configure_grid_options(
                     rowDragManaged=True,

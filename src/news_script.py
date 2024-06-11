@@ -284,16 +284,19 @@ class NewsScript:
         data = {
             'type': [],
             'shot_id': [],
+            'name': [],
             'text': [],
         }
         for section in self.sections:
             if is_type(section, AnchorScriptSection):
                 data['type'] += ["ANCHOR"]
                 data['shot_id'] += [None]
+                data['name'] += [None]
                 data['text'] += [section.text]
             elif is_type(section, SOTScriptSection):
                 data['type'] += ["SOT"]
                 data['shot_id'] += [section.shot_id]
+                data['name'] += [section.name]
                 data['text'] += [section.quote]
             else:
                 print(f"ERROR: Unrecognized section of type: {type(section)}")
