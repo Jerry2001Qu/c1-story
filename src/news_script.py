@@ -296,7 +296,14 @@ class NewsScript:
             elif is_type(section, SOTScriptSection):
                 data['type'] += ["SOT"]
                 data['shot_id'] += [section.shot_id]
-                data['name'] += [section.name]
+                if section.name and section.title:
+                    data['name'] += [f"{section.name}, {section.title}"]
+                elif section.name:
+                    data['name'] += [section.name]
+                elif section.title:
+                    data['name'] += [section.title]
+                else:
+                    data['name'] += ["No Identity"]
                 data['text'] += [section.quote]
             else:
                 print(f"ERROR: Unrecognized section of type: {type(section)}")
