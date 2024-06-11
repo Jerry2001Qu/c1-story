@@ -9,7 +9,7 @@ import streamlit as st
 from pathlib import Path
 from typing import List, Dict, Optional
 import moviepy.editor as mp
-import time
+import traceback
 
 def is_folder_empty(folder_path: Path) -> bool:
     return not any(folder_path.iterdir())
@@ -147,8 +147,7 @@ class ClipManager:
                         i += 1
             except Exception as e:
                 if self.error_handler:
-                    self.error_handler.error(f"ERROR: {e.with_traceback()}")
-                print(e.with_traceback())
+                    self.error_handler.error(f"ERROR: {traceback.format_exc()}")
         
         for clip in self.clips:
             if not clip.whisper_results:
