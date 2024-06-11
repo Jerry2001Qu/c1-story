@@ -200,8 +200,12 @@ def run():
                     st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
             
 
-            if st.button("Generate Video"):
-                st.session_state["video_run"] = True
+            if not st.session_state["video_run"]:
+                if st.button("Generate Video"):
+                    st.session_state["video_run"] = True
+            else:
+                if st.button("Regenerate Video"):
+                    st.session_state["video_ran"] = False
             
             if st.session_state["video_run"]:
                 with st.status("Running"):
@@ -227,6 +231,8 @@ def run():
                         video_editor.assemble_video(output_file=video_output_file)
                     else:
                         video_output_file = story_folder / "output.mp4"
+                
+                st.session_state["video_ran"] = True
                 
                 with st.expander("Details"):
                     st.write(script.sections)
