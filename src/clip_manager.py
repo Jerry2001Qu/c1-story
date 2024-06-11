@@ -129,13 +129,22 @@ class ClipManager:
             current_clip = self.clips[i]
             group = [current_clip]
             
-            while i + 1 < len(self.clips) and (self.clips[i + 1].shot_id == current_clip.shot_id or (i + 2 < len(self.clips) and self.clips[i + 2].shot_id == current_clip.shot_id)):
-                if self.clips[i + 1].shot_id == current_clip.shot_id:
-                    group.append(self.clips[i + 1])
-                    i += 1
-                elif i + 2 < len(self.clips) and self.clips[i + 2].shot_id == current_clip.shot_id:
-                    group.extend([self.clips[i + 1], self.clips[i + 2]])
-                    i += 2
+            while i + 1 < len(self.clips):
+                next_clip = self.clips[i + 1]
+                next_next_clip = self.clips[i + 2] if i + 2 < len(self.clips) else None
+                
+                if current_clip.shot_id is not None:
+                    if next_clip.shot_id == current_clip.shot_id:
+                        group.append(next_clip)
+                        i += 1
+                    elif next_next_clip and next_next_clip.shot_id == current_clip.shot_id:
+                        group.extend([next_clip, next_next_clip])
+                        i += 2
+                    else:
+                        break
+                else:
+                    break
+                
                 current_clip = self.clips[i]
             
             if len(group) > 1:
