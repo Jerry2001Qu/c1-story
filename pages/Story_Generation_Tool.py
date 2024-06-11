@@ -80,11 +80,17 @@ def run():
         st.session_state["ran"] = False
     if "download_run" not in st.session_state:
         st.session_state["download_run"] = False
+    if "video_run" not in st.session_state:
+        st.session_state["video_run"] = False
+    if "video_ran" not in st.session_state:
+        st.session_state["video_ran"] = False
     
     def reset():
         st.session_state["run"] = False
         st.session_state["ran"] = False
         st.session_state["download_run"] = False
+        st.session_state["video_run"] = False
+        st.session_state["video_ran"] = False
         error_handler.reset()
     
     error_handler = StreamlitErrorHandler(error_bar, verbosity)
@@ -192,27 +198,35 @@ def run():
                     st.warning(f"SOT Section {section.id}'s transcript did not contain the given quote. Adding all detected speech.")
                 if section.match_type == "CLIP":
                     st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
-            if st.button("Generate Video"):
-                with st.status("Running"):
-                    audio_processor = AudioProcessor(script, clip_manager, story_folder, error_handler)
-                    st.write("Generating anchor audio")
-                    if error_handler:
-                        error_handler.info("Generating anchor audio")
-                    audio_processor._process_anchor_audio()
-                    st.write("Generating SOT translations")
-                    if error_handler:
-                        error_handler.info("Generating SOT translations")
-                    audio_processor._generate_sot_translations()
-                    st.write("Adding broll placements")
-                    if error_handler:
-                        error_handler.info("Adding broll placements")
-                    audio_processor._add_broll_placements()
+            
 
-                    st.write("Assembling video")
-                    error_handler.info("Assembling video")
-                    video_output_file = story_folder / "output.mp4"
-                    video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
-                    video_editor.assemble_video(output_file=video_output_file)
+            if st.button("Generate Video"):
+                st.session_state["video_run"] = True
+            
+            if st.session_state["video_run"]:
+                with st.status("Running"):
+                    if not st.session_state["video_ran"]:
+                        audio_processor = AudioProcessor(script, clip_manager, story_folder, error_handler)
+                        st.write("Generating anchor audio")
+                        if error_handler:
+                            error_handler.info("Generating anchor audio")
+                        audio_processor._process_anchor_audio()
+                        st.write("Generating SOT translations")
+                        if error_handler:
+                            error_handler.info("Generating SOT translations")
+                        audio_processor._generate_sot_translations()
+                        st.write("Adding broll placements")
+                        if error_handler:
+                            error_handler.info("Adding broll placements")
+                        audio_processor._add_broll_placements()
+
+                        st.write("Assembling video")
+                        error_handler.info("Assembling video")
+                        video_output_file = story_folder / "output.mp4"
+                        video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
+                        video_editor.assemble_video(output_file=video_output_file)
+                    else:
+                        video_output_file = story_folder / "output.mp4"
                 
                 with st.expander("Details"):
                     st.write(script.sections)
