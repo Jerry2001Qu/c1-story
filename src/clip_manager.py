@@ -128,11 +128,10 @@ class ClipManager:
                 current_clip = self.clips[i]
                 next_clip = self.clips[i + 1]
                 if current_clip.shot_id is not None and current_clip.shot_id == next_clip.shot_id:
-                    print(f"Combining clips {current_clip.id}, {next_clip.id}")
                     current_clip = self.combine_clips([current_clip, next_clip])
                     self.clips.pop(i + 1)  # Remove next_clip after combining
                     if self.error_handler:
-                        self.error_handler.stream_status(current_clip.whisper_results.english_text, f"Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
+                        self.error_handler.stream_status(current_clip.whisper_results.english_text + " " + next_clip.whisper_results.english_text, f"Combined adjacent clips ({current_clip.id}, {next_clip.id}) with same sot ({current_clip.shot_id})", video=current_clip.file_path)
                 else:
                     if i < len(self.clips) - 2:
                         next_next_clip = self.clips[i + 2]
@@ -150,6 +149,10 @@ class ClipManager:
                 if self.error_handler:
                     self.error_handler.error(f"ERROR: {e.with_traceback()}")
                 print(e.with_traceback())
+        
+        for clip in self.clips:
+            if not clip.whisper_results:
+                clip.transcribe_clip()
         
         used_sot_ids = set()
         for clip in self.clips:
@@ -258,7 +261,7 @@ class ClipManager:
 
         # Update the first clip with the new file path and transcribe
         clips[0].file_path = new_file_path
-        clips[0].transcribe_clip()
+        clips[0].whisper_results = None
         return clips[0]
 
     def _extract_sots(self) -> str:
