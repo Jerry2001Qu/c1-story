@@ -64,8 +64,9 @@ class AudioProcessor:
                 if self.error_handler:
                     self.error_handler.stream_status(section.text, "Generating anchor audio", audio=audio_file)
 
-        anchor_audio = mp.concatenate_audioclips(audio_clips)
-        anchor_audio.write_audiofile(str(self.anchor_audio_file), logger=None)
+        if audio_clips:
+            anchor_audio = mp.concatenate_audioclips(audio_clips)
+            anchor_audio.write_audiofile(str(self.anchor_audio_file), logger=None)
     
     def _generate_sot_translations(self):
         """Generates dubbed translations for non-English SOT"""
@@ -82,6 +83,8 @@ class AudioProcessor:
 
     def _add_broll_placements(self):
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""
+        if not self.news_script.get_anchor_sections():
+            return
         full_descriptions_str = ""
         for clip in self.clip_manager.clips:
             if not clip.has_quote:

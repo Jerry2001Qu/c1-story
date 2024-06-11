@@ -180,9 +180,9 @@ def run():
                 df = script.to_dataframe()
                 df = df[["type", "shot_id", "name", "text"]]
                 gb = GridOptionsBuilder.from_dataframe(df)
-                gb.configure_column("type", width=60, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, autoHeight=True, editable=True)
-                gb.configure_column("shot_id", width=50, autoHeight=True, editable=True)
-                gb.configure_column("name", width=50, autoHeight=True, editable=True)
+                gb.configure_column("type", width=40, rowDrag=True, rowDragManaged=True, rowDragEntireRow = True, autoHeight=True, editable=True)
+                gb.configure_column("shot_id", width=30, autoHeight=True, editable=True)
+                gb.configure_column("name", width=50, wrapText=True, autoHeight=True, editable=True)
                 gb.configure_column("text", wrapText=True, autoHeight=True, editable=True)
 
                 gb.configure_grid_options(
