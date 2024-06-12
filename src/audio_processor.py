@@ -155,6 +155,30 @@ class AudioProcessor:
             for broll in section.brolls:
                 if broll["end"] > duration:
                     broll["end"] = duration
+
+        last_section = self.news_script.sections[-1]
+        if is_type(last_section, AnchorScriptSection):
+            last_broll = last_section.brolls[-1]
+            if last_broll["id"] == "Anchor":
+                last_broll_duration = last_broll["end"] - last_broll["start"]
+                if last_broll_duration < 5:
+                    needed_duration = 5 - last_broll_duration
+                    if len(last_section.brolls) > 1:
+                        second_last_broll = last_section.brolls[-2]
+                        second_last_broll_duration = second_last_broll["end"] - second_last_broll["start"]
+                        if second_last_broll_duration - needed_duration > 1:
+                            last_broll["start"] -= needed_duration
+                            second_last_broll["end"] = last_broll["start"]
+                        else:
+                            second_last_broll["end"] = min(second_last_broll["start"]+1, second_last_broll["end"])
+                            last_broll["start"] = second_last_broll["end"]
+                        if self.error_handler:
+                            self.error_handler.stream_status(pprint.pformat(last_section.brolls), f"Final anchor placement was too short, extended into previous broll.")
+            else:
+                last_broll["id"] = "Anchor"
+                if self.error_handler:
+                    self.error_handler.stream_status(pprint.pformat(last_section.brolls), f"Final video was not Anchor, swapping broll with anchor")
+
         
         for section in self.news_script.get_anchor_sections():
             for i, broll in enumerate(section.brolls):
