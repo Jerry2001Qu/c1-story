@@ -254,7 +254,7 @@ Here is the script:
  - For quotes, remove any lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
  - For quotes, remove any commas from long numbers. For example, change 1,200 to 1200.
  - For quotes, any dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
- - Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid
+ - Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid. ESCAPE QUOTES!
  - Ensure the order remains the same between all paragraphs (SOT & ANCHOR)
  - Don't move all the SOTs to the end
 
