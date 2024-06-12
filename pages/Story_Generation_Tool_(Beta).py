@@ -118,8 +118,8 @@ def run():
 
             st.title(story_title)
             st.video(str(video_file_path))
-            st.text(storyline)
-            st.text(shotlist)
+            st.write(storyline.replace("$", "\$"))
+            st.write(shotlist.replace("$", "\$"))
         
             if st.button("Generate Script"):
                 st.session_state["run"] = True
