@@ -41,7 +41,7 @@ def run():
         status = split_video_ffmpeg(str(video_file_path), scene_list, show_progress=False,
                         output_file_template=str(clips_folder / "$SCENE_NUMBER.mp4"))
         
-        for video_path in clips_folder.glob("*.mp4"):
+        for video_path in sorted(clips_folder.glob("*.mp4")):
             st.video(str(video_path))
 
 if __name__ == "__main__":
