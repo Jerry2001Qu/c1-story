@@ -113,7 +113,7 @@ class ClipManager:
                 clip.has_quote = 1
             except Exception as e:
                 if self.error_handler:
-                    self.error_handler.error(f"ERROR: {e}")
+                    self.error_handler.error(f"ERROR: {traceback.format_exc()}")
         
         if self.error_handler:
             sot_matches_str = ""
@@ -236,7 +236,7 @@ class ClipManager:
                         self.error_handler.warning(f"WARNING: Could not match clips, likely content blocked by Gemini. ({group})")
             except Exception as e:
                 if self.error_handler:
-                    self.error_handler.error(f"ERROR: {e}")
+                    self.error_handler.error(f"ERROR: {traceback.format_exc()}")
     
     def combine_clips(self, clips: List[Clip]) -> Clip:
         """Combines multiple video clips into a new clip."""
@@ -282,7 +282,7 @@ class ClipManager:
                 clip.transcribe_clip()
             except Exception as e:
                 if self.error_handler:
-                    self.error_handler.error(f"ERROR: {e}")
+                    self.error_handler.error(f"ERROR: {traceback.format_exc()}")
 
     def get_quotes_str(self):
         output = ""

@@ -10,6 +10,7 @@ import streamlit as st
 
 from pathlib import Path
 from typing import Dict, Tuple
+import traceback
 
 import moviepy.editor as mp
 from moviepy.audio.fx.audio_loop import audio_loop
@@ -60,7 +61,7 @@ class VideoEditor:
                 progress_bar.progress(i / (len(self.news_script.sections)-1))
             except Exception as e:
                 if self.error_handler:
-                    self.error_handler.warning(f"Error when assembling section {section.id}: {e}")
+                    self.error_handler.warning(f"Error when assembling section {section.id}: {traceback.format_exc()}")
 
         logline = self.news_script.headline
         concat_video = mp.concatenate_videoclips(video_clips, method="compose")

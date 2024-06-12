@@ -14,6 +14,7 @@ from pathlib import Path
 import moviepy.editor as mp
 import pandas as pd
 import pprint
+import traceback
 
 class ScriptSection(ABC):
     """Represents a single section of the news script."""
@@ -160,7 +161,7 @@ class NewsScript:
                     self._match_sot_clips_different_language(section, clip)
             except Exception as e:
                 if self.error_handler:
-                    self.error_handler.warning(f"WARNING: Problem when matching section {section.id}. {e}")
+                    self.error_handler.warning(f"WARNING: Problem when matching section {section.id}. {traceback.format_exc()}")
 
     def _match_sot_clips_same_language(self, section, clip, quote):
         timestamps = fuzzy_match(quote, clip.whisper_results)
