@@ -230,7 +230,7 @@ class ClipManager:
                             continue
                         clip.shot_id = clip_dict['shot']
                         clip.shotlist_description = clip_dict["description"]
-                        clip.has_quote = clip_dict['quote']
+                        clip.has_quote = int(clip_dict['quote'])
                 except ValueError:
                     if self.error_handler:
                         self.error_handler.warning(f"WARNING: Could not match clips, likely content blocked by Gemini. ({group})")

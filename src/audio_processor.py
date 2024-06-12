@@ -2,7 +2,7 @@
 
 # STREAMLIT
 from src.clip_manager import ClipManager
-from src.prompts import run_chain_json, parse_broll_chain
+from src.prompts import run_chain_json, parse_broll_chain, fix_broll_chain
 from src.news_script import NewsScript, AnchorScriptSection, is_type
 from src.tts import TTS
 from src.gemini import add_broll
@@ -102,7 +102,7 @@ class AudioProcessor:
                 if i == 0:
                     sections_str += f"Anchor must be shown till atleast 5s.\n"
                 if i == len(self.news_script.sections)-1:
-                    sections_str += f"Anchor must be shown at or before {section_end-5}s till end.\n"
+                    sections_str += f"Anchor must be shown at or before {max(section_end-5, section_start)}s till end.\n"
                 sections_str += f"{section.text}\n"
                 section_start = section_end
 
@@ -111,6 +111,29 @@ class AudioProcessor:
 
         if self.error_handler:
             self.error_handler.stream_status(broll_placements, "Placing BROLL")
+
+        # sections_str = ""
+        # for i, section in enumerate(self.news_script.sections):
+        #     if is_type(section, AnchorScriptSection):
+        #         section_id = section.id
+        #         section_duration = section.anchor_audio_clip.duration
+        #         sections_str += f"Section {section_id}: 0.00 - {section_duration}\n"
+        #         if i == 0:
+        #             sections_str += f"Anchor must be shown till atleast {min(5, section_duration)}s.\n"
+        #         if i == len(self.news_script.sections)-1:
+        #             sections_str += f"Anchor must be shown at or before {max(section_end-5, 0)}s till end.\n"
+        #         sections_str += f"{section.text}\n"
+        
+        # broll_timings = ""
+        # for clip in self.clip_manager.clips:
+        #     if not clip.has_quote:
+        #         duration = clip.load_video().duration
+        #         broll_timings += f"<clip{clip.id}>\nMax duration: {duration} seconds\n</clip{clip.id}>\n"
+
+        # fixed_broll_json = run_chain_json(fix_broll_chain, {"BROLL_PLACEMENTS": parsed_broll_json, "SECTION_TIMINGS": sections_str, "BROLL_TIMINGS": broll_timings})
+
+        # if self.error_handler:
+        #     self.error_handler.stream_status(pprint.pformat(fixed_broll_json), "Fixing BROLL")
 
         if len(self.news_script.get_anchor_sections()) != len(parsed_broll_json["sections"]):
             print(f"WARNING: SECTION LENGTHS DONT MATCH script: {len(self.news_script.get_anchor_sections())}, loglines: {len(parsed_broll_json['sections'])}")

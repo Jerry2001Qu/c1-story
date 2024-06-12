@@ -367,6 +367,53 @@ Here is the list of broll placements:
 Parse the <broll_placements></broll_placements> into each <section></section>. Start each section at 0. Put your response in <response></response> tags."""
 )
 
+fix_broll_prompt = PromptTemplate.from_template(
+"""Your task is to adjust broll placements to fit my rules. Here are the current broll placements in JSON format:
+
+<broll_placements>
+{BROLL_PLACEMENTS}
+</broll_placements>
+
+Here are the section timings:
+
+<section_timings>
+{SECTION_TIMINGS}
+</section_timings>
+
+And here are the maximum durations for each broll clip:
+
+<broll_timings>  
+{BROLL_TIMINGS}
+</broll_timings>
+
+Check the broll placements and make adjustments as needed to ensure they follow these rules:
+
+- Do not exceed any broll's maximum duration as specified in <broll_timings>
+- Fill each section with broll placements until the section's end time, but do not go beyond the section end time
+- Clip timings must end exactly at their containing section's end time
+- You cannot use more of a broll clip than its maximum duration allows, so switch to a different clip when needed
+- Place an Anchor block of anywhere between 5-10 seconds (inclusive, can just be 5 seconds) at the very beginning of the first section to set the scene
+- Place an Anchor block of anywhere between 5-10 seconds (inclusive) at the very end of the last section to conclude the story 
+- An Anchor block placement must be at least 3 seconds long
+- Always show a broll clip for at least 1 second before switching to a different one
+- Do not make up any new broll clips. If there is unfilled time, you may reuse existing clips, prioritizing reusing the Anchor clip
+- Not every section needs an Anchor block
+
+Example adjustments include:
+
+- Broll clip was too short (< 1 second), increase its duration to 2 seconds while decreasing the broll clip before it to 3.5 seconds
+- Broll clip was too short & cannot be extended. Removing the entire clip and increasing duration of surrounding broll to fill it in (ensuring these do not exceed their max duration)
+- Final anchor placement is too short (< 5 seconds), increasing its duration
+- Anchor placement is too short (< 3 seconds), increasing duration
+
+First mark down the durations of every broll/anchor placement inside <durations></durations> tags.
+
+Then mark down any violating broll/anchor placements that need to be change inside <violations></violations> tags.
+
+After making the necessary adjustments, output the updated broll placements JSON inside <response></response> tags.
+Ensure it's valid JSON using double quotes & escaping special characters. If no adjustments need to be made, output the original broll placements JSON."""
+)
+
 match_sot_prompt = PromptTemplate.from_template(
 """Your task is to find the substring in one language that best matches the meaning of a string in English.
 
@@ -452,6 +499,7 @@ parse_chain = (parse_prompt | opus).with_config({"run_name": "parse_script"})
 logline_chain = (logline_prompt | opus).with_config({"run_name": "logline"})
 headline_chain = (headline_prompt | opus).with_config({"run_name": "headline"})
 parse_broll_chain = (parse_broll_prompt | opus).with_config({"run_name": "parse_broll"})
+fix_broll_chain = (fix_broll_prompt | opus).with_config({"run_name": "fix_broll"})
 match_sot_chain = (match_sot_prompt | opus).with_config({"run_name": "match_sot"})
 match_hard_sot_chain = (match_hard_sot_prompt | opus).with_config({"run_name": "match_hard_sot"})
 language_to_iso_chain = (language_to_iso_prompt | opus).with_config({"run_name": "language_to_iso"})
