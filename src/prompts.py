@@ -142,7 +142,8 @@ so a TV news anchor could easily read it aloud.
 - Any dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
 - Remove any parentheses and the contained text.
 - Remove any lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
-- Remove any commas from long numbers. For example, change 1,200 to 1200.
+- Convert any numbers to spoken word. For example, 1,200 to One thousand two hundred.
+- Make any other changes that seem appropriate.
 
 Here is the story:
 <story>
@@ -252,7 +253,7 @@ Here is the script:
  - Only put speech in the quote field, no emotes like (laughs)
  - For quotes, always remove or replace parentheses/brackets and the contained text. For example this should be fully removed: (local time / 0200EST). Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ.
  - For quotes, remove any lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
- - For quotes, remove any commas from long numbers. For example, change 1,200 to 1200.
+ - For quotes, convert any numbers to spoken word. For example, 1,200 to One thousand two hundred.
  - For quotes, any dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
  - Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid. ESCAPE QUOTES!
  - Ensure the order remains the same between all paragraphs (SOT & ANCHOR)
