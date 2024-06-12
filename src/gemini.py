@@ -257,8 +257,8 @@ You may also insert Anchor blocks. These should be max 10 seconds. Place Anchor 
 This isn't necessary in other sections, just make your best judgement on when the Anchor should be on screen. For example, if there isn't any related broll, or not enough broll, you may choose to switch to the Anchor.
 An Anchor block must be at least 3 seconds long, so don't place it at the very end of a section. Make sure everything flows nicely!
 Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example. Never make up broll clips. If not enough, use the Anchor.
-This will be aired on TV, so select & place clips informatively and dramatically."""]
-    
+This will be aired on TV, so select & place clips informatively and dramatically. Remember to write your thoughts as you insert clips (ex. We start on an Anchor to introduce the story and set the scene.)"""]
+
     content = [part for part in content if part is not None]
 
     response = GEMINI.generate_content(content)
