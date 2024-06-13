@@ -54,7 +54,7 @@ class AudioProcessor:
                 next_text = self.news_script.sections[i + 1].text if i < len(self.news_script.sections) - 1 else ""
                 start_padding = 0.5 if i == 0 else 0.3
                 end_padding = 1.0 if i == len(self.news_script.sections)-1 else 0.3
-                TTS(section.text, str(audio_file), voice_id=self.clip_manager.anchor_voice_id, previous_text=previous_text, next_text=next_text, start_padding=start_padding, end_padding=end_padding)
+                TTS(section.text, str(audio_file), voice_id=self.clip_manager.anchor_voice_id, start_padding=start_padding, end_padding=end_padding)
 
                 audio_clip = mp.AudioFileClip(str(audio_file))
                 section.anchor_audio_file = audio_file
