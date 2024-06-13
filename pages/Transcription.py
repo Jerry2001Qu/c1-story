@@ -5,10 +5,14 @@ LOGGER = get_logger(__name__)
 
 from src.transcription import WhisperResults
 from src.news_script import fuzzy_match
+from src.authentication import check_password
 
 from pathlib import Path
 
 def run():
+    if not check_password():
+        st.stop()
+        
     st.set_page_config(
         page_title="Channel 1",
         page_icon="👋",

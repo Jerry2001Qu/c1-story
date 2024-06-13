@@ -6,10 +6,14 @@ LOGGER = get_logger(__name__)
 from src.tts import TTS_voice, get_voice_ids
 from src.heygen import animate_anchor, get_heygen_avatars
 from src.error_handler import StreamlitErrorHandler
+from src.authentication import check_password
 
 from pathlib import Path
 
 def run():
+    if not check_password():
+        st.stop()
+
     st.set_page_config(
         page_title="Channel 1",
         page_icon="👋",

@@ -22,6 +22,7 @@ from src.news_script import NewsScript
 from src.video_editor import VideoEditor
 from src.error_handler import StreamlitErrorHandler
 from src.audio_processor import AudioProcessor
+from src.authentication import check_password
 
 from src.prompts import cache
 
@@ -37,6 +38,9 @@ class DummyContextManager:
         pass
 
 def run():
+    if not check_password():
+        st.stop()
+        
     st.set_page_config(
         page_title="Channel 1",
         page_icon="./assets/favicon.png",

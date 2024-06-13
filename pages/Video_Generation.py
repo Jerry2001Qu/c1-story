@@ -4,11 +4,15 @@ from streamlit.logger import get_logger
 LOGGER = get_logger(__name__)
 
 from src.video_editor import VideoEditor
+from src.authentication import check_password
 
 from pathlib import Path
 import moviepy.editor as mp
 
 def run():
+    if not check_password():
+        st.stop()
+        
     st.set_page_config(
         page_title="Channel 1",
         page_icon="👋",
