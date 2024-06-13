@@ -62,7 +62,7 @@ class SOTScriptSection(ScriptSection):
     def __repr__(self):
         return f"""SOT ({self.get_byline() if self.is_interview() else "No byline"}): {self.quote}
 
-CLIP {self.clip.id}: {self.start} - {self.end}"""
+CLIP {self.clip.id if self.clip else None}: {self.start} - {self.end}"""
 
     def is_interview(self):
         return self.name != "Unknown"
