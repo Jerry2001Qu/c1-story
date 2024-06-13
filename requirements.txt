@@ -1,7 +1,5 @@
-altair
 numpy
 pandas
-pydeck
 streamlit
 langchain
 langchain-openai
@@ -11,15 +9,13 @@ scenedetect[opencv]
 elevenlabs
 pyloudnorm
 fuzzysearch
-torch
-torchaudio
 moviepy==1.0.3
-onnxruntime
 readtime
 streamlit-aggrid
 st-annotated-text
 streamlit-image-select
 streamlit-profiler==0.2.2
+google-cloud-secret-manager
 google-cloud-storage
 google-cloud-aiplatform
 pillow

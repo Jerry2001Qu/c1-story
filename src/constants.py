@@ -1,15 +1,32 @@
 # Constants
-# STREAMLIT VERSION
+# GCP VERSION
 
-import streamlit as st
+import os
+from google.cloud import secretmanager
 
-ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
-LANGCHAIN_API_KEY = st.secrets["LANGCHAIN_API_KEY"]
-ANTHROPIC_API_KEY = st.secrets["ANTHROPIC_API_KEY"]
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
-HEYGEN_API_KEY = st.secrets["HEYGEN_API_KEY"]
+def get_secret(secret_id, version_id="latest"):
+    """
+    Access the payload for the given secret version if one exists.
+    """
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
 
-GOOGLE_JSON = st.secrets["GOOGLE_JSON"]
+    # Build the resource name of the secret version.
+    name = f"projects/{os.getenv('GOOGLE_CLOUD_PROJECT')}/secrets/{secret_id}/versions/{version_id}"
 
-REUTERS_CLIENT_ID = st.secrets["REUTERS_CLIENT_ID"]
-REUTERS_CLIENT_SECRET = st.secrets["REUTERS_CLIENT_SECRET"]
+    # Access the secret version.
+    response = client.access_secret_version(request={"name": name})
+
+    # Return the decoded payload.
+    return response.payload.data.decode("UTF-8")
+
+ELEVENLABS_API_KEY = get_secret("ELEVENLABS_API_KEY")
+LANGCHAIN_API_KEY = get_secret("LANGCHAIN_API_KEY")
+ANTHROPIC_API_KEY = get_secret("ANTHROPIC_API_KEY")
+OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+HEYGEN_API_KEY = get_secret("HEYGEN_API_KEY")
+
+GOOGLE_JSON = get_secret("GOOGLE_JSON")
+
+REUTERS_CLIENT_ID = get_secret("REUTERS_CLIENT_ID")
+REUTERS_CLIENT_SECRET = get_secret("REUTERS_CLIENT_SECRET")
