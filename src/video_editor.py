@@ -26,7 +26,7 @@ class VideoEditor:
                  music_file: Path,
                  output_resolution: Tuple[int, int] = (1920, 1080),
                  font: Path = None, logo_path: Path = None,
-                 logline_padding=60, dub_volume_lufs=-40,
+                 logline_padding_ratio=1.0909, dub_volume_lufs=-40,
                  lower_volume_duration=1.5, dub_delay=0.5, error_handler=None):
         self.news_script = news_script
         self.clip_manager = clip_manager
@@ -37,7 +37,7 @@ class VideoEditor:
         self.output_resolution = output_resolution
         self.font = font
         self.logo_path = logo_path
-        self.logline_padding = logline_padding
+        self.logline_padding = (self.output_resolution - (self.output_resolution // logline_padding_ratio)) // 2
         self.dub_volume_lufs = dub_volume_lufs
         self.lower_volume_duration = lower_volume_duration
         self.dub_delay = dub_delay
