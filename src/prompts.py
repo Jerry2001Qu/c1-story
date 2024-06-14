@@ -139,10 +139,10 @@ can be spoken by an on camera news anchor. Please don't change any of the facts 
 my original story text at all, and please don't change the wording at all.  Just reformat it
 so a TV news anchor could easily read it aloud.
 
-- Any dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
-- Remove any parentheses and the contained text.
-- Remove any lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
-- Convert any numbers to spoken word. For example, 1,200 to One thousand two hundred.
+- Always remove or replace parentheses/brackets and the contained text. For example this should be fully removed: (local time / 0200EST). Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ. Ensure the wording flows when spoken aloud. 100,000 rupees ($358) -> One hundred thousand rupees, or three hundred fifty eight dollars.
+- Remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
+- Convert ALL numbers to spoken word. For example, 1,200 to One thousand two hundred.
+- ALL dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
 - Make any other changes that seem appropriate.
 
 Here is the story:
@@ -251,10 +251,10 @@ Here is the script:
  - Some paragraphs are quotes. These should be matched with quotes from the shotlist & add a shot_id
  - There may not be any quotes
  - Only put speech in the quote field, no emotes like (laughs)
- - For quotes, always remove or replace parentheses/brackets and the contained text. For example this should be fully removed: (local time / 0200EST). Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ.
- - For quotes, remove any lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
- - For quotes, convert any numbers to spoken word. For example, 1,200 to One thousand two hundred.
- - For quotes, any dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
+ - For quotes, always remove or replace parentheses/brackets and the contained text. For example this should be fully removed: (local time / 0200EST). Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ. Ensure the wording flows when spoken aloud. 100,000 rupees ($358) -> One hundred thousand rupees, or three hundred fifty eight dollars.
+ - For quotes, remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
+ - For quotes, convert ALL numbers to spoken word. For example, 1,200 to One thousand two hundred.
+ - For quotes, ALL dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
  - Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid. ESCAPE QUOTES!
  - Ensure the order remains the same between all paragraphs (SOT & ANCHOR)
  - Don't move all the SOTs to the end
@@ -489,6 +489,25 @@ Return a JSON in a format like:
 
 The transcript from a clip should match the quote from a sot to match. If a clip doesn't match any sot, set sot_id to None.
 Put your response in <response></response> tags."""
+)
+
+tts_prompt = PromptTemplate.from_template(
+"""Here is some text that will be spoken aloud on television:
+
+<script>
+{SCRIPT}
+</script>
+
+This script will be spoken word for word, and therefore needs to be adjusted to be spoken naturally.
+
+ - Always remove or replace parentheses/brackets and the contained text. For example this should be fully removed: (local time / 0200EST). Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ. Ensure the wording flows when spoken aloud. 100,000 rupees ($358) -> One hundred thousand rupees, or three hundred fifty eight dollars.
+ - Remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
+ - Convert ALL numbers to spoken word. For example, 1,200 to One thousand two hundred.
+ - ALL dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
+
+Don't change any of the actual words, just how they are spoken. Make any other changes that will improve how these are spoken.
+Put your response in <response></response> tags.
+"""
 )
 
 get_sot_chain = (get_sot_prompt | opus).with_config({"run_name": "get_sots"})

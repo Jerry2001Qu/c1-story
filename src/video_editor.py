@@ -72,8 +72,8 @@ class VideoEditor:
         st.write("Rendering final video file")
         if self.error_handler:
             self.error_handler.info("Rendering final video")
-        final_video.write_videofile(str(output_file), fps=24, threads=8,
-                                    logger=None)
+        final_video.write_videofile(str(output_file), fps=29.97, threads=8,
+                                    bitrate=15e6, logger=None)
         # /STREAMLIT
 
     def _process_sot_section(self, section: SOTScriptSection) -> mp.VideoFileClip:
@@ -282,7 +282,7 @@ class VideoEditor:
         text_bbox = draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
         text_height = text_bbox[3] - text_bbox[1]
-        text_x = self.logline_padding // 3
+        text_x = self.logline_padding // 2
         text_y = -text_bbox[1] + (height - text_height) // 2
 
         # Draw the text
