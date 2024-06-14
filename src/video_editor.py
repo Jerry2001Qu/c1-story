@@ -37,7 +37,7 @@ class VideoEditor:
         self.output_resolution = output_resolution
         self.font = font
         self.logo_path = logo_path
-        self.logline_padding = (self.output_resolution[0] - (self.output_resolution[0] // logline_padding_ratio)) // 2
+        self.logline_padding = int((self.output_resolution[0] - (self.output_resolution[0] // logline_padding_ratio)) // 2)
         self.dub_volume_lufs = dub_volume_lufs
         self.lower_volume_duration = lower_volume_duration
         self.dub_delay = dub_delay
