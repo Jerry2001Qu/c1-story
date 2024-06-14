@@ -24,7 +24,7 @@ class VideoEditor:
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
                  live_anchor: bool, test_mode: bool, music: bool,
                  music_file: Path,
-                 output_resolution: Tuple[int, int] = (768, 432),
+                 output_resolution: Tuple[int, int] = (1920, 1080),
                  font: Path = None, logo_path: Path = None,
                  logline_padding=40, dub_volume_lufs=-40,
                  lower_volume_duration=1.5, dub_delay=0.5, error_handler=None):
