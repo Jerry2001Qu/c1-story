@@ -73,7 +73,7 @@ class VideoEditor:
         if self.error_handler:
             self.error_handler.info("Rendering final video")
         final_video.write_videofile(str(output_file), fps=29.97, threads=8,
-                                    bitrate=15e6, logger=None)
+                                    bitrate="15M", logger=None)
         # /STREAMLIT
 
     def _process_sot_section(self, section: SOTScriptSection) -> mp.VideoFileClip:
