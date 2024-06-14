@@ -212,6 +212,12 @@ def run():
                 if section.match_type == "CLIP":
                     st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
             
+            def reset_video():
+                st.session_state["video_run"] = False
+                st.session_state["video_ran"] = False
+            
+            high_res = st.toggle("High Resolution", value=False, on_change=reset_video)
+            output_resolution = (1920, 1080) if high_res else (640, 360)
 
             if not st.session_state["video_run"]:
                 if st.button("Generate Video"):
@@ -240,7 +246,7 @@ def run():
                         st.write("Assembling video")
                         error_handler.info("Assembling video")
                         video_output_file = story_folder / "output.mp4"
-                        video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
+                        video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
                         video_editor.assemble_video(output_file=video_output_file)
                     else:
                         video_output_file = story_folder / "output.mp4"
