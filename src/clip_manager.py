@@ -40,7 +40,11 @@ class Clip:
 
     def transcribe_clip(self):
         """Performs speech recognition on the clip's audio."""
-        self.whisper_results = WhisperResults.from_file(self.file_path)
+        audio_file_path = self.file_path.with_suffix('.mp3')
+        video = self.load_video()
+        video.audio.write_audiofile(str(audio_file_path))
+
+        self.whisper_results = WhisperResults.from_file(audio_file_path)
         if self.error_handler:
             if self.whisper_results.no_speech_prob < 0.3:
                 self.error_handler.stream_status(self.whisper_results.english_text, f"Identified Speech ({self.id})", self.file_path)
