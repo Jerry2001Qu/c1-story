@@ -3,7 +3,7 @@ import streamlit as st
 
 from src.constants import REUTERS_CLIENT_ID, REUTERS_CLIENT_SECRET
 
-@st.cache_data(show_spinner=False, ttl=86400)
+@st.cache_data(show_spinner=False, ttl=3600)
 def get_oauth_token():
     url = "https://auth.thomsonreuters.com/oauth/token"
     headers = {"Content-Type": "application/json"}
