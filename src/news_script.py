@@ -33,11 +33,18 @@ class AnchorScriptSection(ScriptSection):
         self.anchor_audio_file: Optional[Path] = None
         self.anchor_audio_clip: Optional[mp.AudioFileClip] = None
         self.brolls: Optional[List] = None
+
+        self.anchor_video_file: Optional[Path] = None
     
     def __repr__(self):
         return f"""{self.text}
 
 {pprint.pformat(self.brolls)}"""
+    
+    def has_anchor_on_screen(self):
+        if self.brolls is None:
+            return False
+        return any([broll["id"] == "Anchor" for broll in self.brolls])
 
 
 class SOTScriptSection(ScriptSection):

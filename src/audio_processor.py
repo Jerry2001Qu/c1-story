@@ -7,6 +7,7 @@ from src.news_script import NewsScript, AnchorScriptSection, is_type
 from src.tts import TTS
 from src.gemini import add_broll
 from src.language import Language
+from src.heygen import animate_anchor
 
 import streamlit as st
 # /STREAMLIT
@@ -275,3 +276,19 @@ class AudioProcessor:
                             if self.error_handler:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
                             del section.brolls[i]
+
+    def _generate_anchor(self, live_anchor: bool, test_mode: bool):
+        for section in self.news_script.get_anchor_sections():
+            if section.has_anchor_on_screen():
+                anchor_video_file = self.news_script.folder / f"{section.id}_anchor.mp4"
+                if live_anchor:
+                    animate_anchor(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=test_mode, error_handler=self.error_handler)
+                    if self.error_handler:
+                        self.error_handler.stream_status(section.text, title="Generated anchor video", video=anchor_video_file)
+                    section.anchor_video_file = anchor_video_file
+                else:
+                    anchor_clip = self.clip_manager.get_anchor_image_clip()
+                    anchor_clip = anchor_clip.set_duration(section.anchor_audio_clip.duration)
+                    anchor_clip.write_videofile(str(anchor_video_file), fps=29.97, threads=8,
+                                    bitrate="10M", logger=None)
+                    section.anchor_video_file = anchor_video_file
