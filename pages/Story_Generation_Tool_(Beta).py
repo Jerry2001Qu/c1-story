@@ -62,10 +62,26 @@ def run():
     ]
     anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_idx]
 
-    verbosity = st.toggle("Display Generation Data", value=True)
-    live_anchor = st.toggle("Motion Anchor", value=True)
-    high_res_anchor = st.toggle("High Res Anchor", value=True)
-    music = st.toggle("Add Music", value=True)
+    if "verbosity" not in st.session_state:
+        st.session_state["verbosity"] = False
+    if "live_anchor" not in st.session_state:
+        st.session_state["live_anchor"] = False
+    if "high_res_anchor" not in st.session_state:
+        st.session_state["high_res_anchor"] = False
+    if "music" not in st.session_state:
+        st.session_state["music"] = True
+    if "high_res" not in st.session_state:
+        st.session_state["high_res"] = False
+    
+    def on_change(var_name):
+        def _toggle():
+            st.session_state[var_name] = not st.session_state[var_name]
+        return _toggle
+
+    verbosity = st.toggle("Display Generation Data", value=st.session_state["verbosity"], on_change=on_change("verbosity"))
+    live_anchor = st.toggle("Motion Anchor", value=st.session_state["live_anchor"], on_change=on_change("live_anchor"))
+    high_res_anchor = st.toggle("High Res Anchor", value=st.session_state["high_res_anchor"], on_change=on_change("high_res_anchor"))
+    music = st.toggle("Add Music", value=st.session_state["music"], on_change=on_change("music"))
     test_mode = not high_res_anchor
 
     languages = ["English", "Spanish", "French", "German", "Polish", "Italian", "Portuguese", "Russian", "Arabic", "Dutch", "Swedish", "Norwegian", "Turkish", "Japanese", "Korean", "Filipino", "Tamil", "Indonesian", "Greek", "Chinese"]
@@ -84,17 +100,22 @@ def run():
     if "video_ran" not in st.session_state:
         st.session_state["video_ran"] = False
     
-    def reset():
+    if "reuters_id" not in st.session_state:
+        st.session_state["reuters_id"] = "tag:reuters.com,2024:newsml_RW635429052024RP1:5"
+    
+    def reset_and_update():
         st.session_state["run"] = False
         st.session_state["ran"] = False
         st.session_state["download_run"] = False
         st.session_state["video_run"] = False
         st.session_state["video_ran"] = False
         error_handler.reset()
+
+        st.session_state["reuters_id"] = st.session_state["reuters_id_input"]
     
     error_handler = StreamlitErrorHandler(error_bar, verbosity)
 
-    reuters_id = st.text_input("Story Asset ID (Paste Here)", value="tag:reuters.com,2024:newsml_RW635429052024RP1:5", on_change=reset)
+    reuters_id = st.text_input("Story Asset ID (Paste Here)", value=st.session_state["reuters_id"], on_change=reset_and_update, key="reuters_id_input",)
     clean_reuters_id = "".join(filter(lambda x: x.isalnum() or x.isspace(), reuters_id))
     if st.button("Download Story Assets"):
         st.session_state["download_run"] = True
@@ -199,11 +220,13 @@ def run():
             if section.match_type == "CLIP":
                 st.warning(f"SOT Section {section.id}'s had no detected speech. Adding entire clip.")
         
-        def reset_video():
+        def reset_video_and_toggle():
             st.session_state["video_run"] = False
             st.session_state["video_ran"] = False
+
+            st.session_state["high_res"] = not st.session_state["high_res"]
         
-        high_res = st.toggle("High Resolution", value=False, on_change=reset_video)
+        high_res = st.toggle("High Resolution", value=st.session_state["high_res"], on_change=reset_video_and_toggle)
         output_resolution = (1920, 1080) if high_res else (640, 360)
 
         if not st.session_state["video_run"]:
