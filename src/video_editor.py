@@ -277,13 +277,17 @@ class VideoEditor:
             font_path = str(self.font)
             font_size = get_font_size_for_height(font_path, int(height * 0.4))
             font = ImageFont.truetype(font_path, font_size)
+        
+        reference_char = "H"
+        ref_text_bbox = draw.textbbox((0, 0), reference_char, font=font)
+        ref_text_height = ref_text_bbox[3] - ref_text_bbox[1]
 
         # Get text size, adjust height, calculate position
         text_bbox = draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
         text_height = text_bbox[3] - text_bbox[1]
         text_x = self.logline_padding // 2
-        text_y = -text_bbox[1] + (height - text_height) // 2
+        text_y = -ref_text_bbox[1] + (height - ref_text_height) // 2
 
         # Draw the text
         draw.text((text_x, text_y), text, font=font, fill=(0, 0, 0, 255))
