@@ -1,7 +1,7 @@
 # DataLoader
 
 # STREAMLIT
-from src.reuters import get_item, get_assets, download_asset
+from src.reuters import get_item, get_assets, download_asset, get_oauth_token
 # /STREAMLIT
 
 from abc import ABC, abstractmethod
@@ -85,29 +85,41 @@ class ReutersAPIDataLoader(DataLoader):
         if self.pulled_reuters_api:
             return
         
-        bodyXhtml, headline, language, located = get_item(self.reuters_id)
+        attempts = 0
+        success = False
 
-        bodyhtml = extract_str_between(html.unescape(bodyXhtml), "<body>", "</body>")
-        shotlist = extract_str_between(bodyhtml, "</p><p>1.", "</p><p>STORY:")[7:-13]
-        shotlist = "\n".join(shotlist.split("</p><p>"))
+        while not success and attempts < 2:
+            try:
+                bodyXhtml, headline, language, located = get_item(self.reuters_id)
 
-        storyline = extract_str_between(bodyhtml, "<p>STORY:", "</body>")[9:-11]
-        storyline = "\n".join([line.strip() for line in storyline.split("</p><p>")[:-1]])
+                bodyhtml = extract_str_between(html.unescape(bodyXhtml), "<body>", "</body>")
+                shotlist = extract_str_between(bodyhtml, "</p><p>1.", "</p><p>STORY:")[7:-13]
+                shotlist = "\n".join(shotlist.split("</p><p>"))
 
-        self.shotlist = shotlist
-        self.storyline = storyline
-        self.story_title = headline
-        self.language = language
-        self.location = located
+                storyline = extract_str_between(bodyhtml, "<p>STORY:", "</body>")[9:-11]
+                storyline = "\n".join([line.strip() for line in storyline.split("</p><p>")[:-1]])
 
-        video_asset = get_assets(self.reuters_id)[0]
-        video_url, asset_type = download_asset(self.reuters_id, video_asset["uri"])
-        res = requests.get(video_url)
-        video_file_path = self.storage_path / "video.mp4"
-        with open(video_file_path, "wb") as file:
-            file.write(res.content)
-        
-        self.video_file_path = video_file_path
+                self.shotlist = shotlist
+                self.storyline = storyline
+                self.story_title = headline
+                self.language = language
+                self.location = located
+
+                video_asset = get_assets(self.reuters_id)[0]
+                video_url, asset_type = download_asset(self.reuters_id, video_asset["uri"])
+                res = requests.get(video_url)
+                video_file_path = self.storage_path / "video.mp4"
+                with open(video_file_path, "wb") as file:
+                    file.write(res.content)
+                
+                self.video_file_path = video_file_path
+                success = True
+            except Exception as e:
+                get_oauth_token.clear()
+                if attempts == 1:
+                    raise e
+            finally:
+                attempts += 1
 
         self.pulled_reuters_api = True
         
