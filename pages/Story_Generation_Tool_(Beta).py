@@ -228,6 +228,7 @@ def run():
         
         high_res = st.toggle("High Resolution", value=st.session_state["high_res"], on_change=reset_video_and_toggle)
         output_resolution = (1920, 1080) if high_res else (640, 360)
+        bitrate = "10M" if high_res else "1M"
 
         if not st.session_state["video_run"]:
             if st.button("Generate Video"):
@@ -256,7 +257,7 @@ def run():
                     st.write("Assembling video")
                     error_handler.info("Assembling video")
                     video_output_file = story_folder / "output.mp4"
-                    video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
+                    video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, bitrate=bitrate, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
                     video_editor.assemble_video(output_file=video_output_file)
                 else:
                     video_output_file = story_folder / "output.mp4"

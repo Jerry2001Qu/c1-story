@@ -74,6 +74,8 @@ class AudioProcessor:
         for section in self.news_script.get_sot_sections():
             if not section.clip:
                 continue
+            if section.language == Language.from_str("english"):
+                continue
             if section.clip.whisper_results.language == Language.from_str("english"):
                 continue
             audio_file = self.anchor_audio_folder / f"{section.id}_dub.mp3"

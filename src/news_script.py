@@ -82,7 +82,7 @@ CLIP {self.clip.id if self.clip else None}: {self.start} - {self.end}"""
     
     def generate_dub(self, audio_file: Path, voice_id: str = "9f8o652aaiVK5HavyCf1"):
         self.dub_audio_file = audio_file
-        TTS(self.quote, str(audio_file), voice_id=voice_id)
+        TTS(self.quote, str(audio_file), voice_id=voice_id, end_padding=0.3)
 
 class NewsScript:
     """Represents the entire news script."""

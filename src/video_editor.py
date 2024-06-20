@@ -25,6 +25,7 @@ class VideoEditor:
                  live_anchor: bool, test_mode: bool, music: bool,
                  music_file: Path,
                  output_resolution: Tuple[int, int] = (1920, 1080),
+                 bitrate: str = "10M",
                  font: Path = None, logo_path: Path = None,
                  logline_padding_ratio=1.0909, dub_volume_lufs=-40,
                  lower_volume_duration=1.5, dub_delay=0.5, error_handler=None):
@@ -35,6 +36,7 @@ class VideoEditor:
         self.music = music
         self.music_file = music_file
         self.output_resolution = output_resolution
+        self.bitrate = bitrate
         self.font = font
         self.logo_path = logo_path
         self.logline_padding = int((self.output_resolution[0] - (self.output_resolution[0] // logline_padding_ratio)) // 2)
@@ -73,7 +75,7 @@ class VideoEditor:
         if self.error_handler:
             self.error_handler.info("Rendering final video")
         final_video.write_videofile(str(output_file), fps=29.97, threads=8,
-                                    bitrate="10M", logger=None)
+                                    bitrate=self.bitrate, logger=None)
         # /STREAMLIT
 
     def _process_sot_section(self, section: SOTScriptSection) -> mp.VideoFileClip:
@@ -81,7 +83,7 @@ class VideoEditor:
         clip = section.clip.load_video()
         clip = resize_image_clip(clip, self.output_resolution)
 
-        if section.clip.whisper_results.language == Language.from_str("English") or section.dub_audio_file is None:
+        if section.dub_audio_file is None:
             clip = clip.subclip(section.start, min(section.end, clip.duration))
         else:
             clip = clip.subclip(section.start)
