@@ -23,6 +23,8 @@ opus = ChatAnthropic(model="claude-3-opus-20240229", temperature=0, max_tokens=4
 sonnet = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 
+sonnet35 = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
+
 cache = SQLiteCache(database_path="langchain.db")
 set_llm_cache(cache)
 
@@ -189,12 +191,14 @@ Here is the script:
 
 Please carefully read through the list of quotation clips and the news script.
 
-In a <scratchpad>, think through where it would make the most sense to insert each quotation into the news script in a way that fits the overall story and flow. Remember to:
+In a <scratchpad>, think through where it would make the most sense to insert quotations into the news script in a way that fits the overall story and flow. Remember to:
 
-- Keep the quotations short, cutting out portions if needed to keep them concise. No more than 1 or 2 sentences.
+- Keep the quotations short, extracting just a portion of the original quote if needed to keep them concise. No more than 1 or 2 sentences.
+- If extracting a portion of a quotation, ensure the portion is CONTIGUOUS. Never cut a gap out of the portion.
 - Spread the quotations throughout the story
+- Aim for 2-3 quotations inserted. You do not have to use all of the quotations.
 - You may start the story with an English quotation if it makes sense to do so. But don't with a non-English quotation
-- Do not end the story with a quotation
+- NEVER put a quotation at the end of the entire story. We must end with the script
 - Insert the portions of quotations including their descriptions
 - Do not add any transitions between the quotations and the rest of the script
 - Do not change the wording of the news script except to insert the quotations
@@ -510,20 +514,20 @@ Put your response in <response></response> tags.
 """
 )
 
-get_sot_chain = (get_sot_prompt | opus).with_config({"run_name": "get_sots"})
-facts_chain = (facts_prompt | opus).with_config({"run_name": "generate_facts"})
-parse_sot_chain = (parse_sot_prompt | opus).with_config({"run_name": "parse_sots"})
-reformat_chain = (reformat_prompt | opus).with_config({"run_name": "reformat_script"})
-sot_chain = (sot_prompt | opus).with_config({"run_name": "add_sots"})
-parse_chain = (parse_prompt | opus).with_config({"run_name": "parse_script"})
-logline_chain = (logline_prompt | opus).with_config({"run_name": "logline"})
-headline_chain = (headline_prompt | opus).with_config({"run_name": "headline"})
-parse_broll_chain = (parse_broll_prompt | opus).with_config({"run_name": "parse_broll"})
-fix_broll_chain = (fix_broll_prompt | opus).with_config({"run_name": "fix_broll"})
-match_sot_chain = (match_sot_prompt | opus).with_config({"run_name": "match_sot"})
-match_hard_sot_chain = (match_hard_sot_prompt | opus).with_config({"run_name": "match_hard_sot"})
-language_to_iso_chain = (language_to_iso_prompt | opus).with_config({"run_name": "language_to_iso"})
-match_clip_to_sots_chain = (match_clip_to_sots_prompt | opus).with_config({"run_name": "match_clip_to_sots"})
+get_sot_chain = (get_sot_prompt | sonnet35).with_config({"run_name": "get_sots"})
+facts_chain = (facts_prompt | sonnet35).with_config({"run_name": "generate_facts"})
+parse_sot_chain = (parse_sot_prompt | sonnet35).with_config({"run_name": "parse_sots"})
+reformat_chain = (reformat_prompt | sonnet35).with_config({"run_name": "reformat_script"})
+sot_chain = (sot_prompt | sonnet35).with_config({"run_name": "add_sots"})
+parse_chain = (parse_prompt | sonnet35).with_config({"run_name": "parse_script"})
+logline_chain = (logline_prompt | sonnet35).with_config({"run_name": "logline"})
+headline_chain = (headline_prompt | sonnet35).with_config({"run_name": "headline"})
+parse_broll_chain = (parse_broll_prompt | sonnet35).with_config({"run_name": "parse_broll"})
+fix_broll_chain = (fix_broll_prompt | sonnet35).with_config({"run_name": "fix_broll"})
+match_sot_chain = (match_sot_prompt | sonnet35).with_config({"run_name": "match_sot"})
+match_hard_sot_chain = (match_hard_sot_prompt | sonnet35).with_config({"run_name": "match_hard_sot"})
+language_to_iso_chain = (language_to_iso_prompt | sonnet35).with_config({"run_name": "language_to_iso"})
+match_clip_to_sots_chain = (match_clip_to_sots_prompt | sonnet35).with_config({"run_name": "match_clip_to_sots"})
 
 from sqlalchemy.exc import OperationalError
 import time

@@ -217,13 +217,15 @@ The protesters' makeshift barricade symbolizes their attempt to establish a phys
 The artwork and signs on the barricade hint at the protesters' motivations and demands. Identifying these details could be crucial to understanding the context of the protest.
 The chaotic camera work, combined with the intense audio, immerses the viewer in the tension of the moment. It conveys the raw energy of both the police advance and the protesters' resistance.
 This footage is valuable for illustrating the escalation of a protest. It could be used in a news report to provide viewers with a visceral understanding of the events unfolding on the ground. In a documentary context, this scene could represent a turning point in the protest timeline, signaling a shift towards more direct confrontation.
+Minimum Timing: 0:00-0:05, this completes the pan and establishes the chaotic scene.
 </example>"""]
 
     content += ["""
 Describe this video with as much detail as possible. Include timestamps sections of the video. If possible, please give comments on people, location, timing,
-shot (wide, professional, etc.), & anything else you feel could be relevant to fully understand what is
-happening in this video & making video editing decisions."""]
-    
+shot (wide, professional, etc.), & anything else you feel could be relevant to fully understand what is happening in this video & making video editing decisions.
+Also include the minimum amount of time this shot should be on screen for, before cutting away. Generally panning shots need to be on screen longer to not seem abrupt,
+while a still shot can be cut off sooner. Include the key informational part of the clip."""]
+
     content = [part for part in content if part is not None]
 
     response = GEMINI.generate_content(content)
