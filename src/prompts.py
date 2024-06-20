@@ -491,7 +491,7 @@ Return a JSON in a format like:
 }}
 </example>
 
-The transcript from a clip should match the quote from a sot to match. If a clip doesn't match any sot, set sot_id to None.
+The transcript from a clip should match the quote from a sot to match. If a clip doesn't match any sot, set sot_id to null.
 Put your response in <response></response> tags."""
 )
 
