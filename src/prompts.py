@@ -492,7 +492,7 @@ Return a JSON in a format like:
 </example>
 
 The transcript from a clip should match the quote from a sot to match. If a clip doesn't match any sot, set sot_id to null.
-Put your response in <response></response> tags."""
+Ensure properly formatted JSON. Put your response in <response></response> tags."""
 )
 
 tts_prompt = PromptTemplate.from_template(
