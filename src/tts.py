@@ -9,6 +9,7 @@ from elevenlabs.client import ElevenLabs
 from elevenlabs import Voice, VoiceSettings
 
 from pathlib import Path, PosixPath
+import uuid
 
 import moviepy.editor as mp
 
@@ -43,7 +44,7 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
         }
     )
 
-    tmp_file = "/tmp/tmp.mp3"
+    tmp_file = f"/tmp/{str(uuid.uuid4())}.mp3"
     with open(tmp_file, 'wb') as file:
         for chunk in audio:
             if chunk:
@@ -61,6 +62,7 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
         
         audio_clip = mp.concatenate_audioclips(audio_clips)
     audio_clip.write_audiofile(str(filename), logger=None)
+    Path(tmp_file).unlink()
 
 @st.cache_data(show_spinner=False, hash_funcs={Voice: lambda x: x.dict(), PosixPath: lambda x: str(x.resolve())})
 def TTS_voice(text, filename, voice: Voice, previous_text="", next_text="", start_padding=0, end_padding=0):
@@ -78,7 +80,7 @@ def TTS_voice(text, filename, voice: Voice, previous_text="", next_text="", star
         }
     )
 
-    tmp_file = "/tmp/tmp.mp3"
+    tmp_file = f"/tmp/{str(uuid.uuid4())}.mp3"
     with open(tmp_file, 'wb') as file:
         for chunk in audio:
             if chunk:
@@ -96,3 +98,4 @@ def TTS_voice(text, filename, voice: Voice, previous_text="", next_text="", star
         
         audio_clip = mp.concatenate_audioclips(audio_clips)
     audio_clip.write_audiofile(str(filename), logger=None)
+    Path(tmp_file).unlink()
