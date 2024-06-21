@@ -44,6 +44,7 @@ class VideoEditor:
         self.lower_volume_duration = lower_volume_duration
         self.dub_delay = dub_delay
         self.error_handler = error_handler
+        self.fps = 29.97
 
     def assemble_video(self, output_file: Path = Path("output.mp4")):
         """Assembles the final video from script sections and B-roll."""
@@ -70,11 +71,12 @@ class VideoEditor:
         final_video = self._add_logline(concat_video, logline)
         if self.music:
             final_video = self._add_background_music(final_video)
+        final_video = final_video.fadein((1.0/self.fps)*10).fadeout((1.0/self.fps)*10)
 
         st.write("Rendering final video file")
         if self.error_handler:
             self.error_handler.info("Rendering final video")
-        final_video.write_videofile(str(output_file), fps=29.97, threads=8,
+        final_video.write_videofile(str(output_file), fps=self.fps, threads=8,
                                     bitrate=self.bitrate, logger=None)
         # /STREAMLIT
 
