@@ -49,16 +49,17 @@ def run():
         
         error_bar = st.container()
 
-    anchor_imgs = ["assets/EDDIE-square.png", "assets/Kristen-square.png", "assets/DANIEL-square.png", "assets/MIRANDA-square.png"]
-    anchor_names = ["Eddie", "Kristen", "Daniel", "Miranda"]
+    anchor_imgs = ["assets/EDDIE-square.png", "assets/DANIEL-square.png", "assets/MIRANDA-square.png", "assets/UNKNOWN-square.png", "assets/UNKNOWN-square.png"]
+    anchor_names = ["Eddie", "Daniel", "Miranda", "Sarah", "Kara"]
     
     anchor_idx = image_select("Choose an Anchor", anchor_imgs, anchor_names, return_value="index", use_container_width=False)
 
     anchor_map = [
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
-        ("yELTnbNFhESclGsoYVTM", "LHgN09QqKzsRsniiMpww", "6afc5b115c6f440aa92f43a32f50616f"),
+        ("yELTnbNFhESclGsoYVTM", "l6Qo5Atx1JTwyCLkMKQm", "6afc5b115c6f440aa92f43a32f50616f"),
+        ("9f8o652aaiVK5HavyCf1", "l6Qo5Atx1JTwyCLkMKQm", "20251eb0e4504ddbb913f1b09e2bbb8e"),
+        ("dyhDlCWGL3pDsrANTLru", "l6Qo5Atx1JTwyCLkMKQm", "395e53f63eba4ce9a9e3dddc9a0263ed"),
+        ("H2LXjnBS1droRODepT50", "l6Qo5Atx1JTwyCLkMKQm", "e1dfdd60549940159aa4eb529e6f78a7"),
+        ("GxOlMeAhhAqPmZNfxxUm", "l6Qo5Atx1JTwyCLkMKQm", "2c67e653633c4894834585e3a9d5b2be"),
     ]
     anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_idx]
 
