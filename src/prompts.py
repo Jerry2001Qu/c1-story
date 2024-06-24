@@ -536,7 +536,7 @@ from src.hashing import hash_chain
 from langchain_core.runnables.base import RunnableBinding
 
 def extract_xml(text):
-    return XMLOutputParser().invoke(text[text.find("<response>"):text.rfind("</response>")+11].replace("&", "and"))
+    return XMLOutputParser().invoke(text[text.rfind("<response>"):text.rfind("</response>")+11].replace("&", "and"))
 
 def run_chain(chain, params, max_retries=3, retry_delay=5):
     """Runs the LangChain chain with retry logic."""
