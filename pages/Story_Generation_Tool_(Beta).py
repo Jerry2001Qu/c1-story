@@ -181,6 +181,9 @@ def run():
                 script = st.session_state["script"]
 
                 clip_manager.error_handler = error_handler
+                clip_manager.anchor_voice_id = anchor_voice_id
+                clip_manager.voiceover_voice_id = voiceover_voice_id
+                clip_manager.anchor_avatar_id = anchor_avatar_id
                 script.error_handler = error_handler
         
         st.session_state["ran"] = True
