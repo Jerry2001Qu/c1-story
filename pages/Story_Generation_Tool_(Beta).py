@@ -49,7 +49,7 @@ def run():
         
         error_bar = st.container()
 
-    anchor_imgs = ["assets/EDDIE-square.png", "assets/DANIEL-square.png", "assets/MIRANDA-square.png", "assets/UNKNOWN-square.png", "assets/UNKNOWN-square.png"]
+    anchor_imgs = ["assets/EDDIE-square.png", "assets/DANIEL-square.png", "assets/MIRANDA-square.png", "assets/SARAH-square.png", "assets/KARA-square.png"]
     anchor_names = ["Eddie", "Daniel", "Miranda", "Sarah", "Kara"]
     
     anchor_idx = image_select("Choose an Anchor", anchor_imgs, anchor_names, return_value="index", use_container_width=False)
