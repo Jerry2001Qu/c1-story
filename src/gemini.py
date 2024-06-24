@@ -16,7 +16,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file_path
 
 from src.prompts import extract_xml
 from src.clip_manager import Clip
-from src.gcp import upload_to_gcs_part, clear_uploaded_blobs
+from src.gcp import GCSManager
 from src.hashing import sha256sum, hash_audio_file
 # /STREAMLIT
 
@@ -110,6 +110,7 @@ def describe_clips(clips: List[Clip], shotlist: str, previous_shot_id, next_shot
     """
     Uses the Gemini model to match video clips to shot descriptions from a shotlist. Also determines if each video clip has a quote.
     """
+    gcs = GCSManager()
     content: List = []
 
     # Instructions and example for Gemini
@@ -150,7 +151,7 @@ Here are the clips:
         frame_file, audio_file = extract_middle_frame_and_audio(clip.file_path)
 
         content += ["<clip>\n"]
-        content += [f"ID {name}:", upload_to_gcs_part(frame_file), upload_to_gcs_part(audio_file)]
+        content += [f"ID {name}:", gcs.upload_to_gcs_part(frame_file), gcs.upload_to_gcs_part(audio_file)]
         content += [f"Clip has speech with transcript: {clip.whisper_results.english_text}" if clip.whisper_results.has_speech else "Clip may not have speech"]
         content += ["\n</clip>"]
         content += ["\n\n"]
@@ -178,17 +179,18 @@ Only label descriptions with those in the shotlist exactly. <shot></shot> should
 
     response = GEMINI.generate_content(content)
 
-    clear_uploaded_blobs()
+    gcs.clear_uploaded_blobs()
 
     clips_xml = extract_xml(response.text)
     return clips_xml
 
 @st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file})
 def full_description(clip_file, description, title):
+    gcs = GCSManager()
     content = []
     content += ["Video clip:"]
 
-    content += [upload_to_gcs_part(clip_file)]
+    content += [gcs.upload_to_gcs_part(clip_file)]
 
     if title:
         content += ["This clip is from a video about: ", title]
@@ -231,16 +233,17 @@ while a still shot can be cut off sooner. Include the key informational part of 
     response = GEMINI.generate_content(content)
 
     # print(gemini.count_tokens(content))
-    # clear_uploaded_blobs()
+    gcs.clear_uploaded_blobs()
 
     return response.text
 
 @st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file})
 def add_broll(audio_file, full_descriptions_str, section_timings_str):
+    gcs = GCSManager()
     content = []
     content += ["You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling for a TV audience."]
     content += ["Here are the broll descriptions: ", f"<broll>{full_descriptions_str}</broll>\n\n"]
-    content += ["Here is the audio clip: ", upload_to_gcs_part(audio_file)]
+    content += ["Here is the audio clip: ", gcs.upload_to_gcs_part(audio_file)]
     content += ["Here are section timings: ", f"<section_timings>{section_timings_str}</section_timings>\n\n"]
     content += ["Here is an example: ", """<example>
 **Section 1: 0 - 11.96**
@@ -264,7 +267,7 @@ This will be aired on TV, so select & place clips informatively and dramatically
     content = [part for part in content if part is not None]
 
     response = GEMINI.generate_content(content)
-    clear_uploaded_blobs()
+    gcs.clear_uploaded_blobs()
 
     try:
         return response.text

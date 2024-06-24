@@ -27,44 +27,48 @@ import string
 storage_client = storage.Client()
 blobs = []
 
-def upload_to_gcs_blob(local_file_path: Union[str, Path], bucket_name="gemini-colab") -> Blob:
-    bucket = storage_client.bucket(bucket_name)
-    local_file_path = Path(local_file_path)
-    random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
-    extension = local_file_path.suffix
-    blob_name = random_string + extension
-    blob = bucket.blob(blob_name)
-    blob.upload_from_filename(local_file_path)
+class GCSManager:
+    blobs: list[Blob]
 
-    global blobs
-    blobs.append(blob)
+    def __init__(self):
+        self.blobs = []
+    
+    def upload_to_gcs_blob(self, local_file_path: Union[str, Path], bucket_name="gemini-colab") -> Blob:
+        bucket = storage_client.bucket(bucket_name)
+        local_file_path = Path(local_file_path)
+        random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
+        extension = local_file_path.suffix
+        blob_name = random_string + extension
+        blob = bucket.blob(blob_name)
+        blob.upload_from_filename(local_file_path)
 
-    return blob
+        self.blobs.append(blob)
 
-def upload_to_gcs_part(local_file_path: Union[str, Path], bucket_name="gemini-colab") -> Part:
-    local_file_path = Path(local_file_path)
-    extension = local_file_path.suffix
-    blob = upload_to_gcs_blob(local_file_path, bucket_name)
+        return blob
+    
+    def upload_to_gcs_part(self, local_file_path: Union[str, Path], bucket_name="gemini-colab") -> Part:
+        local_file_path = Path(local_file_path)
+        extension = local_file_path.suffix
+        blob = self.upload_to_gcs_blob(local_file_path, bucket_name)
 
-    uri = f"gs://{bucket_name}/{blob.name}"
-    mime_types = {
-        ".mp4": "video/mp4",
-        ".mp3": "audio/mpeg",
-        ".jpg": "image/jpeg",
-    }
-    mime_type = mime_types.get(extension) 
-    if not mime_type:
-        raise ValueError(f"Unsupported file extension: {extension}")
+        uri = f"gs://{bucket_name}/{blob.name}"
+        mime_types = {
+            ".mp4": "video/mp4",
+            ".mp3": "audio/mpeg",
+            ".jpg": "image/jpeg",
+        }
+        mime_type = mime_types.get(extension) 
+        if not mime_type:
+            raise ValueError(f"Unsupported file extension: {extension}")
 
-    return Part.from_uri(uri, mime_type=mime_type)
+        return Part.from_uri(uri, mime_type=mime_type)
 
-def upload_to_gcs_url(local_file_path: Union[str, Path], bucket_name="gemini-colab") -> str:
-    blob = upload_to_gcs_blob(local_file_path, bucket_name)
-    return blob.public_url
-
-def clear_uploaded_blobs():
-    """Deletes blobs that were uploaded to Google Cloud Storage."""
-    global blobs
-    for blob in blobs:
-        blob.delete()
-    blobs.clear()
+    def upload_to_gcs_url(self, local_file_path: Union[str, Path], bucket_name="gemini-colab") -> str:
+        blob = self.upload_to_gcs_blob(local_file_path, bucket_name)
+        return blob.public_url
+    
+    def clear_uploaded_blobs(self):
+        """Deletes blobs that were uploaded to Google Cloud Storage."""
+        for blob in self.blobs:
+            blob.delete()
+        self.blobs.clear()

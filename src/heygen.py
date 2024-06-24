@@ -1,5 +1,5 @@
 # STREAMLIT
-from src.gcp import upload_to_gcs_url, clear_uploaded_blobs
+from src.gcp import GCSManager
 from src.constants import HEYGEN_API_KEY
 from src.hashing import sha256sum, hash_audio_file, hash_ignore, hash_absolute_path
 from src.error_handler import StreamlitErrorHandler
@@ -29,7 +29,8 @@ def get_heygen_avatars():
 @st.cache_data(show_spinner=True, hash_funcs={PosixPath: hash_absolute_path, StreamlitErrorHandler: hash_ignore})
 def animate_anchor(local_audio_file_path: Path, transcript: str, avatar_id: str, output_path: Path, avatar_style: str = 'normal', test: bool = True, error_handler=None):
     # Upload the local audio file to GCP and get the URL
-    audio_url = upload_to_gcs_url(local_audio_file_path, "public-heygen-assets")
+    gcs = GCSManager()
+    audio_url = gcs.upload_to_gcs_url(local_audio_file_path, "public-heygen-assets")
     
     # Define the request payload
     payload = {
@@ -76,7 +77,7 @@ def animate_anchor(local_audio_file_path: Path, transcript: str, avatar_id: str,
         status_data = status_response.json()["data"]
         
         if status_data["status"] == "completed":
-            clear_uploaded_blobs()
+            gcs.clear_uploaded_blobs()
             video_url = status_data["video_url"]
             # Download the video
             video_response = requests.get(video_url)
@@ -84,7 +85,7 @@ def animate_anchor(local_audio_file_path: Path, transcript: str, avatar_id: str,
                 video_file.write(video_response.content)
             return
         elif status_data["status"] == "failed":
-            clear_uploaded_blobs()
+            gcs.clear_uploaded_blobs()
             raise Exception(f"Video generation failed: {status_data.get('error')}")
         elif status_data["status"] in ["processing", "pending"]:
             # if error_handler:
