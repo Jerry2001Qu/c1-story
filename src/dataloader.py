@@ -90,9 +90,10 @@ class ReutersAPIDataLoader(DataLoader):
 
         while not success and attempts < 2:
             try:
-                bodyXhtml, headline, language, located = get_item(self.reuters_id)
+                raw_html, headline, language, located = get_item(self.reuters_id)
 
-                bodyhtml = extract_str_between(html.unescape(bodyXhtml), "<body>", "</body>")
+                parsed_html = html.unescape(raw_html).replace("<p/>", "")
+                bodyhtml = extract_str_between(parsed_html, "<body>", "</body>")
                 shotlist = extract_str_between(bodyhtml, "</p><p>1.", "</p><p>STORY:")[7:-13]
                 shotlist = "\n".join(shotlist.split("</p><p>"))
 
