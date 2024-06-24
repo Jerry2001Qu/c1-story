@@ -57,6 +57,10 @@ class AudioProcessor:
                 end_padding = 1.0 if i == len(self.news_script.sections)-1 else 0.3
                 TTS(section.text, str(audio_file), voice_id=self.clip_manager.anchor_voice_id, start_padding=start_padding, end_padding=end_padding)
 
+                transcript_file = self.anchor_audio_folder / f"{section.id}.txt"
+                with open(transcript_file, 'w') as f:
+                    f.write(section.text)
+
                 audio_clip = mp.AudioFileClip(str(audio_file))
                 section.anchor_audio_file = audio_file
                 section.anchor_audio_clip = audio_clip
