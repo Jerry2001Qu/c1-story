@@ -237,7 +237,7 @@ class AudioProcessor:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
                             del section.brolls[i]
                 else:
-                    if broll_duration < 1.0:
+                    if broll_duration < 0.8:
                         if self.error_handler:
                             self.error_handler.warning(f"Broll placement in section {section.id} is too short ({broll_duration}). Removing clip.")
                         if i-1 >= 0:
