@@ -61,7 +61,7 @@ class VideoEditor:
                         video_clips.append(self._process_anchor_section(section))
                 else:
                     print(f"ERROR: Unknown section type: {type(section)}")
-                progress_bar.progress(i / (len(self.news_script.sections)-1))
+                progress_bar.progress((i+1) / len(self.news_script.sections))
             except Exception as e:
                 if self.error_handler:
                     self.error_handler.warning(f"Error when assembling section {section.id}: {traceback.format_exc()}")
