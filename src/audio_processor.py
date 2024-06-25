@@ -156,9 +156,7 @@ class AudioProcessor:
         
         for section in self.news_script.get_anchor_sections():
             duration = section.anchor_audio_clip.duration
-            for i, broll in enumerate(section.brolls[:]):
-                if broll["start"] > duration:
-                    del section.brolls[i]
+            section.brolls = [broll for broll in section.brolls if broll["start"] <= duration]
             for broll in section.brolls:
                 if broll["end"] > duration:
                     broll["end"] = duration
@@ -188,7 +186,10 @@ class AudioProcessor:
 
         
         for section in self.news_script.get_anchor_sections():
+            new_brolls = []
+
             for i, broll in enumerate(section.brolls):
+                keep_broll = True
                 broll_duration = broll["end"] - broll["start"]
                 if broll["id"] == "Anchor":
                     if broll_duration < 2.0:
@@ -231,11 +232,11 @@ class AudioProcessor:
                                 section.brolls[i+1]["start"] = broll["start"]
                             if self.error_handler:
                                 self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Surrounding clips will be slowed")
-                            del section.brolls[i]
+                            keep_broll = False
                         else:
                             if self.error_handler:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
-                            del section.brolls[i]
+                            keep_broll = False
                 else:
                     if broll_duration < 0.8:
                         if self.error_handler:
@@ -277,11 +278,14 @@ class AudioProcessor:
                                 section.brolls[i+1]["start"] = broll["start"]
                             if self.error_handler:
                                 self.error_handler.warning(f"Broll {broll['id']} in section {section.id} could not be filled. Surrounding clips will be slowed")
-                            del section.brolls[i]
+                            keep_broll = False
                         else:
                             if self.error_handler:
                                 self.error_handler.stream_status(pprint.pformat(section.brolls), f"Broll {broll['id']} in section {section.id} filled")
-                            del section.brolls[i]
+                            keep_broll = False
+                if keep_broll:
+                    new_brolls.append(broll)
+            section.brolls = new_brolls
 
     def _generate_anchor(self, live_anchor: bool, test_mode: bool):
         for section in self.news_script.get_anchor_sections():
