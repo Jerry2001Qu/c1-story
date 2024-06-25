@@ -150,6 +150,9 @@ so a TV news anchor could easily read it aloud.
   - 1,200 -> One thousand two hundred
 - ALL dates need to be formatted so they can be read aloud.
   - May 1 -> May 1st
+- Days of week with dates should remove the date. Leaving the day of the week.
+  - Monday, May 1 -> Monday
+  - on Tuesday (June 25) -> on Tuesday
 - Move "PLACEHOLDER said" to the beginning of the sentence if it is not already there.
   - ("We do not even have half of the people we should have, " Oleg, 49-year-old gunner said.) -> (49-year-old gunner, Oleg said, "We do not even have half of the people we should have.")
   - (The offensive has left Gaza in ruins, killing more than 37,600 people, according to Gaza's health ministry.) -> (According to Gaza's health ministry, the offensive has left Gaza in ruins, killing more than 37,600 people.)
