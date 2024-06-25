@@ -94,7 +94,7 @@ get_sot_prompt = PromptTemplate.from_template(
 {SHOTLIST}
 </shotlist>
 
-Please give me a numbered list of shots in the shotlist that contain quotations. Don't copy from the examples. 
+Please give me a numbered list of shots in the shotlist that contain quotations. The numbers should be from the original shotlist. Don't copy from the examples.
 Include the entire section from the shotlist including parts like :(SOUNDBITE)(English) LOREM IPSUM, SAYING:".
 Copy from the shotlist exactly and put it in <response></response> tags. If there are no quotes respond with <response>NO SOT</response>.""")
 
