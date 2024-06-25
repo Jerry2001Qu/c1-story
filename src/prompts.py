@@ -141,11 +141,20 @@ can be spoken by an on camera news anchor. Please don't change any of the facts 
 my original story text at all, and please don't change the wording at all.  Just reformat it
 so a TV news anchor could easily read it aloud.
 
-- Always remove or replace parentheses/brackets and the contained text. For example this should be fully removed: (local time / 0200EST). Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ. Ensure the wording flows when spoken aloud. 100,000 rupees ($358) -> One hundred thousand rupees, or three hundred fifty eight dollars.
+- Always remove or replace parentheses/brackets and the contained text.
+  - For example this should be fully removed: (local time / 0200EST).
+  - Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ.
+  - Ensure the wording flows when spoken aloud. 100,000 rupees ($358) -> One hundred thousand rupees, or three hundred fifty eight dollars.
 - Remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
-- Convert ALL numbers to spoken word. For example, 1,200 to One thousand two hundred.
-- ALL dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
-- Make any other changes that seem appropriate.
+- Convert ALL numbers to spoken word.
+  - 1,200 -> One thousand two hundred
+- ALL dates need to be formatted so they can be read aloud.
+  - May 1 -> May 1st
+- Move "PLACEHOLDER said" to the beginning of the sentence if it is not already there.
+  - ("We do not even have half of the people we should have, " Oleg, 49-year-old gunner said.) -> (49-year-old gunner, Oleg said, "We do not even have half of the people we should have.")
+  - (The offensive has left Gaza in ruins, killing more than 37,600 people, according to Gaza's health ministry.) -> (According to Gaza's health ministry, the offensive has left Gaza in ruins, killing more than 37,600 people.)
+  - (He will return to Australia after the hearing, according to a Wikileaks statement.) -> (According to a Wikileaks statement, he will return to Australia after the hearing.)
+- Make any other changes that would aid in the story being read aloud.
 
 Here is the story:
 <story>
