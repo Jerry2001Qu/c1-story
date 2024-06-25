@@ -124,6 +124,9 @@ class VideoEditor:
             # 6. Set new audio
             clip = clip.set_audio(new_audio)
             clip = clip.set_duration(dub_end_time)
+        
+        if section.is_interview():
+            clip = self._add_byline(clip, section.name, section.title)
 
         return clip.subclip(0, clip.duration - 0.1)
 
@@ -209,6 +212,55 @@ class VideoEditor:
         broll_clip = broll_clip.set_duration(broll_duration)
         broll_clip = resize_image_clip(broll_clip, self.output_resolution)
         return broll_clip
+    
+    def _add_byline(self, clip: mp.VideoFileClip, name: str, title: str) -> mp.VideoFileClip:
+        """Adds a lower-third byline above the logline to the given clip."""
+
+        output_width, output_height = clip.w, clip.h
+        bottom_margin = 2
+
+        byline_height = int(output_height * (162/1080))
+        inner_content_height = int(byline_height * (82/162))
+        byline_padding = (byline_height - inner_content_height) // 2
+
+        top_inner_content_height = int(inner_content_height * (33/82))
+        bottom_inner_content_height = int(inner_content_height * (25/82))
+        middle_inner_content_spacing = inner_content_height - top_inner_content_height - bottom_inner_content_height
+
+        name_text_clip = self._create_raw_text_clip(name.upper(), top_inner_content_height, (255, 255, 255, 255))
+        title_text_clip = self._create_raw_text_clip(title.upper(), bottom_inner_content_height, (255, 255, 255, 255))
+
+        inner_content_width = max(name_text_clip.w, title_text_clip.w)
+        byline_width = inner_content_width + byline_padding * 2
+
+        byline_x = self.logline_padding
+        logline_height = int(output_height * (150/1080))
+        byline_y = output_height - self.logline_padding - byline_height - logline_height - bottom_margin
+
+        bg_clip = (
+            mp.ColorClip(size=(byline_width, byline_height), color=(0, 5, 52, 255 * 0.9))
+            .set_position(
+                (byline_x, byline_y)
+            )
+            .set_duration(clip.duration)
+        )
+
+        name_x = byline_x + byline_padding
+        name_y = byline_y + byline_padding
+
+        name_text_clip = name_text_clip.set_position(
+            (name_x, name_y)
+        ).set_duration(clip.duration)
+
+        title_x = byline_x + byline_padding
+        title_y = byline_y + byline_padding + top_inner_content_height + middle_inner_content_spacing
+
+        title_text_clip = title_text_clip.set_position(
+            (title_x, title_y)
+        ).set_duration(clip.duration)
+
+        final_elements = [clip, bg_clip, name_text_clip, title_text_clip]
+        return mp.CompositeVideoClip(final_elements)
 
     def _add_logline(self, clip: mp.VideoFileClip, logline_text: str) -> mp.VideoFileClip:
         """Adds a lower-third logline to the given clip."""
@@ -217,7 +269,7 @@ class VideoEditor:
         logo_logline_padding = 2
 
         # Calculate logline dimensions based on video resolution and padding
-        logline_height = int(output_height * 0.138)  # 10% of video height
+        logline_height = int(output_height * (150/1080))  # 10% of video height
         logline_width = output_width - self.logline_padding * 2
         if self.logo_path:
             logline_width -= logline_height
@@ -258,6 +310,39 @@ class VideoEditor:
 
         # 4. Compose final clip
         return mp.CompositeVideoClip(final_elements)
+    
+    def _create_raw_text_clip(self, text: str, height: int, text_color = (0, 0, 0, 255)) -> mp.ImageClip:
+        """Creates a transparent ImageClip with the given text."""
+        ref_text_image = Image.new("RGBA", (1, height), (0, 0, 0, 0))
+        ref_draw = ImageDraw.Draw(ref_text_image)
+
+        def get_font_size_for_height(font_path, desired_height):
+            font_size = 1
+            font = ImageFont.truetype(font_path, font_size)
+            text_bbox = ref_draw.textbbox((0, 0), "H", font=font)
+            while text_bbox[3] - text_bbox[1] < desired_height:
+                font_size += 1
+                font = ImageFont.truetype(font_path, font_size)
+                text_bbox = ref_draw.textbbox((0, 0), "H", font=font)
+            return font_size - 1
+
+        # Load the font
+        if not self.font:
+            font = ImageFont.load_default()
+        else:
+            font_path = str(self.font)
+            font_size = get_font_size_for_height(font_path, height)
+            font = ImageFont.truetype(font_path, font_size)
+
+        ref_text_bbox = ref_draw.textbbox((0, 0), text, font=font)
+        ref_text_width = ref_text_bbox[2] - ref_text_bbox[0]
+        text_x = 0
+        text_y = -ref_text_bbox[1]
+
+        text_image = Image.new("RGBA", (ref_text_width, height), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(text_image)
+        draw.text((text_x, text_y), text, font=font, fill=text_color)
+        return mp.ImageClip(np.array(text_image))
 
     def _create_text_clip(self, text: str, width: int, height: int) -> mp.ImageClip:
         """Creates a transparent ImageClip with the given text."""
@@ -279,7 +364,7 @@ class VideoEditor:
             font = ImageFont.load_default()
         else:
             font_path = str(self.font)
-            font_size = get_font_size_for_height(font_path, int(height * 0.4))
+            font_size = get_font_size_for_height(font_path, int(height * (59/150)))
             font = ImageFont.truetype(font_path, font_size)
         
         reference_char = "H"
