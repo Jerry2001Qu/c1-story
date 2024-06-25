@@ -157,6 +157,7 @@ so a TV news anchor could easily read it aloud.
   - ("We do not even have half of the people we should have, " Oleg, 49-year-old gunner said.) -> (49-year-old gunner, Oleg said, "We do not even have half of the people we should have.")
   - (The offensive has left Gaza in ruins, killing more than 37,600 people, according to Gaza's health ministry.) -> (According to Gaza's health ministry, the offensive has left Gaza in ruins, killing more than 37,600 people.)
   - (He will return to Australia after the hearing, according to a Wikileaks statement.) -> (According to a Wikileaks statement, he will return to Australia after the hearing.)
+  - (Extreme temperatures throughout Asia over the past month were made worse most likely as a result of human-driven climate change, a team of international scientists have said.) -> (A team of international scientists have said, extreme temperatures throughout Asia over the past month were made worse most likely as a result of human-driven climate change.)
 - Reformat ages to be spoken aloud.
   - John Doe, 23, said -> Twenty three year old John Doe said
 - Make any other changes that would aid in the story being read aloud.
