@@ -15,6 +15,7 @@ import moviepy.editor as mp
 import pandas as pd
 import pprint
 import traceback
+import copy
 
 class ScriptSection(ABC):
     """Represents a single section of the news script."""
@@ -105,6 +106,25 @@ class NewsScript:
         for section in self.sections:
             result += f"\n\n{section.__repr__()}"
         return result
+    
+    def with_combined_script(self):
+        script = NewsScript(self.storyline, self.shotlist, self.clip_manager, self.dataloader, self.folder, self.error_handler)
+        script.headline = self.headline
+        script.sots = self.sots
+        script.text_script = self.text_script
+
+        # Combine adjacent AnchorScriptSections. Create new sections
+        combined_sections = []
+        for i, section in enumerate(self.sections):
+            if i == 0:
+                combined_sections.append(copy.copy(section))
+            elif is_type(section, AnchorScriptSection) and is_type(combined_sections[-1], AnchorScriptSection):
+                combined_sections[-1].text += f" {section.text}"
+            else:
+                combined_sections.append(copy.copy(section))
+        script.sections = combined_sections
+
+        return script
     
     def generate_facts(self):
         self.facts_list = run_chain(facts_chain, {"SCRIPT": self.storyline, "SHOTLIST": self.shotlist})

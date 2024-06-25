@@ -215,6 +215,7 @@ def run():
             )
             df = AgGrid(df, gridOptions=gb.build(), height=2000, update_mode=GridUpdateMode.MANUAL, fit_columns_on_grid_load=True, theme="alpine")["data"]
             script.from_dataframe(df)
+            combined_script = script.with_combined_script()
 
         for section in script.get_sot_sections():
             if not section.clip:
@@ -244,7 +245,7 @@ def run():
         if st.session_state["video_run"]:
             with st.status("Running"):
                 if not st.session_state["video_ran"]:
-                    audio_processor = AudioProcessor(script, clip_manager, story_folder, error_handler)
+                    audio_processor = AudioProcessor(combined_script, clip_manager, story_folder, error_handler)
                     st.write("Generating anchor audio")
                     if error_handler:
                         error_handler.info("Generating anchor audio")
@@ -261,7 +262,7 @@ def run():
                     st.write("Assembling video")
                     error_handler.info("Assembling video")
                     video_output_file = story_folder / "output.mp4"
-                    video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, bitrate=bitrate, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
+                    video_editor = VideoEditor(combined_script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, bitrate=bitrate, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
                     video_editor.assemble_video(output_file=video_output_file)
                 else:
                     video_output_file = story_folder / "output.mp4"
@@ -269,7 +270,7 @@ def run():
             st.session_state["video_ran"] = True
             
             with st.expander("Details"):
-                st.write(script)
+                st.write(combined_script)
 
             st.video(str(video_output_file), autoplay=True)
 
