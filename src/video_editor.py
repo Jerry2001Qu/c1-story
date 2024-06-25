@@ -129,7 +129,7 @@ class VideoEditor:
             clip = self._add_byline(clip, section.name, section.title)
         clip = clip.subclip(0, clip.duration - 0.1)
         clip = clip.fadein((1.0/self.fps)*2).fadeout((1.0/self.fps)*2)
-        return clip.subclip(0, clip.duration - 0.1)
+        return clip
 
     def _process_anchor_section(self, section: AnchorScriptSection) -> mp.VideoFileClip:
         """Processes an AnchorScriptSection, assembling B-roll and audio."""
