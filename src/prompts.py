@@ -159,7 +159,7 @@ so a TV news anchor could easily read it aloud.
   - 1,200 -> One thousand two hundred
 - ALL dates need to be formatted so they can be read aloud.
   - May 1 -> May 1st
-- Days of week with dates should remove the date. Leaving the day of the week.
+- Days of week with dates within the current week should remove the date. Leaving the day of the week. If the date is not within the current week, leave the date.
   - Monday, May 1 -> Monday
   - on Tuesday (June 25) -> on Tuesday
 - Reformat ages to be spoken aloud.
@@ -172,6 +172,11 @@ so a TV news anchor could easily read it aloud.
 - Fix any small grammatical and spelling errors that would make the story easier to read aloud.
   - She will be work in the US -> She will be working in the US
 - Make any other changes that would aid in the story being read aloud, word for word.
+
+Current Date:
+<date>
+{DATE}
+</date>
 
 Here is the story:
 <story>

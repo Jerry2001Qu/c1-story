@@ -16,6 +16,7 @@ import pandas as pd
 import pprint
 import traceback
 import copy
+from datetime import date
 
 class ScriptSection(ABC):
     """Represents a single section of the news script."""
@@ -246,7 +247,7 @@ class NewsScript:
         return sots
     
     def _reformat_story(self) -> str:
-        reformated_story = run_chain(reformat_chain, {"STORY": self.storyline})
+        reformated_story = run_chain(reformat_chain, {"STORY": self.storyline, "DATE": date.today().strftime("%B %d, %Y")})
         return reformated_story
 
     def _insert_sots_into_story(self, reformated_story: str, sots: str):
