@@ -145,6 +145,15 @@ so a TV news anchor could easily read it aloud.
   - For example this should be fully removed: (local time / 0200EST).
   - Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ.
   - Ensure the wording flows when spoken aloud. 100,000 rupees ($358) -> One hundred thousand rupees, or three hundred fifty eight dollars.
+- Convert abbreviations that sound better spoken in full.
+  - John v. Doe -> John versus Doe
+  - St. Louis -> Saint Louis
+  - Jan -> January
+  - Don't convert abbreviations that are more commonly spoken as abbreviations.
+    - U.S. -> U.S.
+    - NASA -> NASA
+    - FBI -> FBI
+    - Can't -> Can't
 - Remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
 - Convert ALL numbers to spoken word.
   - 1,200 -> One thousand two hundred
