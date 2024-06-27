@@ -321,15 +321,92 @@ Outnumbered and exhausted after two and a half years in the trenches with little
 </example_output>
 </example>
 
+<example>
+<example_input>
+A fire at a lithium battery factory in the South Korean city of Hwaseong on Monday killed at least sixteen people. A fire official said at least five people remained missing.
+
+Video from the scene showed rescuers wheeling out body bags from the factory and some smoke still rising from the building.
+
+The fire, which has been largely extinguished, occurred at around ten thirty a.m. at the plant run by battery manufacturer Aricell. Local fire official Kim Jin-young said the blaze began after a series of battery cells exploded inside a warehouse containing thirty-five thousand units. He added that it remains unclear what triggered the explosion.
+
+Yonhap news agency had earlier reported that some twenty bodies had been found inside the plant, but Kim told a televised briefing that sixteen people died and two others have suffered serious injuries.
+</example_input>
+<example_output>
+A fire at a lithium battery factory in the South Korean city of Hwaseong on Monday killed at least sixteen people with five or more still missing.
+
+Video from the scene showed rescuers wheeling out body bags from the factory and some smoke still rising from the building.
+
+The fire, which has been largely extinguished, occurred at around ten thirty a.m. at the plant run by battery manufacturer Aricell. Local fire official Kim Jin-young said the blaze began after a series of battery cells exploded inside a warehouse containing thirty-five thousand units. He added that it remains unclear what triggered the explosion.
+</example_output>
+</example>
+
+<example>
+<example_input>
+Medics in Gaza said on Monday they were working to step up screening of young children for severe malnutrition amid fears that hunger is spreading as people flee to new areas.
+
+Aid group International Medical Corps, or IMC, and partners are planning to reach more than two hundred thousand children under five years old as part of a 'Find and Treat' campaign. One of its doctors, Mumawwar Said, told Reuters by phone.
+
+Over the weekend, families were already coming into an IMC clinic in the central city of Deir al-Balah, opened after the agency said it had to shut down two centers in the southern city of Rafah due to insecurity.
+
+Five-year-old Jana Ayad had weighed just nine kilograms when she arrived, suffering from diarrhea and vomiting. Nutrition Officer Raghda Ibrahim Qeshta told Reuters as she carefully held the child.
+
+(SOUNDBITE) (Arabic) MOTHER OF FIVE-YEAR-OLD JANA AYAD, NASMA AYAD, SAYING: 
+"My daughter was dying in front of me. Day after day, she was dying, her condition was very bad. Her weight dropped suddenly. I didn't know what to do."
+
+Nasma Ayad said as she sat next to the bed, "My daughter was dying in front of me. I didn't know what to do."
+
+Jana had started putting on some weight after treatment, medics said, but she was still painfully thin with her ribs showing as she lay listlessly in her bunny pajamas.
+
+Staff can gauge nutrition levels by measuring the circumference of children's arms. During a Reuters cameraman's short visit at least two of the measurements were in the yellow band, indicating a risk of malnutrition.
+
+NUTRITION OFFICER, RAGHDA IBRAHIM QESHTA, HOLDING THE MID-UPPER ARM CIRCUMFERENCE TOOL, AND SAYING (English): 'We use the (Mid-Upper Arm Circumference) MUAC. The MUAC is a tool.'
+
+A group of U.N.-led aid agencies estimates that around seven percent of Gazan children may be acutely malnourished, compared with zero point eight percent before the Israel-Hamas conflict began on October 7th.
+
+Until now the worst of severe hunger has been in the north, with a U.N.-backed report warning of imminent famine in March.
+
+But aid workers worry it could spread to central and southern areas due to the upheaval around Rafah that has displaced more than one million people and constrained supply flows through southern corridors.
+
+(SOUNDBITE) (English) NUTRITION OFFICER, RAGHDA IBRAHIM QESHTA, SAYING:
+"Before the war and the conflict, the GAM or the Global Acute Malnutrition rate was 0.8% and after the conflict and the on-going conflict, and in April, the last data was that the GAM rate in Rafah increased to be 7% and in the north it is as high as 16%."
+
+Israel launched its military operation in Gaza after Hamas-led militants attacked Israel on October 7th, killing one thousand two hundred people and taking some two hundred fifty hostage, according to Israeli tallies.
+
+Israel says it has expanded efforts to facilitate aid flows into Gaza and blames international aid agencies for distribution problems inside the enclave.
+</example_input>
+<example_output>
+Medics in Gaza said on Monday they were working to step up screening of young children for severe malnutrition amid fears that hunger is spreading as people flee to new areas.
+
+Aid group International Medical Corps, or IMC, and partners are planning to reach more than two hundred thousand children under five years old as part of a 'Find and Treat' campaign.
+
+Over the weekend, families were already coming into an IMC clinic in the central city of Deir al-Balah, opened after the agency said it had to shut down two centers in the southern city of Rafah due to insecurity.
+
+Five-year-old Jana Ayad had weighed just nine kilograms when she arrived, suffering from diarrhea and vomiting.
+
+(SOUNDBITE) (Arabic) MOTHER OF FIVE-YEAR-OLD JANA AYAD, NASMA AYAD, SAYING: 
+"My daughter was dying in front of me. Day after day, she was dying, her condition was very bad. Her weight dropped suddenly. I didn't know what to do."
+
+Jana had started putting on some weight after treatment, medics said, but she was still painfully thin with her ribs showing as she lay listlessly in her bunny pajamas.
+
+A group of U.N.-led aid agencies estimates that around seven percent of Gazan children may be acutely malnourished, compared with zero point eight percent before the Israel-Hamas conflict began on October 7th.
+
+Until now the worst of severe hunger has been in the north, with a U.N.-backed report warning of imminent famine in March.
+
+But aid workers worry it could spread to central and southern areas due to the upheaval around Rafah that has displaced more than one million people and constrained supply flows through southern corridors.
+
+Israel launched its military operation in Gaza after Hamas-led militants attacked Israel on October 7th, killing one thousand two hundred people and taking some two hundred fifty hostage, according to Israeli tallies.
+
+Israel says it has expanded efforts to facilitate aid flows into Gaza and blames international aid agencies for distribution problems inside the enclave.
+</example_output>
+</example>
+
 Start by brainstorming changes inside <scratchpad> tags.
 
 Write a first draft inside <draft> tags.
 
 Critique your draft inside <critique> tags.
 
-Put your final script response inside <response> tags.
-
-"""
+Put your final script response inside <response> tags."""
 )
 
 parse_prompt = PromptTemplate.from_template(
