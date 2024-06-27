@@ -40,7 +40,6 @@ class AnchorScriptSection(ScriptSection):
     
     def __repr__(self):
         return f"""{self.text}
-
 {pprint.pformat(self.brolls)}"""
     
     def has_anchor_on_screen(self):
@@ -70,7 +69,6 @@ class SOTScriptSection(ScriptSection):
     
     def __repr__(self):
         return f"""SOT ({self.get_byline() if self.is_interview() else "No byline"}): {self.quote}
-
 CLIP {self.clip.id if self.clip else None}: {self.start} - {self.end}"""
 
     def is_interview(self):
