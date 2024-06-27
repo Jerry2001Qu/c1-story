@@ -258,6 +258,7 @@ You may only make simple edits, including:
   - But like most frontline units, Vasil's team suffers from shortages of manpower. -> But most frontline units still suffer from shortages of manpower.
 
 - Don't change the meaning of any sentences. Never state what someone else said as your own.
+- The anchor should not give opinions. Opinions can be in quotes/statements from other individuals.
 
 The script may contain soundbites. They are in a format like:
 (SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:
@@ -265,7 +266,7 @@ The script may contain soundbites. They are in a format like:
 
 - Do not remove any formatting around soundbites. Leave the "(SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:"
 - You may reorder, remove, or cut down soundbites.
-- If cutting down a soundbite, ensure the soundbite is CONTIGUOUS. Never cut a gap out of the soundbite. Therefore, you may only cut from the start or end.
+- If cutting down a soundbite, ensure the soundbite is CONTIGUOUS. Therefore, you may only cut from the start or end of a soundbite!
 - Soundbites are better when spread throughout the story instead of clumped together.
 
 <example>
@@ -327,6 +328,7 @@ Write a first draft inside <draft> tags.
 Critique your draft inside <critique> tags.
 
 Put your final script response inside <response> tags.
+
 """
 )
 
