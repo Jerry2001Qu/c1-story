@@ -72,7 +72,7 @@ def run():
     if "high_res_anchor" not in st.session_state:
         st.session_state["high_res_anchor"] = False
     if "music" not in st.session_state:
-        st.session_state["music"] = True
+        st.session_state["music"] = False
     if "high_res" not in st.session_state:
         st.session_state["high_res"] = False
     

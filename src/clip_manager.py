@@ -112,13 +112,13 @@ class ClipManager:
             try:
                 clip_id = sot_match["clip_id"]
                 sot_id = sot_match["sot_id"]
-                # shotlist_description = sot_match["shotlist_description"]
+                shotlist_description = sot_match["shotlist_description"]
                 if sot_id is None:
                     continue
                 
                 clip = self.get_clip(clip_id)
                 clip.shot_id = int(sot_id)
-                # clip.shotlist_description = shotlist_description
+                clip.shotlist_description = shotlist_description
                 clip.has_quote = 1
             except Exception as e:
                 if self.error_handler:
