@@ -112,13 +112,13 @@ class ClipManager:
             try:
                 clip_id = sot_match["clip_id"]
                 sot_id = sot_match["sot_id"]
-                shotlist_description = sot_match["shotlist_description"]
+                # shotlist_description = sot_match["shotlist_description"]
                 if sot_id is None:
                     continue
                 
                 clip = self.get_clip(clip_id)
                 clip.shot_id = int(sot_id)
-                clip.shotlist_description = shotlist_description
+                # clip.shotlist_description = shotlist_description
                 clip.has_quote = 1
             except Exception as e:
                 if self.error_handler:
@@ -316,7 +316,7 @@ ID {clip.id}: {clip.whisper_results.english_text}
         # STREAMLIT
         progress_bar = st.progress(0.0)
         with ThreadPoolExecutor(max_workers=10) as executor:
-            future_to_clip = {executor.submit(generate_description, clip): clip for clip in self.clips}
+            future_to_clip = {executor.submit(generate_description, clip): clip for clip in self.clips if not clip.has_quote}
             for i, future in enumerate(as_completed(future_to_clip)):
                 clip, exception = future.result()
                 if exception:

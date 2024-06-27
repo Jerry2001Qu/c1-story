@@ -201,7 +201,10 @@ class NewsScript:
             next_timestamp_idx = clip.whisper_results.timestamps.index(timestamps[-1]) + 1
             if next_timestamp_idx < len(clip.whisper_results.timestamps):
                 next_timestamp = clip.whisper_results.timestamps[next_timestamp_idx]
-                section.end = min(timestamps[-1].end + 0.5, timestamps[-1].end + ((2/3) * (next_timestamp.start - timestamps[-1].end)))
+                padded_end = timestamps[-1].end + 0.5
+                between_end = timestamps[-1].end + ((2/3) * (next_timestamp.start - timestamps[-1].end))
+                min_between_end = timestamps[-1].end + 0.001
+                section.end = min(padded_end, max(between_end, min_between_end))
             else:
                 section.end = min(timestamps[-1].end + 0.5, clip.duration)
             section.match_type = "SUCCESS"
@@ -215,7 +218,10 @@ class NewsScript:
                 next_timestamp_idx = clip.whisper_results.timestamps.index(timestamps[-1]) + 1
                 if next_timestamp_idx < len(clip.whisper_results.timestamps):
                     next_timestamp = clip.whisper_results.timestamps[next_timestamp_idx]
-                    section.end = min(timestamps[-1].end + 0.5, timestamps[-1].end + ((2/3) * (next_timestamp.start - timestamps[-1].end)))
+                    padded_end = timestamps[-1].end + 0.5
+                    between_end = timestamps[-1].end + ((2/3) * (next_timestamp.start - timestamps[-1].end))
+                    min_between_end = timestamps[-1].end + 0.001
+                    section.end = min(padded_end, max(between_end, min_between_end))
                 else:
                     section.end = min(timestamps[-1].end + 0.5, clip.duration)
                 section.match_type = "SUCCESS"
