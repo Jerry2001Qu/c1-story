@@ -23,7 +23,7 @@ class ErrorHandler(ABC):
 
 class StreamlitErrorHandler(ErrorHandler):
 
-    def __init__(self, error_bar: st.container, verbosity: bool):
+    def __init__(self, error_bar: st.container, verbosity: bool, stream_verbosity: bool = False):
         self.error_bar = error_bar.empty()
         if "flip" not in st.session_state:
             st.session_state["flip"] = 1
@@ -34,6 +34,7 @@ class StreamlitErrorHandler(ErrorHandler):
         else:
             st.session_state["flip"] = 1
         self.verbosity = verbosity
+        self.stream_verbosity = stream_verbosity
         self.previous_msgs = []
         self.latest = error_bar
     
@@ -67,6 +68,8 @@ class StreamlitErrorHandler(ErrorHandler):
         self.get_container().info(msg, icon="ℹ️")
     
     def stream_status(self, msg: str, title: str = None, video: Path = None, audio: Path = None) -> None:
+        if not self.verbosity:
+            return
         if msg is None:
             msg = ""
         _hash = msg + (title if title else "")
@@ -75,7 +78,7 @@ class StreamlitErrorHandler(ErrorHandler):
         self.previous_msgs += [_hash]
         
         def stream(msg: str):
-            if self.verbosity:
+            if self.stream_verbosity:
                 for word in msg.split(" "):
                     yield word + " "
                     time.sleep(0.02)
