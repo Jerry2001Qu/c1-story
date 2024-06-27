@@ -136,10 +136,10 @@ Ensure quotes are properly escaped or replaced with single quotes to ensure JSON
 Provide the extractions inside <response></response> tags.""")
 
 reformat_prompt = PromptTemplate.from_template(
-"""I'm producing a television news segment.  I'd like to reformat a news story I wrote so it
+"""I'm producing a television news segment. I'd like to reformat a news story I wrote so it
 can be spoken by an on camera news anchor. Please don't change any of the facts of
-my original story text at all, and please don't change the wording at all.  Just reformat it
-so a TV news anchor could easily read it aloud.
+my original story text at all, and please don't change the wording unless specified.
+Just reformat it so a TV news anchor could easily read it aloud.
 
 - Always remove or replace parentheses/brackets and the contained text.
   - For example this should be fully removed: (local time / 0200EST).
@@ -155,20 +155,22 @@ so a TV news anchor could easily read it aloud.
     - FBI -> FBI
     - Can't -> Can't
 - Remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
-- Convert ALL numbers to spoken word.
+- Convert ALL numbers to spoken word. Only add hyphens for numbers between 21 and 99.
   - 1,200 -> One thousand two hundred
+  - 1,254 -> One thousand two hundred fifty-four
 - ALL dates need to be formatted so they can be read aloud.
   - May 1 -> May 1st
 - Days of week with dates within the current week should remove the date. Leaving the day of the week. If the date is not within the current week, leave the date.
   - Monday, May 1 -> Monday
   - on Tuesday (June 25) -> on Tuesday
-- Reformat ages to be spoken aloud.
-  - John Doe, 23, said -> Twenty three year old John Doe said
-- Move "PLACEHOLDER said" to the beginning of the sentence if it is not already there.
-  - ("We do not even have half of the people we should have, " Oleg, 49-year-old gunner said.) -> (49-year-old gunner, Oleg said, "We do not even have half of the people we should have.")
+- Reformat ages to be spoken aloud. Add hyphens.
+  - John Doe, 23, said -> Twenty-three-year-old John Doe said
+- ALWAYS Move "... said" to the beginning of the sentence if it is not already there. The individual/group should come before what was said.
+  - ("We do not even have half of the people we should have, " Oleg, 49-year-old gunner said.) -> (Forty nine year old gunner, Oleg said, "We do not even have half of the people we should have.")
   - (The offensive has left Gaza in ruins, killing more than 37,600 people, according to Gaza's health ministry.) -> (According to Gaza's health ministry, the offensive has left Gaza in ruins, killing more than 37,600 people.)
   - (He will return to Australia after the hearing, according to a Wikileaks statement.) -> (According to a Wikileaks statement, he will return to Australia after the hearing.)
   - (Extreme temperatures throughout Asia over the past month were made worse most likely as a result of human-driven climate change, a team of international scientists have said.) -> (A team of international scientists have said, extreme temperatures throughout Asia over the past month were made worse most likely as a result of human-driven climate change.)
+  - Don't combine quotes while doing this. Create a new paragraph if two quotes are adjacent.
 - Fix any small grammatical and spelling errors that would make the story easier to read aloud.
   - She will be work in the US -> She will be working in the US
 - Make any other changes that would aid in the story being read aloud, word for word.
@@ -183,7 +185,8 @@ Here is the story:
 {STORY}
 </story>
 
-Reformat the story and put it in <response></response> tags"""
+Reformat the story and put it in <response></response> tags
+"""
 )
 
 sot_prompt = PromptTemplate.from_template(
@@ -236,6 +239,95 @@ In a <scratchpad>, think through where it would make the most sense to insert qu
 - Place quotations in separate paragraphs. You may split paragraphs in the original script.
 
 After planning it out, provide your final response with the quotations inserted into the appropriate parts of the news script inside <response></response> tags."""
+)
+
+edit_prompt = PromptTemplate.from_template(
+"""I'm producing a television news segment. You are an expert editor which will edit my news script.
+
+Here is the original script:
+<script>
+{SCRIPT}
+</script>
+
+You will edit this script to maintain a proper 'flow', while removing unnecessary/irrelavent information.
+
+You may only make simple edits, including:
+- Reordering sections
+- Removing sections
+- Grammatical changes that don't change meaning
+  - But like most frontline units, Vasil's team suffers from shortages of manpower. -> But most frontline units still suffer from shortages of manpower.
+
+- Don't change the meaning of any sentences. Never state what someone else said as your own.
+
+The script may contain soundbites. They are in a format like:
+(SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:
+"People in Karachi are facing extreme heat at the moment. Look..."
+
+- Do not remove any formatting around soundbites. Leave the "(SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:"
+- You may reorder, remove, or cut down soundbites.
+- If cutting down a soundbite, ensure the soundbite is CONTIGUOUS. Never cut a gap out of the soundbite. Therefore, you may only cut from the start or end.
+- Soundbites are better when spread throughout the story instead of clumped together.
+
+<example>
+<example_input>
+Ukrainian gunners at the frontline in Donetsk region say that after months of ammunition shortages they finally have enough shells to fight with.
+
+Forty-nine-year-old Vasil, commander of an artillery unit of the Thirty-Third Separate Mechanised Brigade said on Sunday, "There was a 'shell hunger', ammunition was rationed quite severely."
+
+(SOUNDBITE) (UKRAINIAN)  VASIL, 46, CALL SIGN SILVER, COMMANDER OF THE UNIT OPERATING M-109 HOWITZER, SAYING: 
+"There was a 'shell hunger', ammunuition was rationed quite severely. It had an impact on infantry, they (Russians) crept from all sides, it hurt the infantry men. Now, there is no more 'shell hunger' and we work well."
+
+"Now, there is no more 'shell hunger' and we work well," he said as his fellow soldiers fired the one hundred fifty-five millimeter self-propelled howitzer M-109.
+
+Demand for one hundred fifty-five millimeter artillery rounds has soared since Russia invaded Ukraine in February 2022. Allies' supplies for their own defense have been run down as they have rushed shells to Kyiv, which fires thousands of rounds per day.
+
+Fresh influx of ammunition began arriving at units like Vasil's after a sixty-one billion dollar U.S. aid package was approved in April.
+
+But like most frontline units, Vasil's team suffers from shortages of manpower.
+
+(SOUNDBITE) (UKRAINIAN) OLEG, 49 GUNNER SAYING: 
+"We are very few, there aren't enough people. We do not even have half of the people we should have."
+
+Forty-nine-year-old gunner, Oleg said, "We do not even have half of the people we should have."
+
+Outnumbered and exhausted after two and a half years in the trenches with little hope of being rotated any time soon, many are determined to keep going.
+
+(SOUNDBITE) (UKRAINIAN)  VASIL, 46, CALL SIGN SILVER, COMMANDER OF THE UNIT OPERATING M-109 HOWITZER, SAYING: 
+"All these talks with Korea and China, they will not help them, we will win, we shall overcome. It is our spirit, it is our Ukraine, we are defending it. We shall overcome, at any price but we will win."
+
+"At any price but we will win," Vasil said.
+</example_input>
+
+<example_output>
+Ukrainian gunners at the frontline in Donetsk region say that after months of ammunition shortages they finally have enough shells to fight with.
+
+Demand for one hundred fifty-five millimeter artillery rounds has soared since Russia invaded Ukraine in February 2022. Allies' supplies for their own defense have been run down as they have rushed shells to Kyiv, which fires thousands of rounds per day.
+
+(SOUNDBITE) (UKRAINIAN)  VASIL, 46, CALL SIGN SILVER, COMMANDER OF THE UNIT OPERATING M-109 HOWITZER, SAYING: 
+"There was a 'shell hunger', ammunuition was rationed quite severely. It had an impact on infantry, they (Russians) crept from all sides, it hurt the infantry men. Now, there is no more 'shell hunger' and we work well."
+
+Fresh influx of ammunition began arriving at units like Vasil's after a sixty-one billion dollar U.S. aid package was approved in April.
+
+But most frontline units still suffer from shortages of manpower.
+
+(SOUNDBITE) (UKRAINIAN) OLEG, 49 GUNNER SAYING: 
+"We are very few, there aren't enough people. We do not even have half of the people we should have."
+
+Outnumbered and exhausted after two and a half years in the trenches with little hope of being rotated any time soon, many are determined to keep going.
+
+(SOUNDBITE) (UKRAINIAN)  VASIL, 46, CALL SIGN SILVER, COMMANDER OF THE UNIT OPERATING M-109 HOWITZER, SAYING: 
+"we will win, we shall overcome. It is our spirit, it is our Ukraine, we are defending it. We shall overcome, at any price but we will win."
+</example_output>
+</example>
+
+Start by brainstorming changes inside <scratchpad> tags.
+
+Write a first draft inside <draft> tags.
+
+Critique your draft inside <critique> tags.
+
+Put your final script response inside <response> tags.
+"""
 )
 
 parse_prompt = PromptTemplate.from_template(
@@ -550,6 +642,7 @@ facts_chain = (facts_prompt | sonnet35).with_config({"run_name": "generate_facts
 parse_sot_chain = (parse_sot_prompt | sonnet35).with_config({"run_name": "parse_sots"})
 reformat_chain = (reformat_prompt | sonnet35).with_config({"run_name": "reformat_script"})
 sot_chain = (sot_prompt | sonnet35).with_config({"run_name": "add_sots"})
+edit_chain = (edit_prompt | sonnet35).with_config({"run_name": "edit_script"})
 parse_chain = (parse_prompt | sonnet35).with_config({"run_name": "parse_script"})
 logline_chain = (logline_prompt | sonnet35).with_config({"run_name": "logline"})
 headline_chain = (headline_prompt | sonnet35).with_config({"run_name": "headline"})
