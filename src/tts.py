@@ -45,7 +45,7 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
     )
 
     filename = Path(filename)
-    tmp_file = filename.with_name(f"{filename.stem}_tmp{filename.suffix}")
+    tmp_file = str(filename.with_name(f"{filename.stem}_tmp{filename.suffix}"))
     with open(tmp_file, 'wb') as file:
         for chunk in audio:
             if chunk:
