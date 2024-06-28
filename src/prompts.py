@@ -491,7 +491,7 @@ Here is the script:
  - For quotes, remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
  - For quotes, convert ALL numbers to spoken word. For example, 1,200 to One thousand two hundred.
  - For quotes, ALL dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
- - Ensure double quotes in strngs are replaced with single quotes to ensure JSON is valid.
+ - Ensure double quotes in strings are replaced with single quotes to ensure JSON is valid.
  - Ensure the order remains the same between all paragraphs (SOT & ANCHOR)
  - Don't move all the SOTs to the end
 
@@ -525,7 +525,7 @@ and a "logline" field containing the logline/summary you wrote for that section.
 }}
 </example>
 
-Ensure proper JSON, replacing double quotes in strings with single quotes. Enclose your final JSON response inside <response></response> tags."""
+Ensure proper JSON, replacing double quotes inside strings with single quotes. (Key/Values should still be double quotes.) Enclose your final JSON response inside <response></response> tags."""
 )
 
 headline_prompt = PromptTemplate.from_template(
@@ -746,6 +746,16 @@ Put your response in <response></response> tags.
 """
 )
 
+json_prompt = PromptTemplate.from_template(
+"""Fix this JSON object to be properly formatted:
+
+<json>
+{JSON}
+</json>
+
+Ensure it's valid JSON escaping special characters and converting double quotes in strings to single quotes. (Keys/Values should still be in double quotes) Put your response in <response></response> tags."""
+)
+
 spell_check_chain = (spell_check_prompt | sonnet35).with_config({"run_name": "spell_check"})
 get_sot_chain = (get_sot_prompt | sonnet35).with_config({"run_name": "get_sots"})
 facts_chain = (facts_prompt | sonnet35).with_config({"run_name": "generate_facts"})
@@ -762,6 +772,7 @@ match_sot_chain = (match_sot_prompt | sonnet35).with_config({"run_name": "match_
 match_hard_sot_chain = (match_hard_sot_prompt | sonnet35).with_config({"run_name": "match_hard_sot"})
 language_to_iso_chain = (language_to_iso_prompt | sonnet35).with_config({"run_name": "language_to_iso"})
 match_clip_to_sots_chain = (match_clip_to_sots_prompt | sonnet35).with_config({"run_name": "match_clip_to_sots"})
+json_chain = (json_prompt | sonnet35).with_config({"run_name": "json"})
 
 from sqlalchemy.exc import OperationalError
 import time
@@ -800,4 +811,8 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
 @st.cache_data(show_spinner=False, hash_funcs={RunnableBinding: hash_chain})
 def run_chain_json(chain, params):
     response = run_chain(chain, params)
-    return JsonOutputParser().invoke(response)
+    try:
+        return JsonOutputParser().invoke(response)
+    except Exception as e:
+        response = run_chain(json_chain, {"JSON": response})
+        return JsonOutputParser().invoke(response)
