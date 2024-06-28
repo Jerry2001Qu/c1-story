@@ -154,6 +154,7 @@ class AudioProcessor:
                     broll["id"] = "Anchor"
             section.brolls = broll_data["brolls"]
         
+        # Remove brolls after the end of the anchor audio
         for section in self.news_script.get_anchor_sections():
             duration = section.anchor_audio_clip.duration
             section.brolls = [broll for broll in section.brolls if broll["start"] <= duration]
@@ -161,6 +162,7 @@ class AudioProcessor:
                 if broll["end"] > duration:
                     broll["end"] = duration
 
+        # Ensure last anchor is at least 5 seconds
         last_section = self.news_script.sections[-1]
         if is_type(last_section, AnchorScriptSection):
             last_broll = last_section.brolls[-1]
@@ -178,13 +180,15 @@ class AudioProcessor:
                             second_last_broll["end"] = min(second_last_broll["start"]+1, second_last_broll["end"])
                             last_broll["start"] = second_last_broll["end"]
                         if self.error_handler:
+                            self.error_handler.warning(f"Final anchor placement was too short, extended into previous broll.")
                             self.error_handler.stream_status(pprint.pformat(last_section.brolls), f"Final anchor placement was too short, extended into previous broll.")
             else:
                 last_broll["id"] = "Anchor"
                 if self.error_handler:
+                    self.error_handler.warning(f"Final video was not Anchor, swapping broll with anchor")
                     self.error_handler.stream_status(pprint.pformat(last_section.brolls), f"Final video was not Anchor, swapping broll with anchor")
 
-        
+        # Remove brolls or anchor placements that are too short
         for section in self.news_script.get_anchor_sections():
             new_brolls = []
 
@@ -286,6 +290,41 @@ class AudioProcessor:
                 if keep_broll:
                     new_brolls.append(broll)
             section.brolls = new_brolls
+        
+        # Remove short sequences of non-anchor brolls between anchor brolls (less than 5 seconds), and extend the surrounding anchor brolls
+        for section in self.news_script.get_anchor_sections():
+            new_brolls = []
+            for i, broll in enumerate(section.brolls):
+                if broll["id"] == "Anchor":
+                    new_brolls.append(broll)
+                    continue
+                broll_duration = broll["end"] - broll["start"]
+                if broll_duration < 5:
+                    if i-1 >= 0 and i+1 < len(section.brolls):
+                        previous_broll = section.brolls[i-1]
+                        next_broll = section.brolls[i+1]
+                        if previous_broll["id"] == "Anchor" and next_broll["id"] == "Anchor":
+                            next_broll["start"] = broll["start"]
+                            if self.error_handler:
+                                self.error_handler.warning(f"Short broll {broll['id']} in section {section.id} between anchors. Merged with surrounding anchors.")
+                            continue
+                new_brolls.append(broll)
+            section.brolls = new_brolls
+        
+        # Remove short brolls after anchor at the end of sections
+        for section in self.news_script.get_anchor_sections():
+            if len(section.brolls) >= 2:
+                last_broll = section.brolls[-1]
+                last_broll_duration = last_broll["end"] - last_broll["start"]
+                second_last_broll = section.brolls[-2]
+                if last_broll_duration < 2:
+                    if last_broll["id"] != "Anchor" and second_last_broll["id"] == "Anchor":
+                        second_last_broll["end"] = last_broll["end"]
+                        section.brolls = section.brolls[:-1]
+                        if self.error_handler:
+                            self.error_handler.warning(f"Last broll in section {section.id} was too short, merged with previous anchor")
+                            self.error_handler.stream_status(pprint.pformat(section.brolls), f"Last broll in section {section.id} was too short, merged with previous anchor")
+
 
     def _generate_anchor(self, live_anchor: bool, test_mode: bool):
         for section in self.news_script.get_anchor_sections():
