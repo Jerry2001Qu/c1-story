@@ -133,7 +133,7 @@ Please extract the following information from the quote:
 - The language the quote was spoken in (English if unspecified)
 
 Provide your extractions in JSON format. Use the ID as a key. For each object use the keys "quote", "name", "title", and "language" for the respective pieces of information.
-Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid.
+Ensure double quotes in strings are replaced with single quotes to ensure JSON is valid.
 
 <example>
 {{
@@ -484,7 +484,7 @@ Here is the script:
  - For quotes, remove ALL lone hyphens (Em Dashes). Don't remove hyphens that connect two words.
  - For quotes, convert ALL numbers to spoken word. For example, 1,200 to One thousand two hundred.
  - For quotes, ALL dates need to be formatted so they can be read aloud. For example, May 1st instead of May 1.
- - Ensure quotes are properly escaped or replaced with single quotes to ensure JSON is valid. ESCAPE QUOTES!
+ - Ensure double quotes in strngs are replaced with single quotes to ensure JSON is valid.
  - Ensure the order remains the same between all paragraphs (SOT & ANCHOR)
  - Don't move all the SOTs to the end
 
@@ -518,7 +518,7 @@ and a "logline" field containing the logline/summary you wrote for that section.
 }}
 </example>
 
-Enclose your final JSON response inside <response></response> tags."""
+Ensure proper JSON, replacing double quotes in strings with single quotes. Enclose your final JSON response inside <response></response> tags."""
 )
 
 headline_prompt = PromptTemplate.from_template(
@@ -641,7 +641,7 @@ First mark down the durations of every broll/anchor placement inside <durations>
 Then mark down any violating broll/anchor placements that need to be change inside <violations></violations> tags.
 
 After making the necessary adjustments, output the updated broll placements JSON inside <response></response> tags.
-Ensure it's valid JSON using double quotes & escaping special characters. If no adjustments need to be made, output the original broll placements JSON."""
+Ensure it's valid JSON using double quotes, escaping special characters, and converting double quotes in strings to single quotes. If no adjustments need to be made, output the original broll placements JSON."""
 )
 
 match_sot_prompt = PromptTemplate.from_template(
