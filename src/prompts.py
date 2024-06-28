@@ -65,6 +65,25 @@ Put the output in <response></response> tags."""
 )
 # /STREAMLIT
 
+spell_check_prompt = PromptTemplate.from_template(
+"""Fix any spelling mistakes in the following text.
+
+<input>
+{INPUT}
+</input>
+
+- Only fix obvious spelling mistakes that you are sure of.
+- If you are somewhat uncertain about a mistake, do not change it.
+- Do not fix grammar. You may only fix spelling mistakes one word at a time.
+- Do not change punctuation/spacing.
+- Do not localize spelling. For example, do not change Labour to Labor.
+    - Labour -> Labour
+- Do not change names. Assume they are spelled correctly.
+- Otherwise, output the text just as it came in without any other changes.
+
+Put your response in <response> tags."""
+)
+
 facts_prompt = PromptTemplate.from_template(
 """Give me a complete list of facts from this story.
 
@@ -259,6 +278,8 @@ You may only make simple edits, including:
 
 - Don't change the meaning of any sentences. Never state what someone else said as your own.
 - The anchor should not give opinions. Opinions can be in quotes/statements from other individuals.
+- Ensure your changes are factual & do not misrepresent the original script.
+- Remember the current date. Past events should be in past tense.
 
 The script may contain soundbites. They are in a format like:
 (SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:
@@ -405,6 +426,8 @@ Start by brainstorming changes inside <scratchpad> tags.
 Write a first draft inside <draft> tags.
 
 Critique your draft inside <critique> tags.
+
+KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY.
 
 Put your final script response inside <response> tags."""
 )
@@ -716,6 +739,7 @@ Put your response in <response></response> tags.
 """
 )
 
+spell_check_chain = (spell_check_prompt | sonnet35).with_config({"run_name": "spell_check"})
 get_sot_chain = (get_sot_prompt | sonnet35).with_config({"run_name": "get_sots"})
 facts_chain = (facts_prompt | sonnet35).with_config({"run_name": "generate_facts"})
 parse_sot_chain = (parse_sot_prompt | sonnet35).with_config({"run_name": "parse_sots"})

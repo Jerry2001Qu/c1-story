@@ -3,7 +3,7 @@
 # STREAMLIT
 from src.clip_manager import ClipManager, Clip
 from src.prompts import run_chain, run_chain_json, \
-                        get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, match_hard_sot_chain, facts_chain, edit_chain
+                        spell_check_chain, get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, match_hard_sot_chain, facts_chain, edit_chain
 from src.language import Language
 from src.tts import TTS
 # /STREAMLIT
@@ -124,6 +124,10 @@ class NewsScript:
         script.sections = combined_sections
 
         return script
+    
+    def spell_check(self):
+        self.storyline = run_chain(spell_check_chain, {"INPUT": self.storyline})
+        self.shotlist = run_chain(spell_check_chain, {"INPUT": self.shotlist})
     
     def generate_facts(self):
         self.facts_list = run_chain(facts_chain, {"SCRIPT": self.storyline, "SHOTLIST": self.shotlist})
