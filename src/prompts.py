@@ -160,6 +160,13 @@ can be spoken by an on camera news anchor. Please don't change any of the facts 
 my original story text at all, and please don't change the wording unless specified.
 Just reformat it so a TV news anchor could easily read it aloud.
 
+The script may contain soundbites. They are in a format like:
+(SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:
+"People in Karachi are facing extreme heat at the moment. Look..."
+
+- DO NOT touch soundbites.
+  - Do not remove any formatting around soundbites. Leave the "(SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:"
+  - Do not change any soundbites. Ignore the rest of the instructions for soundbites.
 - Always remove or replace parentheses/brackets and the contained text.
   - For example this should be fully removed: (local time / 0200EST).
   - Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ.

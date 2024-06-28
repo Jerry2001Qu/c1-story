@@ -136,19 +136,21 @@ class NewsScript:
     
     def generate_script(self):
         sots = self._extract_sots()
-        reformated_story = self._reformat_story()
         if self.error_handler:
-            self.error_handler.stream_status(reformated_story, "Writing story")
-        story_with_sots = self._insert_sots_into_story(reformated_story, sots)
+            self.error_handler.stream_status(self.storyline, "Writing story")
+        story_with_sots = self._insert_sots_into_story(self.storyline, sots)
         if self.error_handler:
             self.error_handler.stream_status(story_with_sots, "Inserted SOTs")
         edited_story = self._edit_story(story_with_sots)
         if self.error_handler:
             self.error_handler.stream_status(edited_story, "Edited story")
-        self._parse_script(edited_story, sots)
+        reformated_story = self._reformat_story(edited_story)
+        if self.error_handler:
+            self.error_handler.stream_status(reformated_story, "Reformatted story")
+        self._parse_script(reformated_story, sots)
 
         self.sots = sots
-        self.text_script = edited_story
+        self.text_script = reformated_story
     
     def generate_lower_thirds(self):
         self.headline = self._generate_headline()
@@ -257,26 +259,26 @@ class NewsScript:
         sots = run_chain(get_sot_chain, {"SHOTLIST": self.shotlist})
         return sots
     
-    def _reformat_story(self) -> str:
-        reformated_story = run_chain(reformat_chain, {"STORY": self.storyline, "DATE": date.today().strftime("%B %d, %Y")})
+    def _reformat_story(self, story) -> str:
+        reformated_story = run_chain(reformat_chain, {"STORY": story, "DATE": date.today().strftime("%B %d, %Y")})
         return reformated_story
 
-    def _insert_sots_into_story(self, reformated_story: str, sots: str):
+    def _insert_sots_into_story(self, story: str, sots: str):
         """Inserts the SOTs into the script."""
         if "NO SOT" in sots:
-            story_with_sots = reformated_story
+            story_with_sots = story
         else:
-            story_with_sots = run_chain(sot_chain, {"QUOTATIONS": sots, "SCRIPT": reformated_story})
+            story_with_sots = run_chain(sot_chain, {"QUOTATIONS": sots, "SCRIPT": story})
         return story_with_sots
     
-    def _edit_story(self, story_with_sots: str):
+    def _edit_story(self, story: str):
         """Edits the story"""
-        edited_story = run_chain(edit_chain, {"SCRIPT": story_with_sots})
+        edited_story = run_chain(edit_chain, {"SCRIPT": story})
         return edited_story
 
-    def _parse_script(self, story_with_sots: str, sots: str):
+    def _parse_script(self, story: str, sots: str):
         """Parses the storyline into individual ScriptSection objects."""
-        parsed_script_json = run_chain_json(parse_chain, {"QUOTATIONS": sots, "SCRIPT": story_with_sots})
+        parsed_script_json = run_chain_json(parse_chain, {"QUOTATIONS": sots, "SCRIPT": story})
 
         for section_json in parsed_script_json["sections"]:
             section_type = section_json["type"]
