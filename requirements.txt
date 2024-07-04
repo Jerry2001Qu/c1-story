@@ -23,3 +23,5 @@ pillow
 pycountry
 pyinstrument
 psutil
+wheel
+deepgram-sdk

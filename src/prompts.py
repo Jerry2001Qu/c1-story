@@ -12,11 +12,8 @@ os.environ["LANGCHAIN_PROJECT"] = "Channel 1"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
 
-from langchain_core.messages import HumanMessage
 from langchain_anthropic import ChatAnthropic
-from langchain.globals import set_llm_cache
-from langchain_community.cache import SQLiteCache
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, XMLOutputParser
+from langchain_core.output_parsers import JsonOutputParser, XMLOutputParser
 from langchain.prompts import PromptTemplate
 
 opus = ChatAnthropic(model="claude-3-opus-20240229", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
@@ -24,9 +21,6 @@ sonnet = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0, max_toke
 haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 
 sonnet35 = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
-
-cache = SQLiteCache(database_path="langchain.db")
-set_llm_cache(cache)
 
 # STREAMLIT
 section_summary_prompt = PromptTemplate.from_template(
@@ -783,6 +777,7 @@ from langchain_core.runnables.base import RunnableBinding
 def extract_xml(text):
     return XMLOutputParser().invoke(text[text.rfind("<response>"):text.rfind("</response>")+11].replace("&", "and"))
 
+@st.cache_data(show_spinner=False, hash_funcs={RunnableBinding: hash_chain})
 def run_chain(chain, params, max_retries=3, retry_delay=5):
     """Runs the LangChain chain with retry logic."""
     retries = 0
@@ -792,8 +787,6 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
             response_xml = extract_xml(response_raw)
             return response_xml['response'].strip()
         except OperationalError:
-            cache = SQLiteCache(database_path="langchain.db")
-            set_llm_cache(cache)
             response_raw = chain.invoke(params).content
             response_xml = extract_xml(response_raw)
             return response_xml['response'].strip()

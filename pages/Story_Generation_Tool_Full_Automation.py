@@ -24,8 +24,6 @@ from src.error_handler import StreamlitErrorHandler
 from src.audio_processor import AudioProcessor
 from src.authentication import check_password
 
-from src.prompts import cache
-
 def run():
     if not check_password():
         st.stop()
@@ -43,7 +41,6 @@ def run():
     with st.sidebar:
         if st.button("Clear caches"):
             st.cache_data.clear()
-            cache.clear()
             for folder in Path("/tmp").glob("tagreuters*"):
                 shutil.rmtree(folder)
         
@@ -106,7 +103,7 @@ def run():
         st.session_state["video_ran"] = False
     
     if "reuters_id" not in st.session_state:
-        st.session_state["reuters_id"] = "tag:reuters.com,2024:newsml_RW635429052024RP1:5"
+        st.session_state["reuters_id"] = "tag:reuters.com,2024:newsml_RW275521062024RP1:6"
     
     def reset_and_update():
         st.session_state["run"] = False

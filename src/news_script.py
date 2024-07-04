@@ -6,6 +6,7 @@ from src.prompts import run_chain, run_chain_json, \
                         spell_check_chain, get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, match_hard_sot_chain, facts_chain, edit_chain
 from src.language import Language
 from src.tts import TTS
+from src.transcription import get_adjusted_timestamps
 # /STREAMLIT
 
 from typing import List, Optional
@@ -201,16 +202,7 @@ class NewsScript:
     def _match_sot_clips_same_language(self, section, clip, quote):
         timestamps = fuzzy_match(quote, clip.whisper_results)
         if timestamps:
-            section.start = timestamps[0].get_adjusted_start()
-            next_timestamp_idx = clip.whisper_results.timestamps.index(timestamps[-1]) + 1
-            if next_timestamp_idx < len(clip.whisper_results.timestamps):
-                next_timestamp = clip.whisper_results.timestamps[next_timestamp_idx]
-                padded_end = timestamps[-1].end + 0.5
-                between_end = timestamps[-1].end + ((2/3) * (next_timestamp.start - timestamps[-1].end))
-                min_between_end = timestamps[-1].end + 0.001
-                section.end = min(padded_end, max(between_end, min_between_end))
-            else:
-                section.end = min(timestamps[-1].end + 0.5, clip.duration)
+            section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, timestamps[0], timestamps[-1], clip.duration)
             section.match_type = "SUCCESS"
             if self.error_handler:
                 self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
@@ -218,23 +210,13 @@ class NewsScript:
             matched_quote = run_chain(match_hard_sot_chain, {"QUOTE": quote, "TRANSCRIPT": clip.whisper_results.text})
             timestamps = fuzzy_match(matched_quote, clip.whisper_results)
             if timestamps:
-                section.start = timestamps[0].get_adjusted_start()
-                next_timestamp_idx = clip.whisper_results.timestamps.index(timestamps[-1]) + 1
-                if next_timestamp_idx < len(clip.whisper_results.timestamps):
-                    next_timestamp = clip.whisper_results.timestamps[next_timestamp_idx]
-                    padded_end = timestamps[-1].end + 0.5
-                    between_end = timestamps[-1].end + ((2/3) * (next_timestamp.start - timestamps[-1].end))
-                    min_between_end = timestamps[-1].end + 0.001
-                    section.end = min(padded_end, max(between_end, min_between_end))
-                else:
-                    section.end = min(timestamps[-1].end + 0.5, clip.duration)
+                section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, timestamps[0], timestamps[-1], clip.duration)
                 section.match_type = "SUCCESS"
                 if self.error_handler:
                     self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
             else:
                 if clip.whisper_results.has_speech:
-                    section.start = clip.whisper_results.timestamps[0].get_adjusted_start()
-                    section.end = min(clip.whisper_results.timestamps[-1].end + 0.5, clip.duration)
+                    section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, clip.whisper_results.timestamps[0], clip.whisper_results.timestamps[-1], clip.duration)
                     section.match_type = "SPEECH"
                     if self.error_handler:
                         self.error_handler.warning(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")

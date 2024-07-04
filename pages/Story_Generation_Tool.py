@@ -24,8 +24,6 @@ from src.error_handler import StreamlitErrorHandler
 from src.audio_processor import AudioProcessor
 from src.authentication import check_password
 
-from src.prompts import cache
-
 from streamlit_profiler import Profiler
 
 class DummyContextManager:
@@ -54,7 +52,6 @@ def run():
     with st.sidebar:
         if st.button("Clear caches"):
             st.cache_data.clear()
-            cache.clear()
             for folder in Path("/tmp").glob("tagreuters*"):
                 shutil.rmtree(folder)
         
