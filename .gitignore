@@ -1,5 +1,4 @@
 .streamlit/secrets.toml
 __pycache__
-src/constants.py
 .DS_Store
 **~
