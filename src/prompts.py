@@ -774,8 +774,11 @@ from anthropic import APIError
 from src.hashing import hash_chain
 from langchain_core.runnables.base import RunnableBinding
 
+def extract_response(text):
+    return text[text.rfind("<response>"):text.rfind("</response>")+11]
+
 def extract_xml(text):
-    return XMLOutputParser().invoke(text[text.rfind("<response>"):text.rfind("</response>")+11].replace("&", "and"))
+    return XMLOutputParser().invoke(extract_response(text).replace("&", "and"))
 
 @st.cache_data(show_spinner=False, hash_funcs={RunnableBinding: hash_chain})
 def run_chain(chain, params, max_retries=3, retry_delay=5):

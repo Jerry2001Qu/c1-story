@@ -14,7 +14,7 @@ with open(temp_file_path, "w") as f:
 # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the temporary file path
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file_path
 
-from src.prompts import extract_xml
+from src.prompts import extract_xml, extract_response
 from src.clip_manager import Clip
 from src.gcp import GCSManager
 from src.hashing import sha256sum, hash_audio_file
@@ -241,28 +241,80 @@ while a still shot can be cut off sooner. Include the key informational part of 
 def add_broll(audio_file, full_descriptions_str, section_timings_str):
     gcs = GCSManager()
     content = []
-    content += ["You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling for a TV audience."]
-    content += ["Here are the broll descriptions: ", f"<broll>{full_descriptions_str}</broll>\n\n"]
-    content += ["Here is the audio clip: ", gcs.upload_to_gcs_part(audio_file)]
-    content += ["Here are section timings: ", f"<section_timings>{section_timings_str}</section_timings>\n\n"]
-    content += ["Here is an example: ", """<example>
-**Section 1: 0 - 11.96**
+
+    content += [
+f"""You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling 
+for a TV audience. Your goal is to create a visually engaging and informative news segment by matching appropriate video clips to the audio content.
+
+First, review the available B-roll clips:
+<broll_descriptions>
+{full_descriptions_str}
+</broll_descriptions>
+
+Next, listen carefully to the audio clip:
+""",
+gcs.upload_to_gcs_part(audio_file),
+f"""
+Here are the section timings for the audio clip:
+<section_timings>
+{section_timings_str}
+</section_timings>
+
+Your task is to select and place B-roll clips and Anchor segments to accompany the audio story. Follow these guidelines:
+
+1. Match B-roll clips to the content of each section in the audio.
+2. Always fill each section with B-roll clips until the end, but don't exceed the section's end time.
+3. Aim to switch clips every 6 seconds or sooner for a more intense experience.
+4. Use Anchor blocks (max 10 seconds) at the beginning and end of the story, and as needed throughout.
+5. Ensure smooth transitions between clips and sections.
+
+When selecting and placing clips:
+- Copy the max duration for each B-roll clip (e.g., "max 10 seconds"). Never go over this limit.
+- Provide start and end timestamps for each clip within the section.
+- Use at least 5 seconds of Anchor at the beginning and end of the whole story.
+- Place Anchor blocks for at least 3 seconds, so never at the very end of a section.
+- Don't use too many Anchor blocks. One at the beginning, one at the end, and max one in the middle.
+- An Anchor block should last for an entire thought.
+- Show clips for at least 1 second before switching.
+- Don't reuse B-roll if you can avoid it. Repetition is not good.
+- If there isn't enough relevant B-roll, use Anchor segments.
+- Prefer B-roll over Anchor segments. If there's no related B-roll, perhaps there's background B-roll that could be used as filler?
+
+Format your output as follows for each section:
+1. Section number and time range
+2. Brief transcript or description of the audio content
+3. List of clips with timestamps, max duration, and brief explanation for each choice
+
+Here's an example of the expected output format:
+
+<example>
+**Section 1: 0:00 - 11.96**
 Transcript: Activists in Canada...
 
 * **Anchor (max 10 seconds):** 0.00 - 6.24 - We start on an Anchor to introduce the story and set the scene.
 * **Clip 008 (max 10 seconds):** 6.24 - 7.56 - The image of a national flag acts as a transition.
 * **Clip 020 (max 12 seconds):** 7.56 - 9.82 - This clip shows fireworks being launched, visually illustrating the audio description of fireworks.
 * **Clip 002 (max 4 seconds):** 9.82 - 11.96 - End the section with...
-</example>\n\n"""]
-    content += ["""Please listen to the audio clip carefully, its script should match the section timings. I have given you <broll></broll> clips and want you to place them in the Audio clip.
-Each broll clip has a Max duration which you should copy into the list, ex (max 10 seconds).
-Give me timestamps for when you want a broll clip to start and end. Always fill each section with brolls till the end. But don't go beyond each section. You must end clip timings at the section end time!
-Broll clips have a length, so you can't use more than that & have to switch. You don't have to use the entire Broll clip. Aim to switch around 6 seconds or sooner. Switching creates a more intense experience.
-You may also insert Anchor blocks. These should be max 10 seconds. Place Anchor blocks for at least 5 seconds at the beginning of the whole story to set the scene, and at least 5 seconds at the end of the whole story to conclude. (probably the whole start and end sections. If the section is at the start or end of the whole story, you will be told so in <section_timings> with a message like "Anchor must be shown...")
-This isn't necessary in other sections, just make your best judgement on when the Anchor should be on screen. For example, if there isn't any related broll, or not enough broll, you may choose to switch to the Anchor.
-An Anchor block must be at least 3 seconds long, so don't place it at the very end of a section. Make sure everything flows nicely!
-Show clips for at least 1 second before switching. Make sure your section numbers are correct, they may skip numbers. Broll show always be referenced as Clip ###, like in the example. Never make up broll clips. If not enough, use the Anchor.
-This will be aired on TV, so select & place clips informatively and dramatically. Remember to write your thoughts as you insert clips (ex. We start on an Anchor to introduce the story and set the scene.)"""]
+</example>
+
+Remember:
+- Always use the correct section numbers, even if they skip.
+- Write the whole transcript out. Don't do ...
+- Refer to B-roll as "Clip ###" (e.g., Clip 008).
+- Never invent B-roll clips that aren't provided.
+- Select and place clips informatively and dramatically for TV audiences.
+- Explain your thought process for each clip selection.
+
+Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
+
+Critique your draft inside <critique> tags.
+
+KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 2-3 times. Do this now, don't ask to continue.
+When writing drafts ensure all requirements are met (min timings, etc.), then suggest improvements.
+
+Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS.
+"""
+]
 
     content = [part for part in content if part is not None]
 
@@ -270,7 +322,7 @@ This will be aired on TV, so select & place clips informatively and dramatically
     gcs.clear_uploaded_blobs()
 
     try:
-        return response.text
+        return extract_response(response.text)
     except ValueError:
         print(response.prompt_feedback)
         print(response.candidates[0].finish_reason)
