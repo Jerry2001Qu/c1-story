@@ -93,3 +93,38 @@ class StreamlitErrorHandler(ErrorHandler):
         if audio:
             container.audio(str(audio), format="audio/mpeg")
         container.write_stream(stream(msg))
+
+class StdOutErrorHandler(ErrorHandler):
+
+    def __init__(self):
+        self.previous_msgs = []
+
+    def reset(self) -> None:
+        self.previous_msgs = []
+
+    def error(self, msg: str) -> None:
+        if msg in self.previous_msgs:
+            return
+        self.previous_msgs += [msg]
+        print(f"ERROR: {msg}")
+
+    def warning(self, msg: str) -> None:
+        if msg in self.previous_msgs:
+            return
+        self.previous_msgs += [msg]
+        print(f"WARNING: {msg}")
+
+    def info(self, msg: str) -> None:
+        if msg in self.previous_msgs:
+            return
+        self.previous_msgs += [msg]
+        print(f"INFO: {msg}")
+
+    def stream_status(self, msg: str, title: str = None, video: Path = None, audio: Path = None) -> None:
+        if msg is None:
+            msg = ""
+        _hash = msg + (title if title else "")
+        if _hash in self.previous_msgs:
+            return
+        self.previous_msgs += [_hash]
+        print(msg)

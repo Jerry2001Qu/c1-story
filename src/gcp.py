@@ -33,12 +33,15 @@ class GCSManager:
     def __init__(self):
         self.blobs = []
     
-    def upload_to_gcs_blob(self, local_file_path: Union[str, Path], bucket_name="gemini-colab") -> Blob:
+    def upload_to_gcs_blob(self, local_file_path: Union[str, Path], filename=None, bucket_name="gemini-colab") -> Blob:
         bucket = storage_client.bucket(bucket_name)
         local_file_path = Path(local_file_path)
         random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
         extension = local_file_path.suffix
-        blob_name = random_string + extension
+        if filename:
+            blob_name = filename + extension
+        else:
+            blob_name = random_string + extension
         blob = bucket.blob(blob_name)
         blob.upload_from_filename(local_file_path)
 
@@ -46,10 +49,10 @@ class GCSManager:
 
         return blob
     
-    def upload_to_gcs_part(self, local_file_path: Union[str, Path], bucket_name="gemini-colab") -> Part:
+    def upload_to_gcs_part(self, local_file_path: Union[str, Path], filename=None, bucket_name="gemini-colab") -> Part:
         local_file_path = Path(local_file_path)
         extension = local_file_path.suffix
-        blob = self.upload_to_gcs_blob(local_file_path, bucket_name)
+        blob = self.upload_to_gcs_blob(local_file_path, filename=filename, bucket_name=bucket_name)
 
         uri = f"gs://{bucket_name}/{blob.name}"
         mime_types = {
@@ -63,8 +66,8 @@ class GCSManager:
 
         return Part.from_uri(uri, mime_type=mime_type)
 
-    def upload_to_gcs_url(self, local_file_path: Union[str, Path], bucket_name="gemini-colab") -> str:
-        blob = self.upload_to_gcs_blob(local_file_path, bucket_name)
+    def upload_to_gcs_url(self, local_file_path: Union[str, Path], filename=None, bucket_name="gemini-colab") -> str:
+        blob = self.upload_to_gcs_blob(local_file_path, filename=filename, bucket_name=bucket_name)
         return blob.public_url
     
     def clear_uploaded_blobs(self):
