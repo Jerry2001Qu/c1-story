@@ -2,6 +2,7 @@
 
 # STREAMLIT
 from src.constants import ELEVENLABS_API_KEY
+from src.movie_utils import set_loudness_audio_clip
 import streamlit as st
 # /STREAMLIT
 
@@ -26,7 +27,7 @@ def create_silent_audio_clip(duration: float) -> mp.ColorClip:
     return mp.AudioClip(lambda t: 0, duration=duration)
 
 @st.cache_data(show_spinner=False, hash_funcs={PosixPath: lambda x: str(x.resolve())})
-def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_text="", start_padding=0, end_padding=0):
+def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_text="", start_padding=0, end_padding=0, lufs=-23): # set lufs to 0 for no adjustment
     additional_body_parameters = {}
     # if previous_text:
     #     additional_body_parameters['previous_text'] = previous_text
@@ -53,6 +54,7 @@ def TTS(text, filename, voice_id="LHgN09QqKzsRsniiMpww", previous_text="", next_
     
     audio_clip = mp.AudioFileClip(tmp_file)
     audio_clip = audio_clip.subclip(0, audio_clip.duration - 0.1)
+    audio_clip = set_loudness_audio_clip(audio_clip, lufs)
 
     if start_padding:
         start_pad_clip = create_silent_audio_clip(start_padding)
