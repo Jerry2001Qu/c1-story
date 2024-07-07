@@ -10,6 +10,8 @@ import streamlit as st
 from dataclasses import dataclass
 from typing import List
 from pathlib import Path, PosixPath
+import time
+from requests.exceptions import RequestException
 
 from openai import OpenAI
 
@@ -57,7 +59,10 @@ class WhisperResults:
         Returns:
             A WhisperResults object containing the transcription data.
         """
-        transcription, language = deepgram_transcribe(file)
+        transcription, language = deepgram_transcribe(file, model="nova-2")
+
+        if not transcription.transcript:
+            transcription, language = deepgram_transcribe_with_retry(file, model="whisper-large")
 
         timestamps = [Word(word.punctuated_word, word.start, word.end) for word in transcription.words]
         text = transcription.transcript
@@ -95,7 +100,7 @@ def openai_transcribe(abs_file_path: Path):
         )
 
 @st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file})
-def deepgram_transcribe(abs_file_path: Path):
+def deepgram_transcribe(abs_file_path: Path, model: str = "nova-2"):
     with open(abs_file_path, "rb") as file:
         buffer_data = file.read()
 
@@ -104,7 +109,7 @@ def deepgram_transcribe(abs_file_path: Path):
     }
 
     options = PrerecordedOptions(
-        model="nova-2",
+        model=model,
         smart_format=True,
         utterances=True,
         punctuate=True,
@@ -115,7 +120,38 @@ def deepgram_transcribe(abs_file_path: Path):
         payload, options, timeout=httpx.Timeout(300.0, connect=10.0)
     )
 
+    if not response.results.channels[0].alternatives:
+        class Transcription:
+            pass
+
+        transcription = Transcription()
+        transcription.transcript = ""
+        transcription.confidence = 0
+        transcription.words = []
+        transcription.paragraphs = []
+
+        return transcription, None
+
     return response.results.channels[0].alternatives[0], response.results.channels[0].detected_language
+
+def deepgram_transcribe_with_retry(file: Path, model: str = "nova-2", delays=[0, 1, 60, 300, 60, 600]):
+    delay_idx = 0
+
+    while delay_idx < len(delays):
+        try:
+            time.sleep(delays[delay_idx])
+            transcription, language = deepgram_transcribe(file, model=model)
+            return transcription, language
+        except RequestException as e:
+            delay_idx += 1
+            if delay_idx == len(delays):
+                raise Exception(f"Max retries reached. Last error: {str(e)}")
+            
+            print(f"Request failed. Retrying in {delays[delay_idx]} seconds...")
+
+    # This line should never be reached due to the exception in the loop,
+    # but it's here for completeness
+    raise Exception("Max retries reached without successful API call")
 
 def get_adjusted_timestamps(timestamps, start_timestamp, end_timestamp, max_duration):
     exact_start = timestamps[0].start

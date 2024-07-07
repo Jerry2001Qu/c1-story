@@ -8,6 +8,7 @@ import streamlit as st
 
 from pathlib import Path
 from typing import List, Dict, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import moviepy.editor as mp
 import traceback
 
@@ -44,7 +45,11 @@ class Clip:
         video = self.load_video()
         video.audio.write_audiofile(str(audio_file_path))
 
-        self.whisper_results = WhisperResults.from_file(audio_file_path)
+        try:
+            self.whisper_results = WhisperResults.from_file(audio_file_path)
+        except Exception as e:
+            self.whisper_results = WhisperResults("", [], 1.0, False, "Unknown", "")
+            raise e
         if self.error_handler:
             if self.whisper_results.no_speech_prob < 0.3:
                 self.error_handler.stream_status(self.whisper_results.english_text, f"Identified Speech ({self.id})", self.file_path)
@@ -286,12 +291,27 @@ class ClipManager:
         return sots
 
     def transcribe_clips(self):
-        for clip in self.clips:
+        def transcribe_and_handle_errors(clip):
             try:
                 clip.transcribe_clip()
             except Exception as e:
                 if self.error_handler:
                     self.error_handler.error(f"ERROR: {traceback.format_exc()}")
+                return False
+            return True
+        
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = [executor.submit(transcribe_and_handle_errors, clip) for clip in self.clips]
+
+            results = []
+            for future in as_completed(futures):
+                results.append(future.result())
+
+            successful_transcriptions = sum(results)
+            failed_transcriptions = len(self.clips) - successful_transcriptions
+            
+            if self.error_handler:
+                self.error_handler.stream_status(f"Transcription complete. Successful: {successful_transcriptions}, Failed: {failed_transcriptions}")
 
     def get_quotes_str(self):
         output = ""
@@ -304,8 +324,6 @@ ID {clip.id}: {clip.whisper_results.english_text}
         return output
 
     def generate_full_descriptions(self, story_title: str):
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-
         def generate_description(clip):
             try:
                 clip.generate_full_description(story_title)
