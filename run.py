@@ -45,8 +45,9 @@ def main():
     script = NewsScript(storyline, shotlist, clip_manager, dataloader, folder=story_folder, error_handler=error_handler)
     clip_manager.split_video_into_clips()
     clip_manager.load_clips()
-    clip_manager.transcribe_clips()
+    clip_manager.transcribe_clips(multi=True)
     clip_manager.match_clips()
+    clip_manager.break_up_clips()
     clip_manager.generate_full_descriptions(story_title)
     
     script.spell_check()
