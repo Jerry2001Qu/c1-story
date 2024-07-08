@@ -29,7 +29,7 @@ def graphql_query(query, variables, token=get_oauth_token()):
     return response.json()
 
 @st.cache_data(show_spinner=False)
-def get_item(item_id, token=get_oauth_token()):
+def get_item(item_id):
     query = """
     query GetItem($itemId: ID!) {
         item(id: $itemId) {
@@ -46,14 +46,14 @@ def get_item(item_id, token=get_oauth_token()):
     variables = {
         "itemId": item_id,
     }
-    data = graphql_query(query, variables, token=get_oauth_token())
+    data = graphql_query(query, variables)
 
     associations = data["data"]["item"]["associations"]
     text_association = [association for association in associations if association["type"] == "text"][0]
     return text_association["bodyXhtml"], text_association["headLine"], text_association["language"], text_association["located"]
 
 @st.cache_data(show_spinner=False, ttl=60*5)
-def download_asset(item_id, rendition_id, token=get_oauth_token()):
+def download_asset(item_id, rendition_id):
     query = """
     mutation DownloadAsset($itemId: ID!, $renditionId: ID!) {
         download(itemId: $itemId, renditionId: $renditionId) {
@@ -68,11 +68,11 @@ def download_asset(item_id, rendition_id, token=get_oauth_token()):
         "itemId": item_id,
         "renditionId": rendition_id
     }
-    data = graphql_query(query, variables, token=get_oauth_token())
+    data = graphql_query(query, variables)
     return data["data"]["download"]["url"], data["data"]["download"]["type"]
 
 @st.cache_data(show_spinner=False)
-def get_assets(item_id, token=get_oauth_token(), desired_codes=["stream:8256:16x9:mp4"]):
+def get_assets(item_id, desired_codes=["stream:8256:16x9:mp4"]):
     query = """
     query GetAssets($itemId: ID!) {
         item(id: $itemId) {
@@ -107,7 +107,7 @@ def get_assets(item_id, token=get_oauth_token(), desired_codes=["stream:8256:16x
     }
     """
     variables = {"itemId": item_id}
-    data = graphql_query(query, variables, token)
+    data = graphql_query(query, variables)
     associations = data["data"]["item"]["associations"]
 
     filtered_renditions = [
