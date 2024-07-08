@@ -11,6 +11,7 @@ from typing import List, Dict, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import moviepy.editor as mp
 import traceback
+import copy
 
 def folder_has_no_videos(folder_path: Path) -> bool:
     return not list(folder_path.glob("*.mp4"))
@@ -290,28 +291,72 @@ class ClipManager:
         sots = run_chain(get_sot_chain, {"SHOTLIST": self.shotlist})
         return sots
 
-    def transcribe_clips(self):
-        def transcribe_and_handle_errors(clip):
-            try:
-                clip.transcribe_clip()
-            except Exception as e:
-                if self.error_handler:
-                    self.error_handler.error(f"ERROR: {traceback.format_exc()}")
-                return False
-            return True
-        
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            futures = [executor.submit(transcribe_and_handle_errors, clip) for clip in self.clips]
-
-            results = []
-            for future in as_completed(futures):
-                results.append(future.result())
-
-            successful_transcriptions = sum(results)
-            failed_transcriptions = len(self.clips) - successful_transcriptions
+    def transcribe_clips(self, multi: bool = True):
+        if multi:
+            def transcribe_and_handle_errors(clip):
+                try:
+                    clip.transcribe_clip()
+                    return True, None
+                except Exception as e:
+                    return False, traceback.format_exc()
             
-            if self.error_handler:
-                self.error_handler.stream_status(f"Transcription complete. Successful: {successful_transcriptions}, Failed: {failed_transcriptions}")
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                futures = [executor.submit(transcribe_and_handle_errors, clip) for clip in self.clips]
+
+                results = []
+                for future in as_completed(futures):
+                    success, error = future.result()
+                    results.append(success)
+                    if not success and self.error_handler:
+                        self.error_handler.error(f"ERROR: {error}")
+
+                successful_transcriptions = sum(results)
+                failed_transcriptions = len(self.clips) - successful_transcriptions
+                
+                if self.error_handler:
+                    self.error_handler.stream_status(f"Transcription complete. Successful: {successful_transcriptions}, Failed: {failed_transcriptions}")
+        else:
+            for clip in self.clips:
+                try:
+                    clip.transcribe_clip()
+                except Exception as e:
+                    if self.error_handler:
+                        self.error_handler.error(f"ERROR: {traceback.format_exc()}")
+
+    def break_up_clips(self, max_duration=8.0):
+        num_clips_before = len(self.clips)
+        for clip in self.clips:
+            if clip.has_quote:
+                continue
+            if clip.duration > max_duration:
+                num_clips = int(clip.duration / max_duration) + 1
+                clip_duration = clip.duration / num_clips
+                clip_file = clip.file_path
+                clip_file_name = clip_file.stem
+                for i in range(num_clips):
+                    start = i * clip_duration
+                    end = (i + 1) * clip_duration
+                    if end > clip.duration:
+                        end = clip.duration
+                    new_clip_file = self.clips_folder / f"{clip_file_name}_{i}.mp4"
+                    video_clip = mp.VideoFileClip(str(clip_file)).subclip(start, end)
+                    if not new_clip_file.exists():
+                        video_clip.write_videofile(str(new_clip_file), logger=None)
+
+                    new_clip = copy.deepcopy(clip)
+                    new_clip.file_path = new_clip_file
+                    new_clip.duration = video_clip.duration
+                    new_clip.id = f"{clip.id}_{i}"
+                    self.clips.append(new_clip)
+
+                    if self.error_handler:
+                        self.error_handler.stream_status(f"Split clip {clip.id} into {new_clip.id}", video=new_clip_file)
+                self.clips.remove(clip)
+                clip_file.unlink()
+        num_clips_after = len(self.clips)
+
+        if self.error_handler:
+            self.error_handler.info(f"Split {num_clips_before} clips into {num_clips_after} clips")
 
     def get_quotes_str(self):
         output = ""
