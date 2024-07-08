@@ -127,4 +127,4 @@ class StdOutErrorHandler(ErrorHandler):
         if _hash in self.previous_msgs:
             return
         self.previous_msgs += [_hash]
-        print(msg)
+        print(f"## {title}\n{msg}")

@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import List
 from pathlib import Path, PosixPath
 import time
-from requests.exceptions import RequestException
+import traceback
 
 from openai import OpenAI
 
@@ -141,10 +141,10 @@ def deepgram_transcribe_with_retry(file: Path, model: str = "nova-2", delays=[0,
             time.sleep(delays[delay_idx])
             transcription, language = deepgram_transcribe(file, model=model)
             return transcription, language
-        except RequestException as e:
+        except:
             delay_idx += 1
             if delay_idx == len(delays):
-                raise Exception(f"Max retries reached. Last error: {str(e)}")
+                raise Exception(f"Max retries reached. Last error: {traceback.format_exc()}")
             
             print(f"Request failed. Retrying in {delays[delay_idx]} seconds...")
 

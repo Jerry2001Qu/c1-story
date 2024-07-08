@@ -245,22 +245,53 @@ def add_broll(audio_file, full_descriptions_str, section_timings_str):
     content = []
 
     content += [
-f"""You are a news video editor tasked with editing together a news video.
+f"""You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling 
+for a TV audience. Your goal is to create a visually engaging and informative news segment by matching appropriate video clips to the audio content.
 
-Here are B-roll clips:
+First, review the available B-roll clips:
 <broll_descriptions>
 {full_descriptions_str}
 </broll_descriptions>
 
-Here are the section timings for the audio:
+Next, listen carefully to the audio clip:
+""",
+gcs.upload_to_gcs_part(audio_file),
+f"""
+Here are the section timings for the audio clip:
 <section_timings>
 {section_timings_str}
 </section_timings>
 
-Your task is to select and place either B-roll clips or Anchor segments to accompany the audio.
+Your task is to select and place B-roll clips and Anchor segments to accompany the audio story. Follow these guidelines:
+
+1. Match B-roll clips to the content of each section in the audio.
+2. Always fill each section with B-roll clips until the end, but don't exceed the section's end time.
+3. Aim to switch clips every 6 seconds or sooner for a more intense experience.
+4. Use Anchor blocks (max 10 seconds) at the beginning and end of the story, and as needed throughout.
+5. Ensure smooth transitions between clips and sections.
+
+When selecting and placing clips:
+- Copy the max duration for each B-roll clip (e.g., "max 10 seconds"). Never go over this limit.
+- Provide start and end timestamps for each clip within the section.
+- Use at least 5 seconds of Anchor at the beginning and end of the whole story.
+- Place Anchor blocks for at least 3 seconds, so never at the very end of a section.
+- Don't use too many Anchor blocks. One at the beginning, one at the end, and max one in the middle.
+- An Anchor block should last for an entire thought.
+- Show clips for at least 1 second before switching.
+- Don't reuse B-roll if you can avoid it. Repetition is not good.
+- If there isn't enough relevant B-roll, use Anchor segments.
+- Prefer B-roll over Anchor segments. If there's no related B-roll, perhaps there's background B-roll that could be used as filler?
+
+Format your output as follows for each section:
+1. Section number and time range
+2. Brief transcript or description of the audio content
+3. Brief thoughts on the section and what visuals would enhance it
+3. List of clips with timestamps, max duration, and brief explanation for each choice
+
+Here's an example of the expected output format:
 
 <example>
-**Section 1: 0.00 - 11.96**
+**Section 1: 0:00 - 11.96**
 Transcript: Activists in Canada...
 Thoughts: This section is about the protests in Canada. We should show footage of the protests and the activists involved. We should cut at 7.56 to transition to the fireworks...
 
@@ -270,17 +301,20 @@ Thoughts: This section is about the protests in Canada. We should show footage o
 * **Clip 002 (max 4 seconds):** 9.82 - 11.96 - End the section with...
 </example>
 
-Some rules and tips:
-- Follow the section timings exactly. Fill each section. Never go over each section.
-- For each clip you use, ID & max duration exactly. Never go over the max duration.
-- Copy the entire transcript for each section, and add your thoughts to plan out the section. Don't add ..., this is just for example.
-- If no relevant B-roll is available, use an Anchor segment instead. Keep just B-roll or just Anchor segments for a complete thought/topic, then transition.
+Remember:
+- Always use the correct section numbers, even if they skip.
+- Write the whole transcript out. Don't do ...
+- Refer to B-roll as "Clip ###" (e.g., Clip 008).
+- Never invent B-roll clips that aren't provided.
+- Select and place clips informatively and dramatically for TV audiences.
+- Explain your thought process for each clip selection.
 
 Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
 
 Critique your draft inside <critique> tags.
 
 KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 2-3 times. Do this now, don't ask to continue.
+When writing drafts ensure all requirements are met (min timings, etc.), then suggest improvements.
 
 Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS.
 """

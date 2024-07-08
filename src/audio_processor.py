@@ -117,8 +117,8 @@ class AudioProcessor:
                     sections_str += f"{word.word}: {section_start + word.start}-{section_start + word.end}\n"
                 section_start = section_end
 
-        # broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
-        broll_placements = run_chain(broll_chain, {"BROLL_DESCRIPTIONS": full_descriptions_str, "SECTION_TIMINGS": sections_str})
+        broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
+        # broll_placements = run_chain(broll_chain, {"BROLL_DESCRIPTIONS": full_descriptions_str, "SECTION_TIMINGS": sections_str})
         parsed_broll_json = run_chain_json(parse_broll_chain, {"SECTIONS": sections_str, "BROLL_PLACEMENTS": broll_placements})
 
         if self.error_handler:
