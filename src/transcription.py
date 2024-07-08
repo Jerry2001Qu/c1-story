@@ -68,7 +68,7 @@ class WhisperResults:
         text = transcription.transcript
         confidence = transcription.confidence
         min_no_speech_prob = 1.0 - confidence
-        language = Language.from_str(language) if language else None
+        language = Language.from_str(language) if language else Language("Unknown", "Unknown")
 
         has_speech = bool(text)
 
@@ -99,7 +99,6 @@ def openai_transcribe(abs_file_path: Path):
             timestamp_granularities=["segment", "word"]
         )
 
-@st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file})
 def deepgram_transcribe(abs_file_path: Path, model: str = "nova-2"):
     with open(abs_file_path, "rb") as file:
         buffer_data = file.read()
