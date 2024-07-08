@@ -249,6 +249,7 @@ In a <scratchpad>, think through where it would make the most sense to insert qu
 
 - Keep the quotations short, extracting just a portion of the original quote if needed to keep them concise. No more than 1 or 2 sentences.
 - If extracting a portion of a quotation, ensure the portion is CONTIGUOUS. Never cut a gap out of the portion.
+- Only insert quotations that are relevant, add value, and are interesting to the viewer. If it's not interesting, don't insert it.
 - Spread the quotations throughout the story
 - Aim for 2-3 quotations inserted. You do not have to use all of the quotations.
 - You may start the story with an English quotation if it makes sense to do so. But don't with a non-English quotation
@@ -545,6 +546,48 @@ Please read the story script carefully. Then, in a <brainstorming> tag, come up 
 Count each character count while brainstorming potential headlines. Then select the one you think is best and output it in <response></response> tags."""
 )
 
+broll_prompt = PromptTemplate.from_template(
+"""You are a news video editor tasked with editing together a news video.
+
+Here are B-roll clips:
+<broll_descriptions>
+{BROLL_DESCRIPTIONS}
+</broll_descriptions>
+
+Here are the section timings for the audio:
+<section_timings>
+{SECTION_TIMINGS}
+</section_timings>
+
+Your task is to select and place either B-roll clips or Anchor segments to accompany the audio.
+
+<example>
+**Section 1: 0.00 - 11.96**
+Transcript: Activists in Canada...
+Thoughts: This section is about the protests in Canada. We should show footage of the protests and the activists involved. We should cut at 7.56 to transition to the fireworks...
+
+* **Anchor (max 10 seconds):** 0.00 - 6.24 - We start on an Anchor to introduce the story and set the scene.
+* **Clip 008 (max 10 seconds):** 6.24 - 7.56 - The image of a national flag acts as a transition.
+* **Clip 020 (max 12 seconds):** 7.56 - 9.82 - This clip shows fireworks being launched, visually illustrating the audio description of fireworks.
+* **Clip 002 (max 4 seconds):** 9.82 - 11.96 - End the section with...
+</example>
+
+Some rules and tips:
+- Follow the section timings exactly. Fill each section. Never go over each section.
+- For each clip you use, ID & max duration exactly. Never go over the max duration.
+- Copy the entire transcript for each section, and add your thoughts to plan out the section. Don't add ..., this is just for example.
+- If no relevant B-roll is available, use an Anchor segment instead. Keep just B-roll or just Anchor segments for a complete thought/topic, then transition.
+
+Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
+
+Critique your draft inside <critique> tags.
+
+KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 2-3 times. Do this now, don't ask to continue.
+
+Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS.
+"""
+)
+
 parse_broll_prompt = PromptTemplate.from_template(
 """Parse this list of broll placements into JSON.
 
@@ -595,7 +638,7 @@ Here is the list of broll placements:
 {BROLL_PLACEMENTS}
 </broll_placements>
 
-Parse the <broll_placements></broll_placements> into each <section></section>. Start each section at 0. Put your response in <response></response> tags."""
+Parse the <broll_placements></broll_placements> into each <section></section>. Start each section at 0. id should not include the clip word. Put your response in <response></response> tags."""
 )
 
 fix_broll_prompt = PromptTemplate.from_template(
@@ -760,6 +803,7 @@ edit_chain = (edit_prompt | sonnet35).with_config({"run_name": "edit_script"})
 parse_chain = (parse_prompt | sonnet35).with_config({"run_name": "parse_script"})
 logline_chain = (logline_prompt | sonnet35).with_config({"run_name": "logline"})
 headline_chain = (headline_prompt | sonnet35).with_config({"run_name": "headline"})
+broll_chain = (broll_prompt | sonnet35).with_config({"run_name": "broll"})
 parse_broll_chain = (parse_broll_prompt | sonnet35).with_config({"run_name": "parse_broll"})
 fix_broll_chain = (fix_broll_prompt | sonnet35).with_config({"run_name": "fix_broll"})
 match_sot_chain = (match_sot_prompt | sonnet35).with_config({"run_name": "match_sot"})

@@ -2,12 +2,13 @@
 
 # STREAMLIT
 from src.clip_manager import ClipManager
-from src.prompts import run_chain_json, parse_broll_chain, fix_broll_chain
+from src.prompts import run_chain_json, run_chain, broll_chain, parse_broll_chain, fix_broll_chain
 from src.news_script import NewsScript, AnchorScriptSection, is_type
 from src.tts import TTS
 from src.gemini import add_broll
 from src.language import Language
 from src.heygen import animate_anchor
+from src.transcription import WhisperResults
 
 import streamlit as st
 # /STREAMLIT
@@ -64,6 +65,7 @@ class AudioProcessor:
                 audio_clip = mp.AudioFileClip(str(audio_file))
                 section.anchor_audio_file = audio_file
                 section.anchor_audio_clip = audio_clip
+                section.whisper_results = WhisperResults.from_file(audio_file)
                 audio_clips.append(audio_clip)
 
                 if self.error_handler:
@@ -96,7 +98,7 @@ class AudioProcessor:
         for clip in self.clip_manager.clips:
             if not clip.has_quote:
                 duration = clip.load_video().duration
-                full_descriptions_str += f"<clip{clip.id}>\n{clip.full_description}\n\nMax duration: {duration} seconds\n</clip{clip.id}>\n"
+                full_descriptions_str += f"<clip {clip.id}>\n{clip.full_description}\n\nMax duration: {duration} seconds\n</clip {clip.id}>\n"
 
         sections_str = ""
         section_start = 0
@@ -111,9 +113,12 @@ class AudioProcessor:
                 if i == len(self.news_script.sections)-1:
                     sections_str += f"Anchor must be shown at or before {max(section_end-5, section_start)}s till end.\n"
                 sections_str += f"{section.text}\n"
+                for word in section.whisper_results.timestamps:
+                    sections_str += f"{word.word}: {section_start + word.start}-{section_start + word.end}\n"
                 section_start = section_end
 
-        broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
+        # broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
+        broll_placements = run_chain(broll_chain, {"BROLL_DESCRIPTIONS": full_descriptions_str, "SECTION_TIMINGS": sections_str})
         parsed_broll_json = run_chain_json(parse_broll_chain, {"SECTIONS": sections_str, "BROLL_PLACEMENTS": broll_placements})
 
         if self.error_handler:
