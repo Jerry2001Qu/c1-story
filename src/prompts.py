@@ -539,6 +539,7 @@ Please read the story script carefully. Then, in a <brainstorming> tag, come up 
 - Be concise (MUST BE between 35 and 45 characters including spaces), and content dense
 - Be written in an attention-grabbing style that would make readers want to click on the story
 - Is informative over all else
+- Uses simple language for a general audience.
 - Be unique to the specifics of this story ('Missiles fired in Cuba' is better than 'Fighting in Cuba')
 - Be in title case
 - Spell out numbers (Two instead of 2)
@@ -575,14 +576,14 @@ Thoughts: This section is about the protests in Canada. We should show footage o
 Some rules and tips:
 - Follow the section timings exactly. Fill each section. Never go over each section.
 - For each clip you use, ID & max duration exactly. Never go over the max duration.
-- Copy the entire transcript for each section, and add your thoughts to plan out the section. Don't add ..., this is just for example.
+- Copy import parts of the transcript. Add your thoughts to plan out the section.
 - If no relevant B-roll is available, use an Anchor segment instead. Keep just B-roll or just Anchor segments for a complete thought/topic, then transition.
 
 Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
 
 Critique your draft inside <critique> tags.
 
-KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 2-3 times. Do this now, don't ask to continue.
+KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 1-2 times. Do this now, don't ask to continue.
 
 Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS.
 """
