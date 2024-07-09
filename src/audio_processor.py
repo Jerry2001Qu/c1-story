@@ -2,7 +2,7 @@
 
 # STREAMLIT
 from src.clip_manager import ClipManager
-from src.prompts import run_chain_json, run_chain, broll_chain, parse_broll_chain, fix_broll_chain
+from src.prompts import run_chain_json, run_chain, broll_chain, parse_broll_chain, fix_broll_chain, broll_request_chain
 from src.news_script import NewsScript, AnchorScriptSection, is_type
 from src.tts import TTS
 from src.gemini import add_broll
@@ -94,6 +94,7 @@ class AudioProcessor:
         """Generates and adds B-roll placement instructions to AnchorScriptSections."""
         if not self.news_script.get_anchor_sections():
             return
+
         full_descriptions_str = ""
         for clip in self.clip_manager.clips:
             if not clip.has_quote:
@@ -113,9 +114,15 @@ class AudioProcessor:
                 if i == len(self.news_script.sections)-1:
                     sections_str += f"Anchor must be shown at or before {max(section_end-5, section_start)}s till end.\n"
                 sections_str += f"{section.text}\n"
+                broll_request = run_chain(broll_request_chain, {"SCRIPT": section.text})
+                sections_str += f"B-roll Requests:\n{broll_request}\n"
+                sections_str += f"Timestamps:\n"
                 for word in section.whisper_results.timestamps:
                     sections_str += f"{word.word}: {section_start + word.start}-{section_start + word.end}\n"
                 section_start = section_end
+        
+        if self.error_handler:
+            self.error_handler.stream_status(sections_str, "Generating BROLL requests")
 
         broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
         # broll_placements = run_chain(broll_chain, {"BROLL_DESCRIPTIONS": full_descriptions_str, "SECTION_TIMINGS": sections_str})

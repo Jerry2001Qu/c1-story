@@ -7,10 +7,10 @@ import streamlit as st
 
 import os
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "Channel 1"
-os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
+# os.environ["LANGCHAIN_TRACING_V2"] = "true"
+# os.environ["LANGCHAIN_PROJECT"] = "Channel 1"
+# os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+# os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.output_parsers import JsonOutputParser, XMLOutputParser
@@ -547,6 +547,43 @@ Please read the story script carefully. Then, in a <brainstorming> tag, come up 
 Count each character count while brainstorming potential headlines. Then select the one you think is best and output it in <response></response> tags."""
 )
 
+broll_request_prompt = PromptTemplate.from_template(
+"""You are a news video editor tasked with finding relevant B-roll clips for a news story.
+
+Here is the script:
+<script>
+{SCRIPT}
+</script>
+
+Here is an example:
+<example>
+Activists in Canada are protesting against the government's new policies. The protests have been ongoing for weeks, with activists demanding change. The situation escalated last night when police clashed with protesters, leading to several arrests.
+
+Ideal:
+- Protesters marching with signs
+- Police arresting protesters
+- Activists chanting slogans
+- Aerial view of the protest
+
+Secondary:
+- Police cars arriving at the scene
+- Any shots of the protesters
+- Footage of the government building
+
+Acceptable:
+- Still images of the protest
+- Stock footage of protests
+- Any relevant footage of Canada
+</example>
+
+Please create a list of B-roll clips that would be relevant to this story.
+- Each B-roll clip should be described in a single sentence.
+- Create 3 lists going from most to least relevant B-roll clips.
+- The last list should continue very general B-roll clips that could be used if more specific clips are not available.
+
+Put your response in <response></response> tags."""
+)
+
 broll_prompt = PromptTemplate.from_template(
 """You are a news video editor tasked with editing together a news video.
 
@@ -804,6 +841,7 @@ edit_chain = (edit_prompt | sonnet35).with_config({"run_name": "edit_script"})
 parse_chain = (parse_prompt | sonnet35).with_config({"run_name": "parse_script"})
 logline_chain = (logline_prompt | sonnet35).with_config({"run_name": "logline"})
 headline_chain = (headline_prompt | sonnet35).with_config({"run_name": "headline"})
+broll_request_chain = (broll_request_prompt | sonnet35).with_config({"run_name": "broll_request"})
 broll_chain = (broll_prompt | sonnet35).with_config({"run_name": "broll"})
 parse_broll_chain = (parse_broll_prompt | sonnet35).with_config({"run_name": "parse_broll"})
 fix_broll_chain = (fix_broll_prompt | sonnet35).with_config({"run_name": "fix_broll"})

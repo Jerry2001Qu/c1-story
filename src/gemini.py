@@ -279,6 +279,7 @@ When selecting and placing clips:
 - An Anchor block should last for an entire thought.
 - Show clips for at least 1 second before switching.
 - Don't reuse B-roll if you can avoid it. Repetition is not good.
+- Each section will have B-roll requests. Use these b-rolls if available, otherwise use Anchor segments.
 - If there isn't enough relevant B-roll, use Anchor segments.
 - Prefer B-roll over Anchor segments. If there's no related B-roll, perhaps there's background B-roll that could be used as filler?
 

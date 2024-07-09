@@ -43,31 +43,45 @@ def main():
     clips_folder = story_folder / "clips"
     clip_manager = ClipManager(video_file_path, clips_folder, shotlist, anchor_image_path, anchor_voice_id, voiceover_voice_id, anchor_avatar_id, has_splash_screen=False, error_handler=error_handler)
     script = NewsScript(storyline, shotlist, clip_manager, dataloader, folder=story_folder, error_handler=error_handler)
+    print("Splitting video into clips")
     clip_manager.split_video_into_clips()
+    print("Loading clips")
     clip_manager.load_clips()
+    print("Transcribing clips")
     clip_manager.transcribe_clips(multi=True)
+    print("Matching clips")
     clip_manager.match_clips()
+    print("Breaking up clips")
     clip_manager.break_up_clips()
+    print("Generating full descriptions")
     clip_manager.generate_full_descriptions(story_title)
     
+    print("Spell checking")
     script.spell_check()
+    print("Generating facts")
     script.generate_facts()
+    print("Generating script")
     script.generate_script()
+    print("Generating lower thirds")
     script.generate_lower_thirds()
+    print("Matching SOT clips")
     script.match_sot_clips()
 
-    combined_script = script.with_combined_script()
-
-    audio_processor = AudioProcessor(combined_script, clip_manager, story_folder, error_handler)
+    audio_processor = AudioProcessor(script, clip_manager, story_folder, error_handler)
+    print("Processing anchor audio")
     audio_processor._process_anchor_audio()
+    print("Generating SOT translations")
     audio_processor._generate_sot_translations()
+    print("Adding B-roll placements")
     audio_processor._add_broll_placements()
 
     video_output_file = story_folder / "output.mp4"
-    video_editor = VideoEditor(combined_script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, bitrate=bitrate, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
+    video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, bitrate=bitrate, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), error_handler=error_handler)
+    print("Assembling video")
     video_editor.assemble_video(output_file=video_output_file)
 
     gcs = GCSManager()
+    print("Uploading video to GCS")
     gcs.upload_to_gcs_url(video_output_file, filename=script.headline, bucket_name="c1-videos")
 
 if __name__ == "__main__":
