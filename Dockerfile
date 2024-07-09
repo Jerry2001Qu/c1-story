@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "run_local.py"]
+CMD ["python", "-u", "run_local.py"]

@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import moviepy.editor as mp
 import traceback
 import copy
+import os
 
 def folder_has_no_videos(folder_path: Path) -> bool:
     return not list(folder_path.glob("*.mp4"))
@@ -369,6 +370,8 @@ ID {clip.id}: {clip.whisper_results.english_text}
         return output
 
     def generate_full_descriptions(self, story_title: str):
+        os.environ['GRPC_POLL_STRATEGY'] = 'poll'
+
         def generate_description(clip):
             try:
                 clip.generate_full_description(story_title)
