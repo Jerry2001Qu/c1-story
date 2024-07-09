@@ -2,7 +2,7 @@
 from src.gcp import GCSManager
 from src.constants import HEYGEN_API_KEY
 from src.hashing import sha256sum, hash_audio_file, hash_ignore, hash_absolute_path
-from src.error_handler import StreamlitErrorHandler
+from src.error_handler import StreamlitErrorHandler, StdOutErrorHandler
 
 import streamlit as st
 # /STREAMLIT
@@ -26,8 +26,8 @@ def get_heygen_avatars():
     else:
         raise Exception(f"Error fetching avatars: {response.status_code} - {response.text}")
 
-@st.cache_data(show_spinner=True, hash_funcs={PosixPath: hash_absolute_path, StreamlitErrorHandler: hash_ignore})
-def animate_anchor(local_audio_file_path: Path, transcript: str, avatar_id: str, output_path: Path, avatar_style: str = 'normal', test: bool = True, error_handler=None):
+@st.cache_data(show_spinner=True, hash_funcs={PosixPath: hash_absolute_path, StreamlitErrorHandler: hash_ignore, StdOutErrorHandler: hash_ignore})
+def animate_anchor(local_audio_file_path: Path, transcript: str, avatar_id: str, output_path: Path, avatar_style: str = 'normal', test: bool = True):
     # Upload the local audio file to GCP and get the URL
     gcs = GCSManager()
     audio_url = gcs.upload_to_gcs_url(local_audio_file_path, "public-heygen-assets")

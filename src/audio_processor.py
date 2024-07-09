@@ -336,7 +336,7 @@ class AudioProcessor:
             if section.has_anchor_on_screen():
                 anchor_video_file = self.news_script.folder / f"{section.id}_anchor.mp4"
                 if live_anchor:
-                    animate_anchor(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=test_mode, error_handler=self.error_handler)
+                    animate_anchor(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=test_mode)
                     if self.error_handler:
                         self.error_handler.stream_status(section.text, title="Generated anchor video", video=anchor_video_file)
                     section.anchor_video_file = anchor_video_file
