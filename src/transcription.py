@@ -153,8 +153,8 @@ def deepgram_transcribe_with_retry(file: Path, model: str = "nova-2", delays=[0,
     raise Exception("Max retries reached without successful API call")
 
 def get_adjusted_timestamps(timestamps, start_timestamp, end_timestamp, max_duration):
-    exact_start = timestamps[0].start
-    exact_end = timestamps[-1].end
+    exact_start = start_timestamp.start
+    exact_end = end_timestamp.end
     
     before_timestamp_idx = timestamps.index(start_timestamp) - 1
     after_timestamp_idx = timestamps.index(end_timestamp) + 1
@@ -177,4 +177,6 @@ def get_adjusted_timestamps(timestamps, start_timestamp, end_timestamp, max_dura
     else:
         end = min(exact_end + 0.5, max_duration)
     
+    start = max(0.0, start)
+    end = min(max_duration, end)
     return start, end
