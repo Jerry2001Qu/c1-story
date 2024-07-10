@@ -3,7 +3,7 @@
 # STREAMLIT
 from src.clip_manager import ClipManager, Clip
 from src.prompts import run_chain, run_chain_json, \
-                        spell_check_chain, get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, match_hard_sot_chain, facts_chain, edit_chain
+                        spell_check_chain, get_sot_chain, reformat_chain, sot_chain, parse_chain, logline_chain, parse_sot_chain, headline_chain, match_sot_chain, match_hard_sot_chain, facts_chain, edit_chain, reformat_title_chain
 from src.language import Language
 from src.tts import TTS
 from src.transcription import get_adjusted_timestamps
@@ -213,7 +213,7 @@ class NewsScript:
                 section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, timestamps[0], timestamps[-1], clip.duration)
                 section.match_type = "SUCCESS"
                 if self.error_handler:
-                    self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
+                    self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT (Hard)", clip.file_path)
             else:
                 if clip.whisper_results.has_speech:
                     section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, clip.whisper_results.timestamps[0], clip.whisper_results.timestamps[-1], clip.duration)
@@ -297,6 +297,8 @@ class NewsScript:
             shot_id_str = str(section.shot_id)
             section.name = parsed_sots[shot_id_str]["name"]
             section.title = parsed_sots[shot_id_str]["title"]
+            if len(section.title.split()) > 8:
+                section.title = run_chain(reformat_title_chain, {"TITLE": section.title})
             section.language = Language.from_str(parsed_sots[shot_id_str]["language"])
 
     def get_sot_sections(self) -> List[SOTScriptSection]:
@@ -306,6 +308,10 @@ class NewsScript:
     def get_anchor_sections(self) -> List[AnchorScriptSection]:
         """Returns a list of AnchorScriptSections."""
         return [section for section in self.sections if is_type(section, AnchorScriptSection)]
+    
+    def get_sot_clip_ids(self) -> List[str]:
+        """Returns a list of clip IDs for SOTScriptSections."""
+        return [section.clip.id for section in self.get_sot_sections() if section.clip]
 
     def _generate_headline(self):
         """Generates a headline for the news script."""

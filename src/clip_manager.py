@@ -135,7 +135,7 @@ class ClipManager:
             sot_matches_str = ""
             for clip in self.clips:
                 sot_matches_str += f"{clip.id}: {clip.shot_id}\n"
-            self.error_handler.stream_status(sot_matches_str)
+            self.error_handler.stream_status(sot_matches_str, "SOT Matches")
 
         # Combine clips that match the same sot and are either next to each other or have one clip in between
         i = 0
@@ -253,6 +253,13 @@ class ClipManager:
             except Exception as e:
                 if self.error_handler:
                     self.error_handler.error(f"ERROR: {traceback.format_exc()}")
+        
+        if self.error_handler:
+            clip_matches_str = ""
+            for clip in self.clips:
+                clip_matches_str += f"{clip.id}: {clip.shot_id}\n"
+            self.error_handler.stream_status(sot_matches_str, "Clip Matches")
+
     
     def combine_clips(self, clips: List[Clip]) -> Clip:
         """Combines multiple video clips into a new clip."""
@@ -382,7 +389,7 @@ ID {clip.id}: {clip.whisper_results.english_text}
         # STREAMLIT
         progress_bar = st.progress(0.0)
         with ThreadPoolExecutor(max_workers=10) as executor:
-            future_to_clip = {executor.submit(generate_description, clip): clip for clip in self.clips if not clip.has_quote}
+            future_to_clip = {executor.submit(generate_description, clip): clip for clip in self.clips}
             for i, future in enumerate(as_completed(future_to_clip)):
                 clip, exception = future.result()
                 if exception:

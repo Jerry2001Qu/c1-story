@@ -18,6 +18,8 @@ Check it out on [Streamlit Community Cloud](https://st-hello-app.streamlit.app/)
 
 `docker build -t gcr.io/stg-transcription/video .`
 
+`docker run -v ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json gcr.io/stg-transcription/video:latest`
+
 `docker push gcr.io/stg-transcription/video`
 
 ```

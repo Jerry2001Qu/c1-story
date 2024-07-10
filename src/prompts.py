@@ -148,6 +148,33 @@ Ensure double quotes in strings are replaced with single quotes to ensure JSON i
 
 Provide the extractions inside <response></response> tags.""")
 
+reformat_title_prompt = PromptTemplate.from_template(
+"""Reformat a person's title to fit into a maximum of 7-8 words.
+
+Here is the title:
+<title>
+{TITLE}
+</title>
+
+- The title should be rephrased to fit into a maximum of 7-8 words.
+- If the title is already 8 words or less, do not change it.
+- Do not change the meaning of the title.
+
+Here is an example:
+<example>
+<title>
+Chief Executive Officer and President of The National Broadcasting Company in New York City
+</title>
+
+<response>
+Chief Executive Officer and President of NBC
+</response>
+</example>
+
+Put your response in <response></response> tags.
+"""
+)
+
 reformat_prompt = PromptTemplate.from_template(
 """I'm producing a television news segment. I'd like to reformat a news story I wrote so it
 can be spoken by an on camera news anchor. Please don't change any of the facts of
@@ -253,11 +280,15 @@ In a <scratchpad>, think through where it would make the most sense to insert qu
 - Spread the quotations throughout the story
 - Aim for 2-3 quotations inserted. You do not have to use all of the quotations.
 - You may start the story with an English quotation if it makes sense to do so. But don't with a non-English quotation
+  - For example, you could start with a quote of protestors chanting.
+  - Only start stories with short quotes.
+  - An example could be: "NO JUSTICE, NO PEACE!" chanted the crowd as they marched through the streets.
 - NEVER put a quotation at the end of the entire story. We must end with the script
 - Insert the portions of quotations including their descriptions
 - Do not add any transitions between the quotations and the rest of the script
 - Do not change the wording of the news script except to insert the quotations
 - Place quotations in separate paragraphs. You may split paragraphs in the original script.
+- Short soundbites are good. Chanting or short exclamations should be added as transitions to add real voices to the story.
 
 After planning it out, provide your final response with the quotations inserted into the appropriate parts of the news script inside <response></response> tags."""
 )
@@ -291,6 +322,8 @@ The script may contain soundbites. They are in a format like:
 - You may reorder, remove, or cut down soundbites.
 - If cutting down a soundbite, ensure the soundbite is CONTIGUOUS. Therefore, you may only cut from the start or end of a soundbite!
 - Soundbites are better when spread throughout the story instead of clumped together.
+- Short soundbites are good. Chanting or short exclamations should be kept in the story to add real voices to the story.
+- You can start the story with a soundbite if it makes sense to do so. Especially short soundbites like chanting or exclamations.
 
 <example>
 <example_input>
@@ -542,7 +575,14 @@ Please read the story script carefully. Then, in a <brainstorming> tag, come up 
 - Uses simple language for a general audience.
 - Be unique to the specifics of this story ('Missiles fired in Cuba' is better than 'Fighting in Cuba')
 - Be in title case
-- Spell out numbers (Two instead of 2)
+- Spell out single numbers (Two instead of 2)
+
+Here are some examples of good headlines:
+<good_headlines>
+- New York City Announces Free Metro Passes
+- 100,000 People Attend Climate Change Rally in London
+- Alex Baldwin 'Rust' Shooting: Trial Begins
+</good_headlines>
 
 Count each character count while brainstorming potential headlines. Then select the one you think is best and output it in <response></response> tags."""
 )
@@ -758,7 +798,7 @@ And here is the larger transcript to find the matching substring in:
 </transcript>
 
 Your resulting fuzzy match should be contiguous & be taken exactly from the transcript. Try to obtain as much of the quote as 
-possible, even if some words aren't present in the quote. If there is no fuzzy match, return Unknown. Put your final response in <response></response> tags."""
+possible, even if some words aren't present in the quote. But keep the lengths around the same. If there is no fuzzy match, return Unknown. Put your final response in <response></response> tags."""
 )
 
 language_to_iso_prompt = PromptTemplate.from_template(
@@ -835,6 +875,7 @@ spell_check_chain = (spell_check_prompt | sonnet35).with_config({"run_name": "sp
 get_sot_chain = (get_sot_prompt | sonnet35).with_config({"run_name": "get_sots"})
 facts_chain = (facts_prompt | sonnet35).with_config({"run_name": "generate_facts"})
 parse_sot_chain = (parse_sot_prompt | sonnet35).with_config({"run_name": "parse_sots"})
+reformat_title_chain = (reformat_title_prompt | sonnet35).with_config({"run_name": "reformat_title"})
 reformat_chain = (reformat_prompt | sonnet35).with_config({"run_name": "reformat_script"})
 sot_chain = (sot_prompt | sonnet35).with_config({"run_name": "add_sots"})
 edit_chain = (edit_prompt | sonnet35).with_config({"run_name": "edit_script"})
