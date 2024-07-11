@@ -100,11 +100,14 @@ class ReutersAPIDataLoader(DataLoader):
                 storyline = extract_str_between(bodyhtml, "<p>STORY:", "</body>")[9:-11]
                 storyline = "\n".join([line.strip() for line in storyline.split("</p><p>")[:-1]])
 
+                body = "\n".join([line.strip() for line in bodyhtml.split("</p><p>")])[9:-11]
+
                 self.shotlist = shotlist
                 self.storyline = storyline
                 self.story_title = headline
                 self.language = language
                 self.location = located
+                self.body = body
 
                 video_asset = get_assets(self.reuters_id)[0]
                 video_url, asset_type = download_asset(self.reuters_id, video_asset["uri"])
@@ -139,6 +142,10 @@ class ReutersAPIDataLoader(DataLoader):
     def get_video_file_path(self) -> Path:
         self.pull_reuters_api()
         return self.video_file_path
+    
+    def get_body(self) -> str:
+        self.pull_reuters_api()
+        return self.body
 
 def extract_str_between(text: str, left_tag: str, right_tag: str) -> str:
     return text[text.find(left_tag):text.rfind(right_tag)+len(right_tag)]
