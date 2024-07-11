@@ -200,34 +200,35 @@ class NewsScript:
                     self.error_handler.warning(f"WARNING: Problem when matching section {section.id}. {traceback.format_exc()}")
 
     def _match_sot_clips_same_language(self, section, clip, quote):
-        timestamps = fuzzy_match(quote, clip.whisper_results)
-        if timestamps:
-            section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, timestamps[0], timestamps[-1], clip.duration)
-            section.match_type = "SUCCESS"
-            if self.error_handler:
-                self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
-        else:
-            matched_quote = run_chain(match_hard_sot_chain, {"QUOTE": quote, "TRANSCRIPT": clip.whisper_results.text})
-            timestamps = fuzzy_match(matched_quote, clip.whisper_results)
+        if quote == clip.whisper_results.text:
+            timestamps = fuzzy_match(quote, clip.whisper_results)
             if timestamps:
                 section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, timestamps[0], timestamps[-1], clip.duration)
                 section.match_type = "SUCCESS"
                 if self.error_handler:
-                    self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT (Hard)", clip.file_path)
+                    self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT", clip.file_path)
+                return
+        matched_quote = run_chain(match_hard_sot_chain, {"QUOTE": quote, "TRANSCRIPT": clip.whisper_results.text})
+        timestamps = fuzzy_match(matched_quote, clip.whisper_results)
+        if timestamps:
+            section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, timestamps[0], timestamps[-1], clip.duration)
+            section.match_type = "SUCCESS"
+            if self.error_handler:
+                self.error_handler.stream_status(f"Found quote in clip {clip.id}. From {int(section.start)}s to {int(section.end)}s. {section.quote}", "Matched SOT (Hard)", clip.file_path)
+        else:
+            if clip.whisper_results.has_speech:
+                section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, clip.whisper_results.timestamps[0], clip.whisper_results.timestamps[-1], clip.duration)
+                section.match_type = "SPEECH"
+                if self.error_handler:
+                    self.error_handler.warning(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                print(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
             else:
-                if clip.whisper_results.has_speech:
-                    section.start, section.end = get_adjusted_timestamps(clip.whisper_results.timestamps, clip.whisper_results.timestamps[0], clip.whisper_results.timestamps[-1], clip.duration)
-                    section.match_type = "SPEECH"
-                    if self.error_handler:
-                        self.error_handler.warning(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
-                    print(f"SOT not found, adding all speech, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
-                else:
-                    section.start = 0.0
-                    section.end = clip.duration
-                    section.match_type = "CLIP"
-                    if self.error_handler:
-                        self.error_handler.warning(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
-                    print(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                section.start = 0.0
+                section.end = clip.duration
+                section.match_type = "CLIP"
+                if self.error_handler:
+                    self.error_handler.warning(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, language: {clip.whisper_results.language}, quote: {quote}, whisper: {clip.whisper_results.text}")
+                print(f"SOT not found, adding full clip, section: {section.id}, clip: {clip.id}, quote: {quote}, whisper: {clip.whisper_results.text}")
 
     def _match_sot_clips_different_language(self, section, clip):
         english_str = section.quote

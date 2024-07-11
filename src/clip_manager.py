@@ -294,6 +294,7 @@ class ClipManager:
         # Update the first clip with the new file path and transcribe
         clips[0].id = new_id
         clips[0].file_path = new_file_path
+        clips[0].duration = combined_video.duration
         clips[0].transcribe_clip()
         return clips[0]
 
