@@ -798,7 +798,7 @@ And here is the larger transcript to find the matching substring in:
 </transcript>
 
 Your resulting fuzzy match should be contiguous & be taken exactly from the transcript. Try to obtain as much of the quote as 
-possible, even if some words aren't present in the quote. But keep the lengths around the same. If there is no fuzzy match, return Unknown. Put your final response in <response></response> tags."""
+possible, even if some words aren't present in the quote. If there is no fuzzy match, return Unknown. Put your final response in <response></response> tags."""
 )
 
 language_to_iso_prompt = PromptTemplate.from_template(
