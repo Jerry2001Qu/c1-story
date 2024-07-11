@@ -226,6 +226,7 @@ Rating: 8/10, the footage is high-quality and captures a key moment in the prote
     content += ["""
 Describe this video with as much detail as possible. Include timestamps sections of the video. If possible, please give comments on people, location, timing,
 shot (wide, professional, etc.), & anything else you feel could be relevant to fully understand what is happening in this video & making video editing decisions.
+Additional details could include if the person is speaking, if you can see their face, logos, landmarks, all details to describe the scene.
 Also include the minimum amount of time this shot should be on screen for, before cutting away. Generally panning shots need to be on screen longer to not seem abrupt,
 while a still shot can be cut off sooner. Include the key informational part of the clip. Give a rating out of 10 for how useful this clip is for a news report, and a reason why.
 A 10 would be pivotal to the story, and high quality. A 1 would not be useful, and be of low quality. A still shot of a picture would get a lower rating. Very short clips (< 2s) would get a lower rating."""]
@@ -284,6 +285,7 @@ When selecting and placing clips:
   - For example, "People are looking forward to this weeks events..." could have Anchor on screen
   - That can be followed by "including a jazz concert, carnival games, and a prize to be won." with all 3 being shown as B-roll.
 - When selecting clips, try to show & tell. The b-roll should match what is being said in the script.
+- If placing a b-roll that is an interview or a person speaking, cut quickly to another b-roll. It's weird since the audio is different.
 
 Format your output as follows for each section:
 1. Section number and time range
