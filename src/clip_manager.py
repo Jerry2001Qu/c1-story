@@ -199,6 +199,8 @@ class ClipManager:
                     current_group = []
         if current_group:
             groups.append(current_group)
+        
+        print(groups)
 
         # Describe each group with shot_id of previous and next clip
         for group in groups:
@@ -228,6 +230,7 @@ class ClipManager:
 
                 # Describe the group
                 try:
+                    print(group, shotlist)
                     clips_xml = self.describe_clips(group, shotlist, previous_shot_id=previous_shot_id, next_shot_id=next_shot_id)
                     for clip_data in clips_xml["response"]:
                         clip_dict = {}
