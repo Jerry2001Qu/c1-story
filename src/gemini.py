@@ -461,6 +461,8 @@ Remember:
 - Select and place clips informatively and dramatically for TV audiences.
 - Explain your thought process for each clip selection.
 - Quote the transcript for each clip selection.
+- B-roll must be used for at least 1 second before switching to another clip.
+- Anchor blocks must be used for at least 1.5 seconds before switching to another clip.
 
 Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
 
