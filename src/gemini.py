@@ -304,9 +304,9 @@ This story has less b-roll available, we should not transition as frequently... 
 Transcript: Activists in Canada are protesting against the government's decision to expand a pipeline. The protests have been ongoing for weeks, with activists demanding action on climate change by using fireworks to make their point.
 Thoughts: This section is about the protests in Canada. We should show footage of the protests and the activists involved. We should cut at 7.56 to transition to the fireworks...
 
-* Anchor (max 10 seconds): 0.00 - 7.24 - We start on an Anchor to introduce the story and set the scene.
-* Clip 008 (max 10 seconds):  7.24 - 10.11 - The image of a national flag acts as a transition.
-* Clip 020 (max 12 seconds): 10.11 - 16.68 - This clip shows fireworks being launched, visually illustrating the audio description of fireworks.
+* Anchor (max 10 seconds): 0.00 - 7.24 - We start on an Anchor to introduce the story and set the scene when saying ...
+* Clip 008 (max 10 seconds):  7.24 - 10.11 - The image of a national flag acts as a transition when saying ...
+* Clip 020 (max 12 seconds): 10.11 - 16.68 - This clip shows fireworks being launched, visually illustrating the audio description of fireworks when saying ...
 * Clip 002 (max 4 seconds): 16.68 - 18.82 - End the section with...
 </example>
 
@@ -344,6 +344,7 @@ Remember:
 - Never invent B-roll clips that aren't provided.
 - Select and place clips informatively and dramatically for TV audiences.
 - Explain your thought process for each clip selection.
+- Reference the transcript for each clip selection.
 
 Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
 

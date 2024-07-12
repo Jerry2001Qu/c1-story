@@ -43,11 +43,11 @@ class Clip:
 
     def transcribe_clip(self):
         """Performs speech recognition on the clip's audio."""
-        audio_file_path = self.file_path.with_suffix('.mp3')
-        video = self.load_video()
-        video.audio.write_audiofile(str(audio_file_path))
-
         try:
+            audio_file_path = self.file_path.with_suffix('.mp3')
+            video = self.load_video()
+            video.audio.write_audiofile(str(audio_file_path))
+            
             self.whisper_results = WhisperResults.from_file(audio_file_path)
         except Exception as e:
             self.whisper_results = WhisperResults("", [], 1.0, False, "Unknown", "")

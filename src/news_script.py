@@ -142,7 +142,7 @@ class NewsScript:
         story_with_sots = self._insert_sots_into_story(self.storyline, sots)
         if self.error_handler:
             self.error_handler.stream_status(story_with_sots, "Inserted SOTs")
-        edited_story = self._edit_story(story_with_sots)
+        edited_story = self._edit_story(story_with_sots, sots)
         if self.error_handler:
             self.error_handler.stream_status(edited_story, "Edited story")
         reformated_story = self._reformat_story(edited_story)
@@ -254,9 +254,9 @@ class NewsScript:
             story_with_sots = run_chain(sot_chain, {"QUOTATIONS": sots, "SCRIPT": story})
         return story_with_sots
     
-    def _edit_story(self, story: str):
+    def _edit_story(self, story: str, sots: str):
         """Edits the story"""
-        edited_story = run_chain(edit_chain, {"SCRIPT": story})
+        edited_story = run_chain(edit_chain, {"SCRIPT": story, "SOUNDBITES": sots})
         return edited_story
 
     def _parse_script(self, story: str, sots: str):
