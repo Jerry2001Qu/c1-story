@@ -60,6 +60,8 @@ def run():
     ]
     anchor_voice_id, voiceover_voice_id, anchor_avatar_id = anchor_map[anchor_idx]
 
+    if "edit" not in st.session_state:
+        st.session_state["edit"] = False
     if "verbosity" not in st.session_state:
         st.session_state["verbosity"] = False
     if "stream_verbosity" not in st.session_state:
@@ -78,6 +80,7 @@ def run():
             st.session_state[var_name] = not st.session_state[var_name]
         return _toggle
 
+    edit = st.toggle("Edit Story", value=st.session_state["edit"], on_change=on_change("edit"))
     verbosity = st.toggle("Display Generation Data", value=st.session_state["verbosity"], on_change=on_change("verbosity"))
     stream_verbosity = st.toggle("Stream Generation Data", value=st.session_state["stream_verbosity"], on_change=on_change("stream_verbosity"))
     live_anchor = st.toggle("Motion Anchor", value=st.session_state["live_anchor"], on_change=on_change("live_anchor"))
@@ -167,7 +170,7 @@ def run():
                 script.generate_facts()
                 st.write("Generating script")
                 error_handler.info("Generating script")
-                script.generate_script()
+                script.generate_script(edit=edit)
                 st.write("Generating lower thirds")
                 error_handler.info("Generating lower thirds")
                 script.generate_lower_thirds()

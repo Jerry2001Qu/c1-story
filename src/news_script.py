@@ -135,16 +135,19 @@ class NewsScript:
         if self.error_handler:
             self.error_handler.stream_status(self.facts_list, "Generating list of facts")
     
-    def generate_script(self):
+    def generate_script(self, edit: bool = True):
         sots = self._extract_sots()
         if self.error_handler:
             self.error_handler.stream_status(self.storyline, "Writing story")
         story_with_sots = self._insert_sots_into_story(self.storyline, sots)
         if self.error_handler:
             self.error_handler.stream_status(story_with_sots, "Inserted SOTs")
-        edited_story = self._edit_story(story_with_sots, sots)
-        if self.error_handler:
-            self.error_handler.stream_status(edited_story, "Edited story")
+        if edit:
+            edited_story = self._edit_story(story_with_sots, sots)
+            if self.error_handler:
+                self.error_handler.stream_status(edited_story, "Edited story")
+        else:
+            edited_story = story_with_sots
         reformated_story = self._reformat_story(edited_story)
         if self.error_handler:
             self.error_handler.stream_status(reformated_story, "Reformatted story")
