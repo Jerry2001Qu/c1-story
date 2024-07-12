@@ -382,6 +382,8 @@ First, review the available B-roll clips:
             else:
                 full_description = clip.shotlist_description
             clip_section = [f"<clip {clip.id}>\n", gcs.upload_to_gcs_part(frame_file), f"\nThis clip is a SOT/Interview. \n{full_description}\n\nMax duration: {min(duration, 3)} seconds\n</clip {clip.id}>\n"]
+        else:
+            clip_section = []
         content += clip_section
 
     content += [
