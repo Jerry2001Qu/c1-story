@@ -261,7 +261,7 @@ class ClipManager:
             clip_matches_str = ""
             for clip in self.clips:
                 clip_matches_str += f"{clip.id}: {clip.shot_id}\n"
-            self.error_handler.stream_status(sot_matches_str, "Clip Matches")
+            self.error_handler.stream_status(clip_matches_str, "Clip Matches")
 
     
     def combine_clips(self, clips: List[Clip]) -> Clip:

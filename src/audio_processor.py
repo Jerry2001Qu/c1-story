@@ -5,7 +5,7 @@ from src.clip_manager import ClipManager
 from src.prompts import run_chain_json, run_chain, broll_chain, parse_broll_chain, fix_broll_chain, broll_request_chain
 from src.news_script import NewsScript, AnchorScriptSection, is_type
 from src.tts import TTS
-from src.gemini import add_broll
+from src.gemini import add_broll, add_broll_clips
 from src.language import Language
 from src.heygen import animate_anchor
 from src.transcription import WhisperResults
@@ -129,7 +129,8 @@ class AudioProcessor:
         if self.error_handler:
             self.error_handler.stream_status(sections_str, "Generating BROLL requests")
 
-        broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
+        # broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
+        broll_placements = add_broll_clips(self.anchor_audio_file, self.clip_manager.clips, self.news_script.get_sot_clip_ids(), sections_str)
         # broll_placements = run_chain(broll_chain, {"BROLL_DESCRIPTIONS": full_descriptions_str, "SECTION_TIMINGS": sections_str})
         parsed_broll_json = run_chain_json(parse_broll_chain, {"SECTIONS": sections_str, "BROLL_PLACEMENTS": broll_placements})
 

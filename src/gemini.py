@@ -291,25 +291,9 @@ Format your output as follows for each section:
 1. Section number and time range
 2. Brief transcript or description of the audio content
 3. Brief thoughts on the section and what visuals would enhance it
-3. List of clips with timestamps, max duration, and brief explanation for each choice
+3. List of clips with timestamps, max duration, brief explanation for each choice, and the part of the transcript it corresponds to
 
-Here's an example of the expected output format:
-
-<example>
-<thoughts>
-This story has less b-roll available, we should not transition as frequently... (continued thoughts)
-</thoughts>
-
-**Section 1: 0:00 - 11.96**
-Transcript: Activists in Canada are protesting against the government's decision to expand a pipeline. The protests have been ongoing for weeks, with activists demanding action on climate change by using fireworks to make their point.
-Thoughts: This section is about the protests in Canada. We should show footage of the protests and the activists involved. We should cut at 7.56 to transition to the fireworks...
-
-* Anchor (max 10 seconds): 0.00 - 7.24 - We start on an Anchor to introduce the story and set the scene when saying ...
-* Clip 008 (max 10 seconds):  7.24 - 10.11 - The image of a national flag acts as a transition when saying ...
-* Clip 020 (max 12 seconds): 10.11 - 16.68 - This clip shows fireworks being launched, visually illustrating the audio description of fireworks when saying ...
-* Clip 002 (max 4 seconds): 16.68 - 18.82 - End the section with...
-</example>
-
+Here's an example:
 <example>
 <thoughts>
 This story had more B-roll available, allowing us to transition more frequently... (continued thoughts)
@@ -319,13 +303,13 @@ This story had more B-roll available, allowing us to transition more frequently.
 Transcript: US President Joe Biden at 81 faces a critical moment in his reelection campaign as he prepares for a high-stakes NATO summit in Washington amid mounting pressure from fellow Democrats. Despite calls from within his own party to end his bid, Biden remains resolute.
 Thoughts: This section introduces the main topic of the video: Biden's reelection campaign and the pressure he faces from Democrats. We should show footage of Biden speaking, the NATO summit, and Democrats expressing concern.
 
-* Clip 004 (max 3 seconds): 0.00 - 2.00 - We start with a still image of Biden speaking to set the scene when saying "US President Joe Biden at 81"
-* Anchor (max 10 seconds): 2.00 - 3.65 - Swap to the Anchor to transition to the NATO summit when saying "faces a critical moment in his reelection campaign"
-* Clip 002 (max 1.22 seconds): 3.65 - 4.77 - This clip shows Biden shaking hands at NATO, visually illustrating the audio description of the summit when saying "as he prepares for a high-stakes"
-* Clip 003 (max 1.32 seconds): 4.77 - 6.09 - The last clip reached it's max. This clip is a continuation of the last clip with Biden still shaking hands when saying "NATO summit in Washington"
-* Clip 017 (max 4.56 seconds): 6.09 - 8.56 - Footage of democrats to visually show mouinting pressure, when saying "amid mounting pressure from fellow Democrats"
-* Anchor (max 10 seconds): 8.56 - 11.23 - Back to the Anchor to transition to Biden remaining resolute, when saying "Despite calls from within his own party"
-* Clip 015 (max 8.23 seconds): 11.23 - 12.98 - This clip shows Biden speaking, visually illustrating the audio description of Biden's reelection campaign when saying "Biden remains resolute"
+* Clip 004 (max 3 seconds): 0.00 - 2.00 - We start with a still image of Biden speaking to set the scene. ("US President Joe Biden at 81")
+* Anchor (max 10 seconds): 2.00 - 3.65 - Swap to the Anchor to transition to the NATO summit. ("faces a critical moment in his reelection campaign")
+* Clip 002 (max 1.22 seconds): 3.65 - 4.77 - This clip shows Biden shaking hands at NATO, visually illustrating the audio description of the summit. ("as he prepares for a high-stakes")
+* Clip 003 (max 1.32 seconds): 4.77 - 6.09 - The last clip reached it's max. This clip is a continuation of the last clip with Biden still shaking hands. ("NATO summit in Washington")
+* Clip 017 (max 4.56 seconds): 6.09 - 8.56 - Footage of democrats to visually show mouinting pressure. ("amid mounting pressure from fellow Democrats")
+* Anchor (max 10 seconds): 8.56 - 11.23 - Back to the Anchor to transition to Biden remaining resolute. ("Despite calls from within his own party")
+* Clip 015 (max 8.23 seconds): 11.23 - 12.98 - This clip shows Biden speaking, visually illustrating the audio description of Biden's reelection campaign. ("Biden remains resolute")
 
 **Section 5: 12.98 - 24.54**
 Transcript: As Biden navigates these challenges, he faces a pivotal moment in his bid for reelection.
@@ -344,7 +328,139 @@ Remember:
 - Never invent B-roll clips that aren't provided.
 - Select and place clips informatively and dramatically for TV audiences.
 - Explain your thought process for each clip selection.
-- Reference the transcript for each clip selection.
+- Quote the transcript for each clip selection.
+
+Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
+
+Critique your draft inside <critique> tags.
+
+KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 1-2 times. Do this now, don't ask to continue.
+When writing drafts ensure all requirements are met (min timings, etc.), then suggest improvements.
+
+Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS.
+"""
+]
+
+    content = [part for part in content if part is not None]
+
+    response = GEMINI.generate_content(content)
+    gcs.clear_uploaded_blobs()
+
+    print("## BROLL GEMINI RESPONSE\n\n", response.text)
+
+    try:
+        return extract_response(response.text)
+    except ValueError:
+        print(response.prompt_feedback)
+        print(response.candidates[0].finish_reason)
+        print(response.candidates[0].safety_ratings)
+        return None
+
+@st.cache_data(show_spinner=False, hash_funcs={PosixPath: hash_audio_file, Clip: lambda x: x.__repr__()})
+def add_broll_clips(audio_file, clips, sot_clip_ids, section_timings_str):
+    gcs = GCSManager()
+    content = []
+
+    content += [
+f"""You are a news video editor tasked with editing together an audio story with relevant B-roll video clips to make it compelling 
+for a TV audience. Your goal is to create a visually engaging and informative news segment by matching appropriate video clips to the audio content.
+
+First, review the available B-roll clips:
+<broll_descriptions>
+"""]
+    
+    for clip in clips:
+        duration = clip.duration
+        frame_file = clip.file_path.with_suffix(".jpg")
+        extract_frame(clip.file_path, min(duration, 1.0), frame_file)
+        if not clip.has_quote:
+            clip_section = [f"<clip {clip.id}>\n", gcs.upload_to_gcs_part(frame_file), f"\n{clip.full_description}\n\nMax duration: {duration} seconds\n</clip {clip.id}>\n"]
+        elif clip.id not in sot_clip_ids:
+            if clip.full_description:
+                lines = clip.full_description.split("\n")
+                full_description = '\n'.join(line for line in lines if not line.startswith("Minimum Timing:"))
+            else:
+                full_description = clip.shotlist_description
+            clip_section = [f"<clip {clip.id}>\n", gcs.upload_to_gcs_part(frame_file), f"\nThis clip is a SOT/Interview. \n{full_description}\n\nMax duration: {min(duration, 3)} seconds\n</clip {clip.id}>\n"]
+        content += clip_section
+
+    content += [
+f"""
+Next, listen carefully to the audio clip:
+""",
+gcs.upload_to_gcs_part(audio_file),
+f"""
+Here are the section timings for the audio clip:
+<section_timings>
+{section_timings_str}
+</section_timings>
+
+Your task is to select and place B-roll clips and Anchor segments to accompany the audio story. Follow these guidelines:
+
+1. Match B-roll clips to the content of each section in the audio.
+2. Always fill each section with B-roll clips until the end, but don't exceed the section's end time.
+3. Aim to switch clips every 6 seconds or sooner for a more intense experience.
+4. Use Anchor blocks (max 10 seconds) at the beginning and end of the story, and as needed throughout.
+5. Ensure smooth transitions between clips and sections.
+
+When selecting and placing clips:
+- Copy the max duration for each B-roll clip (e.g., "max 10 seconds"). Never go over this limit.
+- Use at least 5 seconds of Anchor at the beginning and end of the whole story.
+- Place Anchor blocks for at least 1.5 seconds, so never at the very end of a section.
+- Don't use too many Anchor blocks. One at the beginning, one at the end, and some for transitioning.
+- An Anchor block should last for an entire thought, or be used as a transition.
+- Show clips for at least 1 second before switching.
+- Don't reuse B-roll if you can avoid it. Repetition is not good.
+- If there isn't enough relevant B-roll, use Anchor segments.
+- Prefer B-roll over Anchor segments. If there's no related B-roll, perhaps there's background B-roll that could be used as filler?
+- Anchor blocks can be used as transitions.
+  - For example, "People are looking forward to this weeks events..." could have Anchor on screen
+  - That can be followed by "including a jazz concert, carnival games, and a prize to be won." with all 3 being shown as B-roll.
+- When selecting clips, try to show & tell. The b-roll should match what is being said in the script.
+- If placing a b-roll that is an interview or a person speaking, cut quickly (within 3 seconds) to another b-roll. It's weird since the audio is different.
+
+Format your output as follows for each section:
+1. Section number and time range
+2. Brief transcript or description of the audio content
+3. Brief thoughts on the section and what visuals would enhance it
+3. List of clips with timestamps, max duration, brief explanation for each choice, and the part of the transcript it corresponds to
+
+Here's an example:
+<example>
+<thoughts>
+This story had more B-roll available, allowing us to transition more frequently... (continued thoughts)
+</thoughts>
+
+**Section 1: 0.00 - 12.98**
+Transcript: US President Joe Biden at 81 faces a critical moment in his reelection campaign as he prepares for a high-stakes NATO summit in Washington amid mounting pressure from fellow Democrats. Despite calls from within his own party to end his bid, Biden remains resolute.
+Thoughts: This section introduces the main topic of the video: Biden's reelection campaign and the pressure he faces from Democrats. We should show footage of Biden speaking, the NATO summit, and Democrats expressing concern.
+
+* Clip 004 (max 3 seconds): 0.00 - 2.00 - We start with a still image of Biden speaking to set the scene. ("US President Joe Biden at 81")
+* Anchor (max 10 seconds): 2.00 - 3.65 - Swap to the Anchor to transition to the NATO summit. ("faces a critical moment in his reelection campaign")
+* Clip 002 (max 1.22 seconds): 3.65 - 4.77 - This clip shows Biden shaking hands at NATO, visually illustrating the audio description of the summit. ("as he prepares for a high-stakes")
+* Clip 003 (max 1.32 seconds): 4.77 - 6.09 - The last clip reached it's max. This clip is a continuation of the last clip with Biden still shaking hands. ("NATO summit in Washington")
+* Clip 017 (max 4.56 seconds): 6.09 - 8.56 - Footage of democrats to visually show mouinting pressure. ("amid mounting pressure from fellow Democrats")
+* Anchor (max 10 seconds): 8.56 - 11.23 - Back to the Anchor to transition to Biden remaining resolute. ("Despite calls from within his own party")
+* Clip 015 (max 8.23 seconds): 11.23 - 12.98 - This clip shows Biden speaking, visually illustrating the audio description of Biden's reelection campaign. ("Biden remains resolute")
+
+**Section 5: 12.98 - 24.54**
+Transcript: As Biden navigates these challenges, he faces a pivotal moment in his bid for reelection.
+Thoughts: This section concludes the video by emphasizing the importance of the coming days for Biden's campaign. We should show footage of Biden at the White House, the Capitol building, Biden boarding Air Force One, and Biden speaking at a campaign event.
+
+* Anchor (max 10 seconds): 6.45 - 8.56 - No more footage of Biden so we go back to the Anchor when saying "As Biden navigates these challenges"
+* Clip 008 (max 1 second): 8.56 - 9.59 - The footage of the white house acts as a transition to reelection when saying "he faces"
+* Clip 010 (max 4.32 seconds): 9.59 - 10.85 - A different angle of the white house allows for a faster paced feeling, when saying "a pivotal moment"
+* Clip 018 (max 3.21 seconds): 10.85 - 12.03 - This video of Biden speaking ends the transition to Biden and reelection, when saying "in his bid for reelection"
+</example>
+
+Remember:
+- Always use the correct section numbers, even if they skip.
+- Write the whole transcript out for each section. Don't do ...
+- Refer to B-roll as "Clip ###" (e.g., Clip 008).
+- Never invent B-roll clips that aren't provided.
+- Select and place clips informatively and dramatically for TV audiences.
+- Explain your thought process for each clip selection.
+- Quote the transcript for each clip selection.
 
 Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
 
