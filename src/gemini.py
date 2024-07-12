@@ -425,7 +425,7 @@ Format your output as follows for each section:
 1. Section number and time range
 2. Brief transcript or description of the audio content
 3. Brief thoughts on the section and what visuals would enhance it
-3. List of clips with timestamps, max duration, brief explanation for each choice, and the part of the transcript it corresponds to
+3. List of clips with max duration, timestamps, duration, brief explanation for each choice, and the part of the transcript it corresponds to
 
 Here's an example:
 <example>
@@ -437,22 +437,22 @@ This story had more B-roll available, allowing us to transition more frequently.
 Transcript: US President Joe Biden at 81 faces a critical moment in his reelection campaign as he prepares for a high-stakes NATO summit in Washington amid mounting pressure from fellow Democrats. Despite calls from within his own party to end his bid, Biden remains resolute.
 Thoughts: This section introduces the main topic of the video: Biden's reelection campaign and the pressure he faces from Democrats. We should show footage of Biden speaking, the NATO summit, and Democrats expressing concern.
 
-* Clip 004 (max 3 seconds): 0.00 - 2.00 - We start with a still image of Biden speaking to set the scene. ("US President Joe Biden at 81")
-* Anchor (max 10 seconds): 2.00 - 3.65 - Swap to the Anchor to transition to the NATO summit. ("faces a critical moment in his reelection campaign")
-* Clip 002 (max 1.22 seconds): 3.65 - 4.77 - This clip shows Biden shaking hands at NATO, visually illustrating the audio description of the summit. ("as he prepares for a high-stakes")
-* Clip 003 (max 1.32 seconds): 4.77 - 6.09 - The last clip reached it's max. This clip is a continuation of the last clip with Biden still shaking hands. ("NATO summit in Washington")
-* Clip 017 (max 4.56 seconds): 6.09 - 8.56 - Footage of democrats to visually show mouinting pressure. ("amid mounting pressure from fellow Democrats")
-* Anchor (max 10 seconds): 8.56 - 11.23 - Back to the Anchor to transition to Biden remaining resolute. ("Despite calls from within his own party")
-* Clip 015 (max 8.23 seconds): 11.23 - 12.98 - This clip shows Biden speaking, visually illustrating the audio description of Biden's reelection campaign. ("Biden remains resolute")
+* Clip 004 (max 3 seconds): 0.00 - 2.00 (2.00s) - We start with a still image of Biden speaking to set the scene. ("US President Joe Biden at 81")
+* Anchor (max 10 seconds): 2.00 - 3.65 (1.65s) - Swap to the Anchor to transition to the NATO summit. ("faces a critical moment in his reelection campaign")
+* Clip 002 (max 1.22 seconds): 3.65 - 4.77 (1.12s) - This clip shows Biden shaking hands at NATO, visually illustrating the audio description of the summit. ("as he prepares for a high-stakes")
+* Clip 003 (max 1.32 seconds): 4.77 - 6.09 (1.32s) - The last clip reached it's max. This clip is a continuation of the last clip with Biden still shaking hands. ("NATO summit in Washington")
+* Clip 017 (max 4.56 seconds): 6.09 - 8.56 (2.47s) - Footage of democrats to visually show mouinting pressure. ("amid mounting pressure from fellow Democrats")
+* Anchor (max 10 seconds): 8.56 - 11.23 (2.67s) - Back to the Anchor to transition to Biden remaining resolute. ("Despite calls from within his own party")
+* Clip 015 (max 8.23 seconds): 11.23 - 12.98 (1.75s) - This clip shows Biden speaking, visually illustrating the audio description of Biden's reelection campaign. ("Biden remains resolute")
 
 **Section 5: 12.98 - 24.54**
 Transcript: As Biden navigates these challenges, he faces a pivotal moment in his bid for reelection.
 Thoughts: This section concludes the video by emphasizing the importance of the coming days for Biden's campaign. We should show footage of Biden at the White House, the Capitol building, Biden boarding Air Force One, and Biden speaking at a campaign event.
 
-* Anchor (max 10 seconds): 6.45 - 8.56 - No more footage of Biden so we go back to the Anchor when saying "As Biden navigates these challenges"
-* Clip 008 (max 1 second): 8.56 - 9.59 - The footage of the white house acts as a transition to reelection when saying "he faces"
-* Clip 010 (max 4.32 seconds): 9.59 - 10.85 - A different angle of the white house allows for a faster paced feeling, when saying "a pivotal moment"
-* Clip 018 (max 3.21 seconds): 10.85 - 12.03 - This video of Biden speaking ends the transition to Biden and reelection, when saying "in his bid for reelection"
+* Anchor (max 10 seconds): 6.45 - 8.56 (2.11s) - No more footage of Biden so we go back to the Anchor when saying "As Biden navigates these challenges"
+* Clip 008 (max 1 second): 8.56 - 9.59 (1.03s) - The footage of the white house acts as a transition to reelection when saying "he faces"
+* Clip 010 (max 4.32 seconds): 9.59 - 10.85 (1.26s) - A different angle of the white house allows for a faster paced feeling, when saying "a pivotal moment"
+* Clip 018 (max 3.21 seconds): 10.85 - 12.03 (1.18s) - This video of Biden speaking ends the transition to Biden and reelection, when saying "in his bid for reelection"
 </example>
 
 Remember:

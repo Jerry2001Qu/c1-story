@@ -214,7 +214,7 @@ class AudioProcessor:
                 keep_broll = True
                 broll_duration = broll["end"] - broll["start"]
                 if broll["id"] == "Anchor":
-                    if broll_duration < 1.2:
+                    if broll_duration < 1.0:
                         if self.error_handler:
                             self.error_handler.warning(f"Anchor placement in section {section.id} is too short ({broll_duration}). Removing clip.")
                         if i-1 >= 0:
