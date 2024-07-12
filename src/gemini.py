@@ -408,7 +408,7 @@ Your task is to select and place B-roll clips and Anchor segments to accompany t
 When selecting and placing clips:
 - Copy the max duration for each B-roll clip (e.g., "max 10 seconds"). Never go over this limit.
 - Use at least 5 seconds of Anchor at the beginning and end of the whole story.
-- Place Anchor blocks for at least 1.5 seconds, so never at the very end of a section.
+- Place Anchor blocks for at least 2 seconds, so never at the very end of a section.
 - Don't use too many Anchor blocks. One at the beginning, one at the end, and some for transitioning.
 - An Anchor block should last for an entire thought, or be used as a transition.
 - Show clips for at least 1 second before switching.
@@ -464,7 +464,7 @@ Remember:
 - Explain your thought process for each clip selection.
 - Quote the transcript for each clip selection.
 - B-roll must be used for at least 1 second before switching to another clip.
-- Anchor blocks must be used for at least 1.5 seconds before switching to another clip.
+- Anchor blocks must be used for at least 2 seconds before switching to another clip.
 
 Start by writing a first draft of the edited video sequence inside <draft> tags. Follow the format shown in the example, for all sections of the audio clip.
 
