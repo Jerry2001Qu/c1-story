@@ -285,7 +285,7 @@ When selecting and placing clips:
   - For example, "People are looking forward to this weeks events..." could have Anchor on screen
   - That can be followed by "including a jazz concert, carnival games, and a prize to be won." with all 3 being shown as B-roll.
 - When selecting clips, try to show & tell. The b-roll should match what is being said in the script.
-- If placing a b-roll that is an interview or a person speaking, cut quickly to another b-roll. It's weird since the audio is different.
+- If placing a b-roll that is an interview or a person speaking, cut quickly (within 3 seconds) to another b-roll. It's weird since the audio is different.
 
 Format your output as follows for each section:
 1. Section number and time range
