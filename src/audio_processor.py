@@ -101,8 +101,11 @@ class AudioProcessor:
             if not clip.has_quote:
                 full_descriptions_str += f"<clip {clip.id}>\n{clip.full_description}\n\nMax duration: {duration} seconds\n</clip {clip.id}>\n"
             elif clip.id not in self.news_script.get_sot_clip_ids():
-                lines = clip.full_description.split("\n")
-                full_description = '\n'.join(line for line in lines if not line.startswith("Minimum Timing:"))
+                if clip.full_description:
+                    lines = clip.full_description.split("\n")
+                    full_description = '\n'.join(line for line in lines if not line.startswith("Minimum Timing:"))
+                else:
+                    full_description = clip.shotlist_description
                 full_descriptions_str += f"<clip {clip.id}>\nThis clip is a SOT/Interview. \n{full_description}\n\nMax duration: {min(duration, 3)} seconds\n</clip {clip.id}>\n"
 
         sections_str = ""
