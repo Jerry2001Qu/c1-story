@@ -160,6 +160,9 @@ def run():
                 error_handler.info("Generating full descriptions")
                 clip_manager.generate_full_descriptions(story_title)
 
+                st.write("Spell checking")
+                error_handler.info("Spell checking")
+                script.spell_check()
                 st.write("Extracting facts")
                 error_handler.info("Extracting facts")
                 script.generate_facts()

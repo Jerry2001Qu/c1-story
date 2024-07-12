@@ -52,9 +52,6 @@ class Clip:
         except Exception as e:
             self.whisper_results = WhisperResults("", [], 1.0, False, "Unknown", "")
             raise e
-        if self.error_handler:
-            if self.whisper_results.no_speech_prob < 0.3:
-                self.error_handler.stream_status(self.whisper_results.english_text, f"Identified Speech ({self.id})", self.file_path)
 
     def generate_full_description(self, story_title: str):
         """Generates a detailed description of the clip."""
@@ -304,23 +301,29 @@ class ClipManager:
         return sots
 
     def transcribe_clips(self, multi: bool = True):
+        os.environ['GRPC_POLL_STRATEGY'] = 'poll'
+
         if multi:
             def transcribe_and_handle_errors(clip):
                 try:
                     clip.transcribe_clip()
-                    return True, None
+                    return True, None, clip
                 except Exception as e:
-                    return False, traceback.format_exc()
+                    return False, traceback.format_exc(), clip
             
             with ThreadPoolExecutor(max_workers=3) as executor:
                 futures = [executor.submit(transcribe_and_handle_errors, clip) for clip in self.clips]
 
                 results = []
                 for future in as_completed(futures):
-                    success, error = future.result()
+                    success, error, clip = future.result()
                     results.append(success)
                     if not success and self.error_handler:
                         self.error_handler.error(f"ERROR: {error}")
+                    else:
+                        if self.error_handler:
+                            if clip.whisper_results.no_speech_prob < 0.3:
+                                self.error_handler.stream_status(clip.whisper_results.english_text, f"Identified Speech ({clip.id})", clip.file_path)
 
                 successful_transcriptions = sum(results)
                 failed_transcriptions = len(self.clips) - successful_transcriptions
