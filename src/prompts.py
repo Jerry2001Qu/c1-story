@@ -249,11 +249,11 @@ Live streaming on social media depicted officers in uniform clearing the area an
 
 FAN SHOUTING (English) "MUSIC IS OUR RIGHT" AS POLICE LEAD THEM AWAY
 
-The air was thick with the sound of sirens as the crowd grew increasingly agitated, resisting the police’s efforts to disperse the impromptu gathering.
+The air was thick with the sound of sirens as the crowd grew increasingly agitated, resisting the police's efforts to disperse the impromptu gathering.
 
 Fans, some equipped with concert posters and glow sticks, tried to prevent the police from entering the venue by forming human chains, all while chanting, "let us sing" and shining flashlights towards the officers.
 
-FAN EXCLAIMING (English) "I’VE WAITED MONTHS FOR THIS, YOU CAN’T JUST TAKE IT AWAY" WHILE BEING ESCORTED OUT BY POLICE
+FAN EXCLAIMING (English) "I'VE WAITED MONTHS FOR THIS, YOU CAN'T JUST TAKE IT AWAY" WHILE BEING ESCORTED OUT BY POLICE
 
 A few individuals near the back of the crowd chose not to resist, and footage showed them walking towards the exits with their hands visibly empty and raised.
 
@@ -272,25 +272,33 @@ Here is the script:
 
 Please carefully read through the list of quotation clips and the news script.
 
-In a <scratchpad>, think through where it would make the most sense to insert quotations into the news script in a way that fits the overall story and flow. Remember to:
+In a <scratchpad>, first count the number of sentences in the script & divide by 3 to get the maximum number of quotes.
+Then order the quotations based on how well they'd fit into the script & plan the placement of the top quotes. Remember to:
 
 - Keep the quotations short, extracting just a portion of the original quote if needed to keep them concise. No more than 1 or 2 sentences.
 - If extracting a portion of a quotation, ensure the portion is CONTIGUOUS. Never cut a gap out of the portion.
 - Only insert quotations that are relevant, add value, and are interesting to the viewer. If it's not interesting, don't insert it.
 - Spread the quotations throughout the story
-- Aim for 2-3 quotations inserted. You do not have to use all of the quotations.
-- You may start the story with an English quotation if it makes sense to do so. But don't with a non-English quotation
+- Don't add too many quotations. Maximum 1 every 3 sentences. You do not have to use all of the quotations.
+- You may start the story with an English quotation if it makes sense to do so.
   - For example, you could start with a quote of protestors chanting.
-  - Only start stories with short quotes.
+  - Only start stories with short quotes, maximum 5 words. If longer, you may cut it down.
   - An example could be: "NO JUSTICE, NO PEACE!" chanted the crowd as they marched through the streets.
+- NEVER start with a quote in a language other than English.
 - NEVER put a quotation at the end of the entire story. We must end with the script
 - Insert the portions of quotations including their descriptions
 - Do not add any transitions between the quotations and the rest of the script
 - Do not change the wording of the news script except to insert the quotations
 - Place quotations in separate paragraphs. You may split paragraphs in the original script.
-- Short soundbites are good. Chanting or short exclamations should be added as transitions to add real voices to the story.
 
-After planning it out, provide your final response with the quotations inserted into the appropriate parts of the news script inside <response></response> tags."""
+Here are some general criteria of good soundbites:
+- Short soundbites such as chanting or short exclamations. They're good as transitions and adding real voices to the story.
+- Soundbites that reflect what was said in the script.
+- Soundbites that are directly referenced in the script.
+- Key events referenced in the script.
+
+After planning it out, provide your final response with the quotations inserted into the appropriate parts of the news script inside <response></response> tags.
+"""
 )
 
 edit_prompt = PromptTemplate.from_template(
@@ -300,6 +308,11 @@ Here is the original script:
 <script>
 {SCRIPT}
 </script>
+
+Here are available soundbites:
+<soundbites>
+{SOUNDBITES}
+</soundbites>
 
 You will edit this script to maintain a proper 'flow', while removing unnecessary/irrelavent information.
 
@@ -311,6 +324,7 @@ You may only make simple edits, including:
 
 - Don't change the meaning of any sentences. Never state what someone else said as your own.
 - The anchor should not give opinions. Opinions can be in quotes/statements from other individuals.
+  - NEVER add your own opinions or agree/disagree with the content. You just report what happened.
 - Ensure your changes are factual & do not misrepresent the original script.
 - Remember the current date. Past events should be in past tense.
 
@@ -319,11 +333,16 @@ The script may contain soundbites. They are in a format like:
 "People in Karachi are facing extreme heat at the moment. Look..."
 
 - Do not remove any formatting around soundbites. Leave the "(SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:"
-- You may reorder, remove, or cut down soundbites.
+- You may add, reorder, remove, or cut down soundbites.
 - If cutting down a soundbite, ensure the soundbite is CONTIGUOUS. Therefore, you may only cut from the start or end of a soundbite!
 - Soundbites are better when spread throughout the story instead of clumped together.
 - Short soundbites are good. Chanting or short exclamations should be kept in the story to add real voices to the story.
-- You can start the story with a soundbite if it makes sense to do so. Especially short soundbites like chanting or exclamations.
+- Don't add too many quotations. Maximum 1 every 3 sentences. You do not have to use all of the quotations.
+- You may start the story with an English quotation if it makes sense to do so.
+  - For example, you could start with a quote of protestors chanting.
+  - Only start stories with short quotes, maximum 5 words. If longer, you may cut it down.
+  - An example could be: "NO JUSTICE, NO PEACE!" chanted the crowd as they marched through the streets.
+- NEVER start with a quote in a language other than English.
 
 <example>
 <example_input>
