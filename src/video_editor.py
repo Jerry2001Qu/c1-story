@@ -170,22 +170,27 @@ class VideoEditor:
     
     def _load_and_process_anchor(self, broll_info: Dict, section: AnchorScriptSection) -> mp.VideoFileClip:
         if self.live_anchor:
-            anchor_video_file = self.news_script.folder / f"{section.id}_anchor.mp4"
-            animate_anchor(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=self.test_mode)
-            if self.error_handler:
-                self.error_handler.stream_status(section.text, title="Generated anchor video", video=anchor_video_file)
-            anchor_clip = mp.VideoFileClip(str(anchor_video_file))
+            try:
+                anchor_video_file = self.news_script.folder / f"{section.id}_anchor.mp4"
+                animate_anchor(section.anchor_audio_file, section.text, self.clip_manager.get_anchor_avatar_id(), anchor_video_file, test=self.test_mode)
+                if self.error_handler:
+                    self.error_handler.stream_status(section.text, title="Generated anchor video", video=anchor_video_file)
+                anchor_clip = mp.VideoFileClip(str(anchor_video_file))
 
-            anchor_start = broll_info['start']
-            anchor_end = broll_info['end']
+                anchor_start = broll_info['start']
+                anchor_end = broll_info['end']
 
-            anchor_clip = anchor_clip.subclip(anchor_start, anchor_end)
-            anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
-        else:
-            anchor_clip = self.clip_manager.get_anchor_image_clip()
-            duration = broll_info['end'] - broll_info['start']
-            anchor_clip = anchor_clip.set_duration(duration)
-            anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
+                anchor_clip = anchor_clip.subclip(anchor_start, anchor_end)
+                anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
+                return anchor_clip
+            except:
+                if self.error_handler:
+                    self.error_handler.warning(f"Failed to generate anchor video for section {section.id}. Using default anchor shot. Error: {traceback.format_exc()}")
+
+        anchor_clip = self.clip_manager.get_anchor_image_clip()
+        duration = broll_info['end'] - broll_info['start']
+        anchor_clip = anchor_clip.set_duration(duration)
+        anchor_clip = resize_image_clip(anchor_clip, self.output_resolution)
         return anchor_clip
 
     def _load_and_process_broll(self, broll_info: Dict) -> mp.VideoFileClip:

@@ -82,8 +82,8 @@ class AudioProcessor:
                 continue
             if section.language == Language.from_str("english"):
                 continue
-            if section.clip.whisper_results.language == Language.from_str("english"):
-                continue
+            # if section.clip.whisper_results.language == Language.from_str("english"):
+            #     continue
             audio_file = self.anchor_audio_folder / f"{section.id}_dub.mp3"
             section.generate_dub(audio_file, voice_id=self.clip_manager.get_voiceover_voice_id())
 

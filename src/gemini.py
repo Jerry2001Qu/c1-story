@@ -469,7 +469,7 @@ Critique your draft inside <critique> tags.
 KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 1-2 times. Do this now, don't ask to continue.
 When writing drafts ensure all requirements are met (min timings, etc.), then suggest improvements.
 
-Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS.
+Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS. Do not leave this section blank, fill it with  your final draft.
 """
 ]
 
