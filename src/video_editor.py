@@ -319,14 +319,14 @@ class VideoEditor:
         ref_text_image = Image.new("RGBA", (1, height), (0, 0, 0, 0))
         ref_draw = ImageDraw.Draw(ref_text_image)
 
-        def get_font_size_for_height(font_path, desired_height):
+        def get_font_size_for_height(font_path, desired_height, text):
             font_size = 1
             font = ImageFont.truetype(font_path, font_size)
-            text_bbox = ref_draw.textbbox((0, 0), "H", font=font)
+            text_bbox = ref_draw.textbbox((0, 0), text, font=font)
             while text_bbox[3] - text_bbox[1] < desired_height:
                 font_size += 1
                 font = ImageFont.truetype(font_path, font_size)
-                text_bbox = ref_draw.textbbox((0, 0), "H", font=font)
+                text_bbox = ref_draw.textbbox((0, 0), text, font=font)
             return font_size - 1
 
         # Load the font
@@ -334,7 +334,7 @@ class VideoEditor:
             font = ImageFont.load_default()
         else:
             font_path = str(self.font)
-            font_size = get_font_size_for_height(font_path, height)
+            font_size = get_font_size_for_height(font_path, height, text)
             font = ImageFont.truetype(font_path, font_size)
 
         ref_text_bbox = ref_draw.textbbox((0, 0), text, font=font)
@@ -352,14 +352,14 @@ class VideoEditor:
         text_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_image)
 
-        def get_font_size_for_height(font_path, desired_height):
+        def get_font_size_for_height(font_path, desired_height, text):
             font_size = 1
             font = ImageFont.truetype(font_path, font_size)
-            text_bbox = draw.textbbox((0, 0), "H", font=font)
+            text_bbox = draw.textbbox((0, 0), text, font=font)
             while text_bbox[3] - text_bbox[1] < desired_height:
                 font_size += 1
                 font = ImageFont.truetype(font_path, font_size)
-                text_bbox = draw.textbbox((0, 0), "H", font=font)
+                text_bbox = draw.textbbox((0, 0), text, font=font)
             return font_size - 1
 
         # Load the font
@@ -367,7 +367,7 @@ class VideoEditor:
             font = ImageFont.load_default()
         else:
             font_path = str(self.font)
-            font_size = get_font_size_for_height(font_path, int(height * (59/150)))
+            font_size = get_font_size_for_height(font_path, int(height * (59/150)), text)
             font = ImageFont.truetype(font_path, font_size)
         
         reference_char = "H"

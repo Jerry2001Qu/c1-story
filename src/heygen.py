@@ -30,7 +30,7 @@ def get_heygen_avatars():
 def animate_anchor(local_audio_file_path: Path, transcript: str, avatar_id: str, output_path: Path, avatar_style: str = 'normal', test: bool = True):
     # Upload the local audio file to GCP and get the URL
     gcs = GCSManager()
-    audio_url = gcs.upload_to_gcs_url(local_audio_file_path, "public-heygen-assets")
+    audio_url = gcs.upload_to_gcs_url(local_audio_file_path, bucket_name="public-heygen-assets")
     
     # Define the request payload
     payload = {
