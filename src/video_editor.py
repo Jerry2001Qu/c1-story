@@ -65,8 +65,10 @@ class VideoEditor:
                 if self.error_handler:
                     self.error_handler.warning(f"Error when assembling section {section.id}: {traceback.format_exc()}")
 
-        logline = self.news_script.headline
+        video_clips = [clip for clip in video_clips if clip is not None]
         concat_video = mp.concatenate_videoclips(video_clips, method="compose")
+
+        logline = self.news_script.headline
         final_video = self._add_logline(concat_video, logline)
         if self.music:
             final_video = self._add_background_music(final_video)

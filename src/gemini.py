@@ -429,6 +429,7 @@ Format your output as follows for each section:
 
 Here's an example:
 <example>
+<response>
 <thoughts>
 This story had more B-roll available, allowing us to transition more frequently... (continued thoughts)
 </thoughts>
@@ -449,10 +450,17 @@ Thoughts: This section introduces the main topic of the video: Biden's reelectio
 Transcript: As Biden navigates these challenges, he faces a pivotal moment in his bid for reelection.
 Thoughts: This section concludes the video by emphasizing the importance of the coming days for Biden's campaign. We should show footage of Biden at the White House, the Capitol building, Biden boarding Air Force One, and Biden speaking at a campaign event.
 
-* Anchor (max 10 seconds): 6.45 - 8.56 (2.11s) - No more footage of Biden so we go back to the Anchor when saying "As Biden navigates these challenges"
-* Clip 008 (max 1 second): 8.56 - 9.59 (1.03s) - The footage of the white house acts as a transition to reelection when saying "he faces"
-* Clip 010 (max 4.32 seconds): 9.59 - 10.85 (1.26s) - A different angle of the white house allows for a faster paced feeling, when saying "a pivotal moment"
-* Clip 018 (max 3.21 seconds): 10.85 - 12.03 (1.18s) - This video of Biden speaking ends the transition to Biden and reelection, when saying "in his bid for reelection"
+* Anchor (max 10 seconds): 6.45 - 8.56 (2.11s) - No more footage of Biden so we go back to the Anchor ("As Biden navigates these challenges")
+* Clip 008 (max 1 second): 8.56 - 9.59 (1.03s) - The footage of the white house acts as a transition to reelection ("he faces")
+* Clip 010 (max 4.32 seconds): 9.59 - 10.85 (1.26s) - A different angle of the white house allows for a faster paced feeling ("a pivotal moment")
+* Clip 018 (max 3.21 seconds): 10.85 - 12.03 (1.18s) - This video of Biden speaking ends the transition to Biden and reelection ("in his bid for reelection")
+
+**Section 6: 24.54 - 30.00**
+Transcript: The fate of his presidency hangs in the balance as he confronts the challenges of a divided nation.
+Thoughts: This is the last section. We must show the Anchor starting at 25.00 to the end. Since it's short, we might as well fill the whole section with the Anchor.
+
+* Anchor (max 10 seconds): 24.54 - 30.00 - This is the final section, so we should end with the Anchor. ("The fate of his presidency hangs in the balance as he confronts the challenges of a divided nation")
+</response>
 </example>
 
 Remember:
@@ -473,7 +481,7 @@ Critique your draft inside <critique> tags.
 KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 1-2 times. Do this now, don't ask to continue.
 When writing drafts ensure all requirements are met (min timings, etc.), then suggest improvements.
 
-Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS. Do not leave this section blank, fill it with  your final draft.
+Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS. Do not leave this section blank, fill it with your final draft.
 """
 ]
 

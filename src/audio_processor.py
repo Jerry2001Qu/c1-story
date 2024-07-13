@@ -132,6 +132,10 @@ class AudioProcessor:
         # broll_placements = add_broll(self.anchor_audio_file, full_descriptions_str, sections_str)
         broll_placements = add_broll_clips(self.anchor_audio_file, self.clip_manager.clips, self.news_script.get_sot_clip_ids(), sections_str)
         # broll_placements = run_chain(broll_chain, {"BROLL_DESCRIPTIONS": full_descriptions_str, "SECTION_TIMINGS": sections_str})
+
+        if len(broll_placements) < 50:
+            raise Exception("NO BROLLS IN RESPONSE FROM GEMINI")
+        
         parsed_broll_json = run_chain_json(parse_broll_chain, {"SECTIONS": sections_str, "BROLL_PLACEMENTS": broll_placements})
 
         if self.error_handler:
