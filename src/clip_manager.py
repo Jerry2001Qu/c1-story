@@ -96,11 +96,14 @@ class ClipManager:
             clip.close()
 
             scene_list = detect(str(self.video_file_path), AdaptiveDetector(adaptive_threshold=4, min_scene_len=fps))
-            status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=False,
-                            output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
-            if status != 0:
-                if self.error_handler:
-                    self.error_handler.error(f"ERROR: Splitting video into clips failed with code: {status}")
+            if scene_list:
+                status = split_video_ffmpeg(str(self.video_file_path), scene_list, show_progress=False,
+                                output_file_template=str(self.clips_folder / "$SCENE_NUMBER.mp4"))
+                if status != 0:
+                    if self.error_handler:
+                        self.error_handler.error(f"ERROR: Splitting video into clips failed with code: {status}")
+            else:
+                self.video_file_path.rename(self.clips_folder / "001.mp4")
         if self.error_handler:
             self.error_handler.info(f"Detected {len(list(self.clips_folder.glob('*.mp4')))} clips")
 
@@ -246,7 +249,7 @@ class ClipManager:
                             continue
                         clip.shot_id = clip_dict['shot']
                         clip.shotlist_description = clip_dict["description"]
-                        clip.has_quote = int(clip_dict['quote'])
+                        clip.has_quote = 0 # int(clip_dict['quote'])
                 except ValueError:
                     if self.error_handler:
                         self.error_handler.warning(f"WARNING: Could not match clips, likely content blocked by Gemini. ({group})")
