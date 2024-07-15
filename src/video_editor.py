@@ -131,6 +131,8 @@ class VideoEditor:
         
         if section.is_interview():
             clip = self._add_byline(clip, section.name, section.title)
+        if section.clip.courtesy:
+            clip = self._add_courtesy(clip, section.clip.courtesy)
         clip = clip.subclip(0, clip.duration - 0.1)
         clip = clip.audio_fadein((1.0/self.fps)*2).audio_fadeout((1.0/self.fps)*2)
         return clip
@@ -221,7 +223,24 @@ class VideoEditor:
         broll_clip = broll_clip.subclip(0, min(broll_duration, broll_clip.duration))
         broll_clip = broll_clip.set_duration(broll_duration)
         broll_clip = resize_image_clip(broll_clip, self.output_resolution)
+        if clip.courtesy:
+            broll_clip = self._add_courtesy(broll_clip, clip.courtesy)
         return broll_clip
+    
+    def _add_courtesy(self, clip: mp.VideoFileClip, courtesy_text: str) -> mp.VideoFileClip:
+        """Adds a courtesy text to the given clip."""
+
+        output_width, output_height = clip.w, clip.h
+        courtesy_height = int(output_height * (33/1080))
+        courtesy_margin = self.logline_padding
+
+        courtesy_clip = self._create_raw_text_clip(courtesy_text.upper(), courtesy_height, (255, 255, 255, 255))
+        courtesy_x = output_width - courtesy_margin - courtesy_clip.w
+        courtesy_y = courtesy_margin
+        courtesy_clip = courtesy_clip.set_position((courtesy_x, courtesy_y)).set_duration(clip.duration)
+
+        final_elements = [clip, courtesy_clip]
+        return mp.CompositeVideoClip(final_elements)
     
     def _add_byline(self, clip: mp.VideoFileClip, name: str, title: str) -> mp.VideoFileClip:
         """Adds a lower-third byline above the logline to the given clip."""

@@ -39,6 +39,7 @@ def main():
     shotlist = dataloader.load_shotlist()
     story_title = dataloader.get_story_title()
     video_file_path = dataloader.get_video_file_path()
+    body = dataloader.get_body()
 
     clips_folder = story_folder / "clips"
     clip_manager = ClipManager(video_file_path, clips_folder, shotlist, anchor_image_path, anchor_voice_id, voiceover_voice_id, anchor_avatar_id, has_splash_screen=False, error_handler=error_handler)
@@ -53,6 +54,8 @@ def main():
     clip_manager.match_clips()
     print("Breaking up clips")
     clip_manager.break_up_clips()
+    print("Applying courtesy to clips")
+    clip_manager.courtesy_clips(body)
     print("Generating full descriptions")
     clip_manager.generate_full_descriptions(story_title)
     

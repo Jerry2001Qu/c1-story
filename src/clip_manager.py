@@ -2,7 +2,7 @@
 
 # STREAMLIT
 from src.transcription import WhisperResults
-from src.prompts import run_chain, run_chain_json, match_clip_to_sots_chain, get_sot_chain
+from src.prompts import run_chain, run_chain_json, match_clip_to_sots_chain, get_sot_chain, courtesy_chain
 import streamlit as st
 # /STREAMLIT
 
@@ -33,9 +33,10 @@ class Clip:
         self.has_quote: Optional[bool] = None
         self.whisper_results: Optional[WhisperResults] = None
         self.full_description: Optional[str] = None
+        self.courtesy: Optional[int] = None
 
     def __repr__(self):
-        return f"""{self.id} ({self.shot_id}, quote: {self.has_quote}): {self.shotlist_description}"""
+        return f"""{self.id} ({self.shot_id}, quote: {self.has_quote}, courtesy: {self.courtesy}): {self.shotlist_description}"""
 
     def load_video(self) -> mp.VideoFileClip:
         """Loads the video clip using moviepy."""
@@ -375,6 +376,23 @@ class ClipManager:
 
         if self.error_handler:
             self.error_handler.info(f"Split {num_clips_before} clips into {num_clips_after} clips")
+    
+    def courtesy_clips(self, body: str):
+        print(body)
+        courtesies_json = run_chain_json(courtesy_chain, {"BODY": body})
+        print(courtesies_json)
+
+        print(self.clips)
+        for clip in self.clips:
+            if clip.shot_id is None:
+                continue
+            for courtesy in courtesies_json["clips"]:
+                if clip.shot_id == int(courtesy["id"]):
+                    clip.courtesy = courtesy["courtesy"]
+                    break
+            if clip.courtesy is None:
+                clip.courtesy = 0
+        print(self.clips)
 
     def get_quotes_str(self):
         output = ""

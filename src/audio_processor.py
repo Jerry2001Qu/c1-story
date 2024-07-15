@@ -121,9 +121,9 @@ class AudioProcessor:
                 if i == len(self.news_script.sections)-1:
                     sections_str += f"Anchor must be shown at or before {max(section_end-5, section_start):.2f}s till end.\n"
                 sections_str += f"{section.text}\n"
-                # sections_str += f"Timestamps:\n"
-                # for word in section.whisper_results.timestamps:
-                #     sections_str += f"{word.word}: {section_start + word.start:.2f}-{section_start + word.end:.2f}\n"
+                sections_str += f"Timestamps:\n"
+                for word in section.whisper_results.timestamps:
+                    sections_str += f"{word.word}: {section_start + word.start:.2f}-{section_start + word.end:.2f}\n"
                 section_start = section_end
         
         if self.error_handler:

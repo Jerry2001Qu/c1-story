@@ -890,6 +890,158 @@ json_prompt = PromptTemplate.from_template(
 Ensure it's valid JSON escaping special characters and converting double quotes in strings to single quotes. (Keys/Values should still be in double quotes) Put your response in <response></response> tags."""
 )
 
+courtesy_prompt = PromptTemplate.from_template(
+"""Identify any courtesy requirements in the shotlist and put them in JSON.
+
+Here's an example:
+<example>
+VIDEO SHOWS: SECURITY PERSONNEL SCUFFLING WITH PEOPLE NEAR STADIUM GATES / MAN WITH HANDS IN ZIP TIES LYING ON GROUND, BEING REMOVED BY SECURITY
+
+RESENDING WITH COMPLETE SCRIPT
+
+Verified by:
+
+- Original file metadata
+
+SHOWS: MIAMI GARDENS, FLORIDA, UNITED STATES (JULY 14, 2024) (SAMMBONU - No resale / Must on-screen courtesy sammbonu)
+
+1. SECURITY PERSONNEL SCUFFLING WITH FAN
+
+2. MAN WITH HANDS IN ZIP TIES LYING ON GROUND, SECURITY PERSONNEL HELPING HIM STAND AND REMOVING HIM FROM PREMISES
+
+STORY: Security scuffled with fans after organizers said thousands of supporters without tickets rushed security and tried to force their way into the stadium, delaying the Copa America final between Argentina and Colombia by more than hour on Sunday (July 14).
+
+Video obtained by Reuters showed security manhandling fans near the gates of the Hard Rock Stadium in Miami Gardens, Florida. Footage also showed a man lying on the ground with his hands behind him in zip ties before being removed by security from the premises.
+
+The date and location of the footage was verified by corroborating visuals of the event shot by different sources and original file metadata from the source.
+
+Police managed to close the gates and initiate a lockdown, leading to scores of people stuck outside trying to enter before the match kicked off.
+
+South American football's governing body CONMEBOL pushed the match's start time back three times from 8:00 p.m. to 8:30 p.m., to 8:45 p.m. and finally to 9:15 p.m, when the teams were finally able to line up for the national anthems.
+
+<example_response>
+{{
+   "clips": [
+      {{
+         "id": 1,
+         "courtesy": "sammbonu"
+      }},
+      {{
+         "id": 2,
+         "courtesy": "sammbonu"
+      }}
+   ]
+}}
+</example_response>
+</example>
+
+<example>
+VIDEO SHOWS: VARIOUS OF LOCATION HALF A MILE FROM SITE OF TRUMP PENNSYLVANIA RALLY SHOOTING.
+
+SHOTLIST ONLY; FULL SCRIPT TO FOLLOW
+
+SHOWS: NEAR BUTLER, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+1. VARIOUS OF POLICE CAR WITH TRAFFIC FLOWING INFRONT OF 'ROAD CLOSED' CORDONS
+
+2. MEDIA AT SITE
+
+SHOWS: BUTLER, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (US TV - Must on screen courtesy 'US TV')
+
+3. SIGNS READING (English): 'TRUMP GEAR HERE' AND 'YARD SALE '
+
+4. VARIOUS OF POLICE CAR WITH TRAFFIC FLOWING INFRONT OF 'ROAD CLOSED' CORDONS
+
+STORY: Police barriers were set up on Sunday (14 July) near the site of the Donald Trump Pennsylvania rally where a gunman took shots at the Republican presidential hopeful.
+
+The site, half a mile from the location of the shooting in Butler, Pennsylvania, has been cordoned off on Sunday.
+
+The FBI identified 20-year-old Thomas Matthew Crooks of Bethel Park, Pennsylvania as the suspect in Saturday's attempted assassination of former U.S. President Donald Trump at a campaign rally.
+
+The suspect was shot and killed by the Secret Service seconds after he allegedly fired shots toward a stage where Trump was speaking.
+
+The FBI said it was working to determine a motive for the attack, in which one rally attendee died and two other spectators were critically injured. Trump was shot in the ear.
+
+<example_response>
+{{
+   "clips": [
+      {{
+         "id": 1,
+         "courtesy": 0
+      }},
+      {{
+         "id": 2,
+         "courtesy": 0
+      }},
+      {{
+         "id": 3,
+         "courtesy": "US TV"
+      }},
+      {{
+         "id": 4,
+         "courtesy": "US TV"
+      }}
+   ]
+}}
+</example_response>
+</example>
+
+<example>
+SHOWS: BALTIMORE, MARYLAND, UNITED STATES (JUNE 24, 2024) (ABC AFFILIATE WJLA - Broadcast: No use USA. No archive. Digital: No use USA. No archive.)
+
+1. AERIAL OF CONTAINER SHIP DALI BEING TOWED, PASSING BETWEEN THE SUPPORTS OF THE FRANCIS SCOTT KEY BRIDGE
+
+2. AERIAL SHOWING CLOSE-UP OF THE FRONT OF CONTAINER SHIP DALI WITH DEBRIS AND DAMAGED CONTAINERS
+
+3. AERIAL OF DALI IN HARBOUR
+
+4. AERIAL OF DALI APPROACHING BRIDGE
+
+5. AERIAL OF SIDE VIEW OF DALI
+
+6. VARIOUS AERIALS OF DALI PASSING BETWEEN THE SUPPORTS OF THE FRANCIS SCOTT KEY BRIDGE
+
+<example_response>
+{{
+   "clips": [
+      {{
+         "id": 1,
+         "courtesy": 0
+      }},
+      {{
+         "id": 2,
+         "courtesy": 0
+      }},
+      {{
+         "id": 3,
+         "courtesy": 0
+      }},
+      {{
+         "id": 4,
+         "courtesy": 0
+      }},
+      {{
+         "id": 5,
+         "courtesy": 0
+      }},
+      {{
+         "id": 6,
+         "courtesy": 0
+      }}
+   ]
+}}
+</example_response>
+</example>
+
+Here's the shotlist and surrounding text:
+<shotlist>
+{BODY}
+</shotlist>
+
+Identify any courtesy requirements in the shotlist and put them in JSON. If there are no courtesy requirements, return 0. Put your response in <response></response> tags.
+"""
+)
+
 spell_check_chain = (spell_check_prompt | sonnet35).with_config({"run_name": "spell_check"})
 get_sot_chain = (get_sot_prompt | sonnet35).with_config({"run_name": "get_sots"})
 facts_chain = (facts_prompt | sonnet35).with_config({"run_name": "generate_facts"})
@@ -910,6 +1062,7 @@ match_hard_sot_chain = (match_hard_sot_prompt | sonnet35).with_config({"run_name
 language_to_iso_chain = (language_to_iso_prompt | sonnet35).with_config({"run_name": "language_to_iso"})
 match_clip_to_sots_chain = (match_clip_to_sots_prompt | sonnet35).with_config({"run_name": "match_clip_to_sots"})
 json_chain = (json_prompt | sonnet35).with_config({"run_name": "json"})
+courtesy_chain = (courtesy_prompt | sonnet35).with_config({"run_name": "courtesy"})
 
 from sqlalchemy.exc import OperationalError
 import time
