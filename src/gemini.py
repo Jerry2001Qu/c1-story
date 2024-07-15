@@ -495,7 +495,7 @@ Critique your draft inside <critique> tags.
 KEEP WRITING DRAFTS AND CRITIQUES UNTIL THE CRITIQUE IS SATISFACTORY. Usually 1-2 times. Do this now, don't ask to continue.
 When writing drafts ensure all requirements are met (min timings, etc.), then suggest improvements.
 
-Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END WITH THIS. Do not leave this section blank, fill it with your final draft.
+Put your final edited video sequence inside <response></response> tags. YOU MUST ALWAYS END WITH THIS. Do not leave this section blank, fill it with your final draft.
 """
 ]
 
@@ -507,9 +507,21 @@ Put your final edited video sequence inside <response> tags. YOU MUST ALWAYS END
     print("## BROLL GEMINI RESPONSE\n\n", response.text)
 
     try:
-        return extract_response(response.text)
+        placements = extract_response(response.text)
+        if len(placements) > 50:
+            return placements
+        else:
+            print("ERROR: GEMINI BROLL RESPONSE NOT FILLED. RETURNING LAST DRAFT")
+            placements = extract_str_between(response.text[response.text.rfind("<draft>"):], "<draft>", "</draft>")
+            if len(placements) > 50:
+                return placements
+            else:
+                raise Exception("GEMINI BROLL RESPONSE NOT FILLED")
     except ValueError:
         print(response.prompt_feedback)
         print(response.candidates[0].finish_reason)
         print(response.candidates[0].safety_ratings)
         return None
+
+def extract_str_between(text: str, left_tag: str, right_tag: str) -> str:
+    return text[text.find(left_tag):text.rfind(right_tag)+len(right_tag)]

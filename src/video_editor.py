@@ -231,15 +231,35 @@ class VideoEditor:
         """Adds a courtesy text to the given clip."""
 
         output_width, output_height = clip.w, clip.h
-        courtesy_height = int(output_height * (33/1080))
+        courtesy_height = int(output_height * (54/1080))
         courtesy_margin = self.logline_padding
 
-        courtesy_clip = self._create_raw_text_clip(courtesy_text.upper(), courtesy_height, (255, 255, 255, 255))
-        courtesy_x = output_width - courtesy_margin - courtesy_clip.w
-        courtesy_y = courtesy_margin
-        courtesy_clip = courtesy_clip.set_position((courtesy_x, courtesy_y)).set_duration(clip.duration)
+        inner_content_height = int(courtesy_height * (24/54))
+        courtesy_padding = (courtesy_height - inner_content_height) // 2
 
-        final_elements = [clip, courtesy_clip]
+        courtesy_text_clip = self._create_raw_text_clip(courtesy_text.upper(), inner_content_height, (255, 255, 255, 255))
+        inner_content_width = courtesy_text_clip.w
+        courtesy_width = inner_content_width + courtesy_padding * 2
+
+        courtesy_x = courtesy_margin
+        courtesy_y = courtesy_margin
+
+        bg_clip = (
+            mp.ColorClip(size=(courtesy_width, courtesy_height), color=(0, 5, 52, 255 * 0.5))
+            .set_position(
+                (courtesy_x, courtesy_y)
+            )
+            .set_duration(clip.duration)
+        )
+
+        inner_content_x = courtesy_x + courtesy_padding
+        inner_content_y = courtesy_y + courtesy_padding
+
+        courtesy_text_clip = courtesy_text_clip.set_position(
+            (inner_content_x, inner_content_y)
+        ).set_duration(clip.duration)
+
+        final_elements = [clip, bg_clip, courtesy_text_clip]
         return mp.CompositeVideoClip(final_elements)
     
     def _add_byline(self, clip: mp.VideoFileClip, name: str, title: str) -> mp.VideoFileClip:
