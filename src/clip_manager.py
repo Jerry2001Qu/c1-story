@@ -378,11 +378,9 @@ class ClipManager:
             self.error_handler.info(f"Split {num_clips_before} clips into {num_clips_after} clips")
     
     def courtesy_clips(self, body: str):
-        print(body)
         courtesies_json = run_chain_json(courtesy_chain, {"BODY": body})
         print(courtesies_json)
 
-        print(self.clips)
         for clip in self.clips:
             if clip.shot_id is None:
                 continue

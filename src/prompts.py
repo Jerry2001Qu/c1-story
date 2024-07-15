@@ -1038,7 +1038,7 @@ Here's the shotlist and surrounding text:
 {BODY}
 </shotlist>
 
-Identify any courtesy requirements in the shotlist and put them in JSON. If there are no courtesy requirements, return 0. Put your response in <response></response> tags.
+Identify any courtesy requirements in the shotlist and put them in JSON. If there are no courtesy requirements for a clip, set courtesy to 0. Always do this for every clip id. Put your JSON response in <response></response> tags.
 """
 )
 
