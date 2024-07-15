@@ -387,7 +387,7 @@ class ClipManager:
             if clip.shot_id is None:
                 continue
             for courtesy in courtesies_json["clips"]:
-                if clip.shot_id == int(courtesy["id"]):
+                if int(clip.shot_id) == int(courtesy["id"]):
                     clip.courtesy = courtesy["courtesy"]
                     break
             if clip.courtesy is None:
