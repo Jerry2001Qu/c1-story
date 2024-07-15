@@ -1042,6 +1042,287 @@ Identify any courtesy requirements in the shotlist and put them in JSON. If ther
 """
 )
 
+extract_storyline_and_shotlist_prompt = PromptTemplate.from_template(
+"""Extract the storyline and shotlist from the following text.
+
+Here is an example:
+<example>
+<example_input>
+VIDEO SHOWS: SECOND WRAP OF EDITS FOLLOWING SHOOTING INCIDENT AT FORMER U.S. PRESIDENT DONALD TRUMP'S RALLY IN PENNSYLVANIA
+
+EDITORS PLEASE NOTE: THIS EDIT IS A WRAP AND CONTAINS NO FRESH MATERIAL / ORIGINAL EDIT NUMBERS AND STORY DETAILS INCLUDED IN SHOTLIST
+
+RESENDING WITH COMPLETE SCRIPT
+
+SHOWS: Eyewitness footage at Donald Trump's campaign rally on Saturday (July 13) showed people shouting and panicking during a shooting attack that left the presidential candidate's face streaked with blood. Reuters corroborated visuals from the scene such as the grey structure with glass windows also seen in the video by comparing it to matching file imagery. The date of the video matched that of Reuters and other media reports. (8706-USA-ELECTION/TRUMP-UGC2)
+
+BUTLER, PENNSYLVANIA, UNITED STATES (JULY 13, 2024) (VIDEO OBTAINED BY REUTERS VIA TMX - No resale / Must on-screen courtesy VIDEO OBTAINED BY REUTERS VIA TMX) (ORIGINALLY SHOT IN PORTRAIT)
+
+1. STAGE AT RALLY / PEOPLE PANICKING AS AUDIO HEARD SHOUTING (English): "He's got a gun!" / AUDIO OF GUNFIRE / GREY STRUCTURE / VOICE HEARD SAYING (English): "He's on top of the roof, don't go over there. He's on the roof buddy." / PEOPLE WALKING AROUND / VOICE HEARD SAYING (English): "I can see his head blow up, they shot him in the head" (PROFANITY HEARD IN BACKGROUND) / VOICE HEARD SAYING (English): "He's pulled off a number of shots. The first few number of shots were him." / PEOPLE WALKING AND GREY STRUCTURE / POLICE MAN WALKING
+
+A 2020 high school yearbook photo of Thomas Matthew Crooks of Bethel Park, Pennsylvania, was released on Sunday (July 14) after the FBI identified the 20-year-old as the suspect involved in the attempted assassination of former U.S. President Donald Trump at a campaign rally. (8824-USA-ELECTION/TRUMP-SHOOTER-STILLS)
+
+BETHEL PARK, PENNSYLVANIA, UNITED STATES (FILE) (OBTAINED BY REUTERS - No Archive/No Resale) (MUTE)
+
+2. VARIOUS STILL PHOTOGRAPHS OF 2020 HIGH SCHOOL YEARBOOK PHOTO OF THOMAS MATTHEW CROOKS, NAMED BY FBI AS 'SUBJECT INVOLVED' IN ATTEMPTED ASSASSINATION OF FORMER U.S. PRESIDENT DONALD TRUMP
+
+An eyewitness recalled on Sunday (July 14) seeing a man with a riffle on a nearby roof moments before former US president Donald Trump was shot in the ear at a campaign rally in Pennsylvania. Greg Smith said he had alerted police and Secret Services just before shots were heard. (8813-USA-ELECTION/TRUMP-SHOOTING-EYEWITNESS)
+
+BUTLER, PENNSYLVANIA, UNITED STATES (JULY 13, 2024) (BBC - Mandatory onscreen credit BBC News/ No use after 1500GMT on July 16, 2024)
+
+3. (SOUNDBITE) (English) EYEWITNESS AND TRUMP SUPPORTER GREG SMITH, SPEAKING TO REPORTER, SAYING:
+
+"We noticed a guy crawling, bear-crawling up the roof of the building beside us, 50 feet away from us. So we're standing there, we're pointing at the guy crawling up the roof."
+
+REPORTER: 'And he had a gun right.'
+
+SMITH: 'A rifle, we can clearly see him with a rifle, absolutely. We're pointing at him, the police are down there running around on the ground, we're like, hey man, there's a guy on the roof with a rifle. And the police are like, huh, what, they didn't know what was going on, we're like right here on the roof, we can see him from right here, we see him, he's crawling. And next thing you know, I'm thinking to myself, why is Trump still speaking, why have they not pulled him off the stage. I'm standing there pointing at him for two or three minutes. Secret services are looking at us from the top of the barn, I'm pointing at that roof, just standing there like this, and next thing you know five shots ring out."
+
+Witnesses who attended the former U.S. President Donald Trump’s rally in Butler, Pennsylvania described the attempted assassination on Sunday (July 14). (8806-USA-ELECTION/TRUMP-SHOOTING-BUTLER REACTION)
+
+BUTLER, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+4. (SOUNDBITE) (English) TRUMP SUPPORTER FROM FROM NEWLAND, NORTH CAROLINA, RENEE WHITE, SAYING:
+
+“So, I heard the first shot. And as soon as I heard that first shot, I turned over and I looked at Trump and then I heard two more. It was like, bang, bang, bang. It's like three right in a row. I looked at Trump and I saw him looking and I saw him drop to the ground. And then as he, as he dropped to the ground, then I saw the Secret Service come around him. I saw the guys and all the military with the guns and everything come around him. I heard all the calls they were doing. I heard what they were saying back and forth about, you know, waiting until they had the all clear that they had everything."
+
+Police barriers were set up on Sunday (14 July) near the site of the Donald Trump Pennsylvania rally where a gunman took shots at the Republican presidential hopeful. (8770-USA-ELECTION/TRUMP-SHOOTING SITE-MORNING)
+
+NEAR BUTLER, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+5. VARIOUS OF POLICE CAR WITH TRAFFIC FLOWING IN FRONT OF 'ROAD CLOSED' CORDONS
+
+6. MEDIA AT SITE
+
+7. SIGNS READING (English): 'TRUMP GEAR HERE' AND 'YARD SALE '
+
+A local district attorney in Butler, Pennsylvania, expressed embarrassment on Sunday (July 14) following the assassination attempt on former U.S. President Donald Trump the day before. (8797-USA-ELECTION/TRUMP-SHOOTING-LOCAL PROSECUTOR)
+
+BUTLER, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+8. (SOUNDBITE) (English) BUTLER COUNTY DISTRICT ATTORNEY, RICHARD GOLDINGER, SAYING:
+
+“I've lived here my whole life and you just don't think that something like this would happen in your hometown. We haven't had an attempt on a, on a president assassination attempt since Reagan in 1980. Now, for it to happen in your backyard, you just don't expect that. So it's embarrassing for the community, but at the same time, I mean, you just can't predict, you know, human behaviour sometimes.”
+
+9. VARIOUS OF POLICE OFFICERS AND VEHICLE NEAR SITE OF TRUMP RALLY IN BUTLER, PENNSYLVANIA
+
+Thomas Crooks, the man named by the FBI as the shooter in the attempted assassination of Donald Trump, was "bullied every day" in high school, a high school classmate told media on Sunday (July 14). Jason Kohler, who graduated from Bethel Park High School the year before Crooks, described him as an "outcast" who was "always alone". Kohler said he did not have any interactions with Crooks but spoke of him sitting alone at lunch and wearing hunting outfits to school. The 21-year-old local resident also said he thought Crooks had been on the school's rifle team, though he was uncertain. (8821-USA-ELECTION/TRUMP-BETHEL-PARK-SCHOOL CLASSMATE)
+
+BETHEL PARK, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+10. (SOUNDBITE) (English) CLASSMATE OF THOMAS CROOKS AT BETHEL PARK HIGH SCHOOL, JASON KOHLER, SAYING:
+
+"I didn't have any interaction with him, but he was, like a kid that was always alone. He was always bullied. Every day. He was just an outcast. Yeah."
+
+The neighbourhood of Bethel Park, Pennsylvania, was abuzz with media and police on Sunday (July 14) a day after one of its residents allegedly tried to kill former U.S. President Donald Trump at a campaign rally about one hour away in the city of Butler. (8791-USA-ELECTION/TRUMP-SHOOTER-BETHEL-PARK)
+
+BETHEL PARK, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+11. VARIOUS OF POLICE OFFICERS STANDING NEAR VEHICLES IN NEIGHBOURHOOD WHERE SUSPECTED TRUMP RALLY SHOOTER THOMAS MATTHEW CROOKS LIVED
+
+12. VARIOUS OF NEWS CAMERAS
+
+13. VARIOUS OF PENNSYLVANIA STATE POLICE VEHICLE
+
+Residents of the Pittsburgh suburb of Bethel Park expressed shock and sadness on Sunday (July 14) after finding out a local man had been identified as the shooter in an attempted assassination of Donald Trump. (8802-USA-ELECTION/TRUMP-BETHEL-PARK-VOXIES)
+
+BETHEL PARK, PENNSYLVANIA, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+14. (SOUNDBITE) (English) RETIRED RESIDENT, JIM ZAWOJSKI, 70, SAYING:
+
+"I was stunned. I mean, where is America going to now? Okay. I was talking to one other reporter, and I said, the country's been never so divided. Okay? Everyone needs to go and take a step back. Relax. If you have differences with a candidate, you do it at the voting booth. You know? You don't do it... you don't take action like this clown did. Okay? If it happened to Biden, I'd be just as stunned, you know, because there is no need for that in our society like this."
+
+Supporters of former U.S. President Donald Trump gathered outside Trump Tower in New York on Sunday (July 14), after he survived an assassination attempt days before he was due to accept the formal Republican presidential nomination. (8831-USA-ELECTION/TRUMP-SHOOTING-TOWER SUPPORTERS and 8814-USA-ELECTION/TRUMP-SHOOTING-TRUMP TOWER REACTION)
+
+NEW YORK, NEW YORK, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+15. VARIOUS OF TRUMP SUPPORTERS STANDING ON PICKUP TRUCK AND WAVING FLAGS, TRUMP TOWER SEEN IN BACKGROUND
+
+16. VARIOUS OF PICKUP TRUCK PARKED OUTSIDE TRUMP TOWER WITH SUPPORTERS ON BACK WAVING FLAG
+
+17. FLAG WITH ILLUSTRATION OF TRUMP’S FACE ON IT
+
+18. (SOUNDBITE) (English) CALIFORNIA RESIDENT, ARMIN (NO LAST NAME GIVEN), SAYING:
+
+“You know what happened yesterday was a tragedy for this country. It's unthinkable that, you know, something like this can happen. And, you know, I pray for Trump. You know, he's he's trying to save our country from, you know, the radicals that exist. He wants a better USA for us all. And there's now people are trying to assassinate him, which is an unthinkable thing. And, you know, he doesn't have to do this job. He's 78 years old. He should be relaxing, golfing. But he's risking his life, you know, to save the country.”
+
+19. PEOPLE ENTERING TRUMP TOWER
+
+20. ENTRANCE OF TRUMP TOWER
+
+21. TRUMP SUPPORTER HOLDING BANNER, READING (English): 'PURSUED, PERSECUTED, PROSECUTED'
+
+It was a quiet scene near the former U.S. President Donald Trump’s property in Bedminster, New Jersey on Sunday (July 14). (8778-USA-ELECTION/TRUMP-SHOOTING-BEDMINSTER-MORNING)
+
+BEDMINSTER, NEW JERSEY, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+22. STREET NEAR TRUMP’S GOLF CLUB PROPERTY IN BEDMINSTER, NEW JERSEY
+
+23. CAMERA EQUIPMENT / REPORTERS AND VEHICLES SEEN FROM ACROSS THE STREET
+
+24. STREET SIGN READING (English) ‘CLUCAS BROOK RD’
+
+25. SIGNS READING (English) ‘SOMERSET 523 COUNTY’ AND ‘MILE 29’
+
+In a country already on edge, the assassination attempt on former President Donald Trump has enraged his supporters, paused the Democratic campaign, and raised fears of further political violence in the run-up to November's election. According to analysts, the country is at a tipping point. (8807-USA-ELECTION/TRUMP-SHOOTING-ANALYST)
+
+CHICAGO, ILLINOIS, UNITED STATES (JULY 14, 2024) (REUTERS - Access all)
+
+26. (SOUNDBITE) (English) UNIVERSITY OF CHICAGO PROFESSOR IN THE POLITICAL SCIENCE DEPARTMENT AND THE CHICAGO PROJECT ON SECURITY AND THREATS DIRECTOR, ROBERT PAPE, SAYING:
+
+"Support for political violence matters because that is what normalizes political violence for volatile actors who would go that next step. So it's often the case that the actors who are the lone wolves are, I call them, 'volatile' because they can be mentally ill. They can be inundated with propaganda coming from one of the political parties and so forth. And then and then the media will say, 'Oh, well, that's not really political violence or something.' No, these are not competing explanations."
+
+U.S. President Joe Biden delivered remarks on Sunday (July 14), one day following the assassination attempt on former President Donald Trump. (8827-USA-ELECTION/TRUMP-SHOOTING-BIDEN)
+
+WASHINGTON, D.C., UNITED STATES (JULY 14, 2024) (US NETWORK POOL - Broadcast: No use USA. Digital: No use USA.)
+
+27. (SOUNDBITE) (English) U.S. PRESIDENT, JOE BIDEN, SAYING:
+
+“Last night, I spoke with Donald Trump. I'm sincerely grateful that he's doing well and recovering."
+
+28. (SOUNDBITE) (English) U.S. PRESIDENT, JOE BIDEN, SAYING:
+
+"Mr. Trump, as a former president, the nominee of the Republican Party already receives a heightened level of security. And I've been consistent in my direction to the Secret Service to provide him with every resource, capability, and protective measure necessary to ensure his continued safety."
+
+Former U.S. President Donald Trump thanked well-wishers on Sunday (July 14) on his social media website Truth Social, after he was shot in the ear in an attempted assassination during a campaign rally. (8780-USA-ELECTION/TRUMP-TRUTH SOCIAL UPDATE)
+
+INTERNET (JULY 14, 2024) (SOCIAL MEDIA WEBSITE - Access all) (MUTE)
+
+29. SCREENSHOT FROM TRUMP'S SOCIAL MEDIA ACCOUNT 'TRUTH SOCIAL' READING (English):
+
+"Thank you to everyone for your thoughts and prayers yesterday, as it was God alone who prevented the unthinkable from happening. We will FEAR NOT, but instead remain resilient in our Faith and Defiant in the face of Wickedness. Our love goes out to the other victims and their families. We pray for the recovery of those who were wounded, and hold in our hearts the memory of the citizen who was so horribly killed. In this moment, it is more important than ever that we stand United, and show our True Character as Americans, remaining Strong and Determined, and not allowing Evil to Win. I truly love our Country, and love you all, and look forward to speaking to our Great Nation this week from Wisconsin. DJT"
+
+STORY: Please see shotlist for story details.
+
+(Production: Lynné Schoeman)
+</example_input>
+
+<example_response>
+<shotlist>
+1. STAGE AT RALLY / PEOPLE PANICKING AS AUDIO HEARD SHOUTING (English): "He's got a gun!" / AUDIO OF GUNFIRE / GREY STRUCTURE / VOICE HEARD SAYING (English): "He's on top of the roof, don't go over there. He's on the roof buddy." / PEOPLE WALKING AROUND / VOICE HEARD SAYING (English): "I can see his head blow up, they shot him in the head" (PROFANITY HEARD IN BACKGROUND) / VOICE HEARD SAYING (English): "He's pulled off a number of shots. The first few number of shots were him." / PEOPLE WALKING AND GREY STRUCTURE / POLICE MAN WALKING
+
+2. VARIOUS STILL PHOTOGRAPHS OF 2020 HIGH SCHOOL YEARBOOK PHOTO OF THOMAS MATTHEW CROOKS, NAMED BY FBI AS 'SUBJECT INVOLVED' IN ATTEMPTED ASSASSINATION OF FORMER U.S. PRESIDENT DONALD TRUMP
+
+3. (SOUNDBITE) (English) EYEWITNESS AND TRUMP SUPPORTER GREG SMITH, SPEAKING TO REPORTER, SAYING:
+
+"We noticed a guy crawling, bear-crawling up the roof of the building beside us, 50 feet away from us. So we're standing there, we're pointing at the guy crawling up the roof."
+
+REPORTER: 'And he had a gun right.'
+
+SMITH: 'A rifle, we can clearly see him with a rifle, absolutely. We're pointing at him, the police are down there running around on the ground, we're like, hey man, there's a guy on the roof with a rifle. And the police are like, huh, what, they didn't know what was going on, we're like right here on the roof, we can see him from right here, we see him, he's crawling. And next thing you know, I'm thinking to myself, why is Trump still speaking, why have they not pulled him off the stage. I'm standing there pointing at him for two or three minutes. Secret services are looking at us from the top of the barn, I'm pointing at that roof, just standing there like this, and next thing you know five shots ring out."
+
+4. (SOUNDBITE) (English) TRUMP SUPPORTER FROM FROM NEWLAND, NORTH CAROLINA, RENEE WHITE, SAYING:
+
+“So, I heard the first shot. And as soon as I heard that first shot, I turned over and I looked at Trump and then I heard two more. It was like, bang, bang, bang. It's like three right in a row. I looked at Trump and I saw him looking and I saw him drop to the ground. And then as he, as he dropped to the ground, then I saw the Secret Service come around him. I saw the guys and all the military with the guns and everything come around him. I heard all the calls they were doing. I heard what they were saying back and forth about, you know, waiting until they had the all clear that they had everything."
+
+5. VARIOUS OF POLICE CAR WITH TRAFFIC FLOWING IN FRONT OF 'ROAD CLOSED' CORDONS
+
+6. MEDIA AT SITE
+
+7. SIGNS READING (English): 'TRUMP GEAR HERE' AND 'YARD SALE '
+
+8. (SOUNDBITE) (English) BUTLER COUNTY DISTRICT ATTORNEY, RICHARD GOLDINGER, SAYING:
+
+“I've lived here my whole life and you just don't think that something like this would happen in your hometown. We haven't had an attempt on a, on a president assassination attempt since Reagan in 1980. Now, for it to happen in your backyard, you just don't expect that. So it's embarrassing for the community, but at the same time, I mean, you just can't predict, you know, human behaviour sometimes.”
+
+9. VARIOUS OF POLICE OFFICERS AND VEHICLE NEAR SITE OF TRUMP RALLY IN BUTLER, PENNSYLVANIA
+
+10. (SOUNDBITE) (English) CLASSMATE OF THOMAS CROOKS AT BETHEL PARK HIGH SCHOOL, JASON KOHLER, SAYING:
+
+"I didn't have any interaction with him, but he was, like a kid that was always alone. He was always bullied. Every day. He was just an outcast. Yeah."
+
+11. VARIOUS OF POLICE OFFICERS STANDING NEAR VEHICLES IN NEIGHBOURHOOD WHERE SUSPECTED TRUMP RALLY SHOOTER THOMAS MATTHEW CROOKS LIVED
+
+12. VARIOUS OF NEWS CAMERAS
+
+13. VARIOUS OF PENNSYLVANIA STATE POLICE VEHICLE
+
+14. (SOUNDBITE) (English) RETIRED RESIDENT, JIM ZAWOJSKI, 70, SAYING:
+
+"I was stunned. I mean, where is America going to now? Okay. I was talking to one other reporter, and I said, the country's been never so divided. Okay? Everyone needs to go and take a step back. Relax. If you have differences with a candidate, you do it at the voting booth. You know? You don't do it... you don't take action like this clown did. Okay? If it happened to Biden, I'd be just as stunned, you know, because there is no need for that in our society like this."
+
+15. VARIOUS OF TRUMP SUPPORTERS STANDING ON PICKUP TRUCK AND WAVING FLAGS, TRUMP TOWER SEEN IN BACKGROUND
+
+16. VARIOUS OF PICKUP TRUCK PARKED OUTSIDE TRUMP TOWER WITH SUPPORTERS ON BACK WAVING FLAG
+
+17. FLAG WITH ILLUSTRATION OF TRUMP’S FACE ON IT
+
+18. (SOUNDBITE) (English) CALIFORNIA RESIDENT, ARMIN (NO LAST NAME GIVEN), SAYING:
+
+“You know what happened yesterday was a tragedy for this country. It's unthinkable that, you know, something like this can happen. And, you know, I pray for Trump. You know, he's he's trying to save our country from, you know, the radicals that exist. He wants a better USA for us all. And there's now people are trying to assassinate him, which is an unthinkable thing. And, you know, he doesn't have to do this job. He's 78 years old. He should be relaxing, golfing. But he's risking his life, you know, to save the country.”
+
+19. PEOPLE ENTERING TRUMP TOWER
+
+20. ENTRANCE OF TRUMP TOWER
+
+21. TRUMP SUPPORTER HOLDING BANNER, READING (English): 'PURSUED, PERSECUTED, PROSECUTED'
+
+22. STREET NEAR TRUMP’S GOLF CLUB PROPERTY IN BEDMINSTER, NEW JERSEY
+
+23. CAMERA EQUIPMENT / REPORTERS AND VEHICLES SEEN FROM ACROSS THE STREET
+
+24. STREET SIGN READING (English) ‘CLUCAS BROOK RD’
+
+25. SIGNS READING (English) ‘SOMERSET 523 COUNTY’ AND ‘MILE 29’
+
+26. (SOUNDBITE) (English) UNIVERSITY OF CHICAGO PROFESSOR IN THE POLITICAL SCIENCE DEPARTMENT AND THE CHICAGO PROJECT ON SECURITY AND THREATS DIRECTOR, ROBERT PAPE, SAYING:
+
+"Support for political violence matters because that is what normalizes political violence for volatile actors who would go that next step. So it's often the case that the actors who are the lone wolves are, I call them, 'volatile' because they can be mentally ill. They can be inundated with propaganda coming from one of the political parties and so forth. And then and then the media will say, 'Oh, well, that's not really political violence or something.' No, these are not competing explanations."
+
+27. (SOUNDBITE) (English) U.S. PRESIDENT, JOE BIDEN, SAYING:
+
+“Last night, I spoke with Donald Trump. I'm sincerely grateful that he's doing well and recovering."
+
+28. (SOUNDBITE) (English) U.S. PRESIDENT, JOE BIDEN, SAYING:
+
+"Mr. Trump, as a former president, the nominee of the Republican Party already receives a heightened level of security. And I've been consistent in my direction to the Secret Service to provide him with every resource, capability, and protective measure necessary to ensure his continued safety."
+
+29. SCREENSHOT FROM TRUMP'S SOCIAL MEDIA ACCOUNT 'TRUTH SOCIAL' READING (English):
+
+"Thank you to everyone for your thoughts and prayers yesterday, as it was God alone who prevented the unthinkable from happening. We will FEAR NOT, but instead remain resilient in our Faith and Defiant in the face of Wickedness. Our love goes out to the other victims and their families. We pray for the recovery of those who were wounded, and hold in our hearts the memory of the citizen who was so horribly killed. In this moment, it is more important than ever that we stand United, and show our True Character as Americans, remaining Strong and Determined, and not allowing Evil to Win. I truly love our Country, and love you all, and look forward to speaking to our Great Nation this week from Wisconsin. DJT"
+</shotlist>
+
+<storyline>
+Eyewitness footage at Donald Trump's campaign rally on Saturday (July 13) showed people shouting and panicking during a shooting attack that left the presidential candidate's face streaked with blood. Reuters corroborated visuals from the scene such as the grey structure with glass windows also seen in the video by comparing it to matching file imagery. The date of the video matched that of Reuters and other media reports.
+
+A 2020 high school yearbook photo of Thomas Matthew Crooks of Bethel Park, Pennsylvania, was released on Sunday (July 14) after the FBI identified the 20-year-old as the suspect involved in the attempted assassination of former U.S. President Donald Trump at a campaign rally.
+
+An eyewitness recalled on Sunday (July 14) seeing a man with a riffle on a nearby roof moments before former US president Donald Trump was shot in the ear at a campaign rally in Pennsylvania. Greg Smith said he had alerted police and Secret Services just before shots were heard.
+
+Witnesses who attended the former U.S. President Donald Trump’s rally in Butler, Pennsylvania described the attempted assassination on Sunday (July 14).
+
+Police barriers were set up on Sunday (14 July) near the site of the Donald Trump Pennsylvania rally where a gunman took shots at the Republican presidential hopeful.
+
+A local district attorney in Butler, Pennsylvania, expressed embarrassment on Sunday (July 14) following the assassination attempt on former U.S. President Donald Trump the day before.
+
+Thomas Crooks, the man named by the FBI as the shooter in the attempted assassination of Donald Trump, was "bullied every day" in high school, a high school classmate told media on Sunday (July 14). Jason Kohler, who graduated from Bethel Park High School the year before Crooks, described him as an "outcast" who was "always alone". Kohler said he did not have any interactions with Crooks but spoke of him sitting alone at lunch and wearing hunting outfits to school. The 21-year-old local resident also said he thought Crooks had been on the school's rifle team, though he was uncertain.
+
+The neighbourhood of Bethel Park, Pennsylvania, was abuzz with media and police on Sunday (July 14) a day after one of its residents allegedly tried to kill former U.S. President Donald Trump at a campaign rally about one hour away in the city of Butler.
+
+Residents of the Pittsburgh suburb of Bethel Park expressed shock and sadness on Sunday (July 14) after finding out a local man had been identified as the shooter in an attempted assassination of Donald Trump.
+
+Supporters of former U.S. President Donald Trump gathered outside Trump Tower in New York on Sunday (July 14), after he survived an assassination attempt days before he was due to accept the formal Republican presidential nomination.
+
+It was a quiet scene near the former U.S. President Donald Trump’s property in Bedminster, New Jersey on Sunday (July 14).
+
+In a country already on edge, the assassination attempt on former President Donald Trump has enraged his supporters, paused the Democratic campaign, and raised fears of further political violence in the run-up to November's election. According to analysts, the country is at a tipping point.
+
+U.S. President Joe Biden delivered remarks on Sunday (July 14), one day following the assassination attempt on former President Donald Trump.
+
+Former U.S. President Donald Trump thanked well-wishers on Sunday (July 14) on his social media website Truth Social, after he was shot in the ear in an attempted assassination during a campaign rally.
+</storyline>
+</example_response>
+
+Here is the input:
+<script>
+{SCRIPT}
+</script>
+
+Please parse the script and push the storyline in <storyline></storyline> tags and the shotlist in <shotlist></shotlist> tags. Both of these should be in <response></response> tags.
+Remember to copy both from the script. Don't make any changes to the text.
+"""
+)
+
 spell_check_chain = (spell_check_prompt | sonnet35).with_config({"run_name": "spell_check"})
 get_sot_chain = (get_sot_prompt | sonnet35).with_config({"run_name": "get_sots"})
 facts_chain = (facts_prompt | sonnet35).with_config({"run_name": "generate_facts"})
@@ -1063,6 +1344,7 @@ language_to_iso_chain = (language_to_iso_prompt | sonnet35).with_config({"run_na
 match_clip_to_sots_chain = (match_clip_to_sots_prompt | sonnet35).with_config({"run_name": "match_clip_to_sots"})
 json_chain = (json_prompt | sonnet35).with_config({"run_name": "json"})
 courtesy_chain = (courtesy_prompt | sonnet35).with_config({"run_name": "courtesy"})
+extract_storyline_and_shotlist_chain = (extract_storyline_and_shotlist_prompt | sonnet35).with_config({"run_name": "extract_storyline_and_shotlist"})
 
 from sqlalchemy.exc import OperationalError
 import time
@@ -1084,11 +1366,17 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
         try:
             response_raw = chain.invoke(params).content
             response_xml = extract_xml(response_raw)
-            return response_xml['response'].strip()
+            if type(response_xml['response']) is str:
+                return response_xml['response'].strip()
+            else:
+                return response_xml['response']
         except OperationalError:
             response_raw = chain.invoke(params).content
             response_xml = extract_xml(response_raw)
-            return response_xml['response'].strip()
+            if type(response_xml['response']) is str:
+                return response_xml['response'].strip()
+            else:
+                return response_xml['response']
         except APIError as e: 
             if e.status_code == 529 and retries < max_retries: 
                 print(f"Server overloaded, retrying in {retry_delay} seconds...")

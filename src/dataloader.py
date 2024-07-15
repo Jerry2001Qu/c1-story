@@ -2,6 +2,7 @@
 
 # STREAMLIT
 from src.reuters import get_item, get_assets, download_asset, get_oauth_token
+from src.prompts import extract_storyline_and_shotlist_chain, run_chain
 # /STREAMLIT
 
 from abc import ABC, abstractmethod
@@ -101,6 +102,18 @@ class ReutersAPIDataLoader(DataLoader):
                 storyline = "\n".join([line.strip() for line in storyline.split("</p><p>")[:-1]])
 
                 body = "\n".join([line.strip() for line in bodyhtml.split("</p><p>")])[9:-11]
+
+                if "Please see shotlist for story details." in storyline or len(storyline) < 10:
+                    print("Extracting storyline and shotlist")
+                    extracted_storyline_and_shotlist = run_chain(extract_storyline_and_shotlist_chain, {"SCRIPT": body})
+                    for element in extracted_storyline_and_shotlist:
+                        if "storyline" in element:
+                            storyline = element["storyline"]
+                        if "shotlist" in element:
+                            shotlist = element["shotlist"]
+                    
+                    print(storyline)
+                    print(shotlist)
 
                 self.shotlist = shotlist
                 self.storyline = storyline
