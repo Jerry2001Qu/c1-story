@@ -391,13 +391,15 @@ First, review the available B-roll clips:
         extract_frame(clip.file_path, min(duration, 1.0), frame_file)
         if not clip.has_quote:
             clip_section = [f"<clip {clip.id}>\n", gcs.upload_to_gcs_part(frame_file), f"\n{clip.full_description}\n\nMax duration: {duration} seconds\n</clip {clip.id}>\n"]
-        else:
+        elif clip.id not in sot_clip_ids:
             if clip.full_description:
                 lines = clip.full_description.split("\n")
                 full_description = '\n'.join(line for line in lines if not line.startswith("Minimum Timing:"))
             else:
                 full_description = clip.shotlist_description
             clip_section = [f"<clip {clip.id}>\n", gcs.upload_to_gcs_part(frame_file), f"\nThis clip is a SOT/Interview. \n{full_description}\n\nMax duration: {min(duration, 3)} seconds\n</clip {clip.id}>\n"]
+        else:
+            clip_section = []
         content += clip_section
 
     content += [
