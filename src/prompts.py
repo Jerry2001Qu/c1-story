@@ -222,6 +222,9 @@ The script may contain soundbites. They are in a format like:
   - (He will return to Australia after the hearing, according to a Wikileaks statement.) -> (According to a Wikileaks statement, he will return to Australia after the hearing.)
   - (Extreme temperatures throughout Asia over the past month were made worse most likely as a result of human-driven climate change, a team of international scientists have said.) -> (A team of international scientists have said, extreme temperatures throughout Asia over the past month were made worse most likely as a result of human-driven climate change.)
   - Don't combine quotes while doing this. Create a new paragraph if two quotes are adjacent.
+- Put subjects at the front of sentences when it makes the sentence make more sense when read aloud.
+  - (people were running, video from the event showed) -> (Video from the event showed people running.)
+  - This makes more sense when read aloud.
 - Fix any small grammatical and spelling errors that would make the story easier to read aloud.
   - She will be work in the US -> She will be working in the US
 - Make any other changes that would aid in the story being read aloud, word for word.
