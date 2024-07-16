@@ -103,7 +103,7 @@ class ReutersAPIDataLoader(DataLoader):
 
                 body = "\n".join([line.strip() for line in bodyhtml.split("</p><p>")])[9:-11]
 
-                if "Please see shotlist for story details." in storyline or len(storyline) < 10:
+                if len(storyline.split()) < 20:
                     print("Extracting storyline and shotlist")
                     extracted_storyline_and_shotlist = run_chain(extract_storyline_and_shotlist_chain, {"SCRIPT": body})
                     for element in extracted_storyline_and_shotlist:

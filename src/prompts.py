@@ -108,7 +108,8 @@ get_sot_prompt = PromptTemplate.from_template(
 </shotlist>
 
 Please give me a numbered list of shots in the shotlist that contain quotations. The numbers should be from the original shotlist. Don't copy from the examples.
-Include the entire section from the shotlist including parts like :(SOUNDBITE)(English) LOREM IPSUM, SAYING:".
+Include the entire section from the shotlist including parts like "(SOUNDBITE)(English) LOREM IPSUM, SAYING:".
+Only include shots that have people speaking. Don't include shots that are text clips such as "POST ON TRUTH SOCIAL PLATFORM BY REPUBLICAN PRESIDENTIAL CANDIDATE DONALD TRUMP, READING (English):"
 Copy from the shotlist exactly and put it in <response></response> tags. If there are no quotes respond with <response>NO SOT</response>.""")
 
 parse_sot_prompt = PromptTemplate.from_template(
@@ -188,6 +189,9 @@ The script may contain soundbites. They are in a format like:
 - DO NOT touch soundbites.
   - Do not remove any formatting around soundbites. Leave the "(SOUNDBITE) (Urdu) LOCAL RESIDENT, MOHAMMAD IMRAN, SAYING:"
   - Do not change any soundbites. Ignore the rest of the instructions for soundbites.
+    - (SOUNDBITE) (English) SKY NEWS AUSTRALIA WEEKEND LIVE PRESENTER, KIERAN GILBERT, SAYING:
+      "We begin this hour with breaking news, the former President Donald Trump has survived what law authorities are calling an assassination attempt at a rally."
+      (This is a soundbite. Do not change it. It may be at the beginning of the story, still do not change it.)
 - Always remove or replace parentheses/brackets and the contained text.
   - For example this should be fully removed: (local time / 0200EST).
   - Acronyms can be replaced such as: Korean Demilitarized Zone (DMZ) -> Korean Demilitarized Zone or DMZ.
