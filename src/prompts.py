@@ -329,6 +329,7 @@ You may only make simple edits, including:
 - Don't change the meaning of any sentences. Never state what someone else said as your own.
 - The anchor should not give opinions. Opinions can be in quotes/statements from other individuals.
   - NEVER add your own opinions or agree/disagree with the content. You just report what happened.
+- Avoid descriptive language, metaphors, or emotional words. Keep it factual.
 - Ensure your changes are factual & do not misrepresent the original script.
 - Remember the current date. Past events should be in past tense.
 
@@ -347,6 +348,7 @@ The script may contain soundbites. They are in a format like:
   - Only start stories with short quotes, maximum 5 words. If longer, you may cut it down.
   - An example could be: "NO JUSTICE, NO PEACE!" chanted the crowd as they marched through the streets.
 - NEVER start with a quote in a language other than English.
+- Don't end the story with a quote. We must end with the Anchor speaking.
 
 <example>
 <example_input>

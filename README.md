@@ -26,7 +26,7 @@ Check it out on [Streamlit Community Cloud](https://st-hello-app.streamlit.app/)
 gcloud run jobs create video-job \
   --image gcr.io/stg-transcription/video:latest \
   --region us-central1 \
-  --task-timeout 120m \
+  --task-timeout 240m \
   --max-retries 0 \
   --cpu 8 \
   --memory 32Gi
@@ -36,7 +36,7 @@ gcloud run jobs create video-job \
 gcloud run jobs update video-job \
   --image gcr.io/stg-transcription/video:latest \
   --region us-central1 \
-  --task-timeout 120m \
+  --task-timeout 240m \
   --max-retries 0 \
   --cpu 8 \
   --memory 32Gi
