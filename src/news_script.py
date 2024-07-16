@@ -73,7 +73,7 @@ class SOTScriptSection(ScriptSection):
 CLIP {self.clip.id if self.clip else None}: {self.start} - {self.end}"""
 
     def is_interview(self):
-        return self.name != "Unknown"
+        return self.name.upper() != "UNKNOWN"
 
     def get_byline(self):
         if self.is_interview():
