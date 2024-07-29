@@ -131,6 +131,7 @@ def run():
         shotlist = dataloader.load_shotlist()
         story_title = dataloader.get_story_title()
         video_file_path = dataloader.get_video_file_path()
+        body = dataloader.get_body()
 
         st.title(story_title)
         st.video(str(video_file_path))
@@ -158,6 +159,9 @@ def run():
                 st.write("Breaking up clips")
                 error_handler.info("Breaking up clips")
                 clip_manager.break_up_clips()
+                st.write("Applying courtesy to clips")
+                error_handler.info("Applying courtesy to clips")
+                clip_manager.courtesy_clips(body)
                 st.write("Generating full descriptions")
                 error_handler.info("Generating full descriptions")
                 clip_manager.generate_full_descriptions(story_title)

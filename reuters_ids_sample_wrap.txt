@@ -1,3 +1,6 @@
 tag:reuters.com,2024:newsml_RW868314072024RP1:4
 tag:reuters.com,2024:newsml_RW788910072024RP1:7
 tag:reuters.com,2024:newsml_RW915115072024RP1:4
+tag:reuters.com,2024:newsml_RW851312072024RP1:3
+tag:reuters.com,2024:newsml_RW933209062024RP1:12
+tag:reuters.com,2024:newsml_RW641105072024RP1:6

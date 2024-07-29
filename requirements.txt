@@ -25,3 +25,4 @@ pyinstrument
 psutil
 wheel
 deepgram-sdk
+pydantic

@@ -20,7 +20,7 @@ opus = ChatAnthropic(model="claude-3-opus-20240229", temperature=0, max_tokens=4
 sonnet = ChatAnthropic(model="claude-3-sonnet-20240229", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 haiku = ChatAnthropic(model="claude-3-haiku-20240307", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
 
-sonnet35 = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0, max_tokens=4096, anthropic_api_key=ANTHROPIC_API_KEY)
+sonnet35 = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0, max_tokens=8192, anthropic_api_key=ANTHROPIC_API_KEY, extra_headers={"anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15"})
 
 # STREAMLIT
 section_summary_prompt = PromptTemplate.from_template(
@@ -330,6 +330,7 @@ You may only make simple edits, including:
   - But like most frontline units, Vasil's team suffers from shortages of manpower. -> But most frontline units still suffer from shortages of manpower.
 
 - Don't change the meaning of any sentences. Never state what someone else said as your own.
+- The original script is factual, and you should maintain that. It may be breaking news, so take its word as truth.
 - The anchor should not give opinions. Opinions can be in quotes/statements from other individuals.
   - NEVER add your own opinions or agree/disagree with the content. You just report what happened.
 - Avoid descriptive language, metaphors, or emotional words. Keep it factual.
@@ -481,6 +482,70 @@ But aid workers worry it could spread to central and southern areas due to the u
 Israel launched its military operation in Gaza after Hamas-led militants attacked Israel on October 7th, killing one thousand two hundred people and taking some two hundred fifty hostage, according to Israeli tallies.
 
 Israel says it has expanded efforts to facilitate aid flows into Gaza and blames international aid agencies for distribution problems inside the enclave.
+</example_output>
+</example>
+
+<example>
+<example_input>
+STOREFRONT PROTECTED WITH WOODEN PLANKS AND SPRAY PAINTED MESSAGE READING (English): "GO HOME BERYL"
+Residents of Union Island could be seen navigating piles of debris to assess the damage to their homes on Tuesday (July 2) after Hurricane Beryl tore through the area and destroyed more than 90% of buildings, said government officials.
+
+Drone footage revealed the aftermath of Hurricane Beryl's destruction at Petite Martinique, Grenada, on Tuesday.
+
+Video showed destroyed buildings, boats and debris along the shore of the Caribbean island.
+
+Drone footage released by the Office Of The Prime Minister Of Grenada on Wednesday (July 3) showed destroyed houses, uprooted trees and debris strewn on roads in Carriacou in Grenada, after Beryl also hit the island country.
+
+Hurricane Beryl pummelled Jamaica with winds and rain that caused floods and widespread power outages on Thursday (July 4).
+
+Beryl has so far left at least 10 people dead but that number was widely expected to rise as communications are restored on islands devastated by flooding and powerful winds.
+
+Hurricane Beryl rumbled towards the Cayman Islands and Mexico on Thursday (July 4) after pummelling Jamaica.
+
+Winds and rain from Beryl caused floods and widespread power outages, leaving a deadly trail of destruction in several smaller Caribbean islands.
+
+Eyewitness footage showed the trail of destruction left by Beryl on the Cayman Islands.
+
+Residents of the popular beachside destination of Tulum in southeastern Mexico prepared on Thursday for the arrival of Beryl.
+
+Local residents, seasoned in safeguarding against storms, lined up at gas stations to fill their tanks and additional containers, while hotels and tourist complexes removed loose furniture and equipment.
+
+(SOUNDBITE) (Spanish) TULUM RESIDENT, RAMON DIAZ, SAYING:
+"We have some experience with hurricanes. The way we are protecting ourselves is by buying supplies, filling up the tank with gas, protecting our windows and doors, cleaning up our patios. That's how we protect ourselves. We are attentive to instructions from authorities."
+
+Authorities closed beaches, urging people to remain indoors, secure their windows, clear their drains, and stock up on food and supplies.
+
+While some tourists adhered to the government's directives, others seemed less worried and expressed a desire to witness the hurricane's arrival.
+
+(SOUNDBITE) (English) UNITED STATES TOURIST, STACIE SNIPES, SAYING:
+"No, it's a Category Two, no it's not too strong. I want to watch it come in."
+
+Businesses in Mexico's top tourist destination, Cancun, were counting down to the arrival of Beryl on Thursday as the storm was forecast to cross the Yucatan Peninsula during the night.
+
+Workers could be seen filling sandbags and boarding up the doors and windows of shops and hotels.
+
+Cancun's international airport was packed with tourists hoping to catch the last flights out before the hurricane's full fury. Around 100 flights were cancelled, according to a post on X by the state governor.
+</example_input>
+<example_output>
+"GO HOME BERYL" read a spray-painted message on a storefront protected with wooden planks, as Hurricane Beryl tore through the Caribbean.
+
+Residents of Union Island could be seen navigating piles of debris to assess the damage to their homes after the hurricane destroyed more than 90% of buildings, according to government officials.
+
+Drone footage revealed the aftermath of Beryl's destruction across the region. In Petite Martinique, Grenada, video showed destroyed buildings, boats and debris along the shore. In Carriacou, Grenada, footage showed destroyed houses, uprooted trees and debris strewn on roads.
+
+The hurricane has left at least 10 people dead, but that number was expected to rise as communications are restored on devastated islands.
+
+As Beryl rumbled towards the Cayman Islands and Mexico, residents in Tulum prepared for its arrival.
+
+(SOUNDBITE) (Spanish) TULUM RESIDENT, RAMON DIAZ, SAYING:
+"We have some experience with hurricanes. The way we are protecting ourselves is by buying supplies, filling up the tank with gas, protecting our windows and doors, cleaning up our patios. That's how we protect ourselves. We are attentive to instructions from authorities."
+
+Authorities closed beaches, urging people to remain indoors, secure their windows, clear their drains, and stock up on food and supplies. While some tourists adhered to the government's directives, others seemed less concerned.
+
+(SOUNDBITE) (English) UNITED STATES TOURIST, STACIE SNIPES, SAYING:
+"No, it's a Category Two, no it's not too strong. I want to watch it come in."
+
+In Cancun, businesses were preparing for Beryl's arrival. Workers could be seen filling sandbags and boarding up doors and windows of shops and hotels. The international airport was packed with tourists hoping to catch the last flights out, with around 100 flights cancelled according to local authorities.
 </example_output>
 </example>
 
@@ -1362,7 +1427,13 @@ from src.hashing import hash_chain
 from langchain_core.runnables.base import RunnableBinding
 
 def extract_response(text):
-    return text[text.rfind("<response>"):text.rfind("</response>")+11]
+    if "<response>" in text:
+        if "</response>" not in text:
+            print(f"WARNING: Incomplete response found in text of length: {len(text)}")
+        return text[text.rfind("<response>"):text.rfind("</response>")+11]
+    else:
+        print(f"WARNING: No response found in text of length: {len(text)}")
+        return "<response></response>"
 
 def extract_xml(text):
     return XMLOutputParser().invoke(extract_response(text).replace("&", "and"))
@@ -1373,7 +1444,12 @@ def run_chain(chain, params, max_retries=3, retry_delay=5):
     retries = 0
     while retries <= max_retries:
         try:
-            response_raw = chain.invoke(params).content
+            response = chain.invoke(params)
+            response_stop_reason = response.response_metadata.get("stop_reason")
+            if response_stop_reason != "end_turn":
+                print(f"DEBUG: {chain.config.get('run_name')} response_stop_reason: {response_stop_reason}")
+            response_raw = response.content
+            print(f"DEBUG: {chain.config.get('run_name')} response_raw: {response_raw}")
             response_xml = extract_xml(response_raw)
             if type(response_xml['response']) is str:
                 return response_xml['response'].strip()

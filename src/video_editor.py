@@ -26,6 +26,8 @@ class VideoEditor:
                  output_resolution: Tuple[int, int] = (1920, 1080),
                  bitrate: str = "10M",
                  font: Path = None, logo_path: Path = None,
+                 add_logline: bool = True,
+                 add_courtesy: bool = True,
                  logline_padding_ratio=1.0909, dub_volume_lufs=-40,
                  lower_volume_duration=1.5, dub_delay=0.5, error_handler=None):
         self.news_script = news_script
@@ -34,6 +36,8 @@ class VideoEditor:
         self.test_mode = test_mode
         self.music = music
         self.music_file = music_file
+        self.add_logline = add_logline
+        self.add_courtesy = add_courtesy
         self.output_resolution = output_resolution
         self.bitrate = bitrate
         self.font = font
@@ -66,10 +70,11 @@ class VideoEditor:
                     self.error_handler.warning(f"Error when assembling section {section.id}: {traceback.format_exc()}")
 
         video_clips = [clip for clip in video_clips if clip is not None]
-        concat_video = mp.concatenate_videoclips(video_clips, method="compose")
+        final_video = mp.concatenate_videoclips(video_clips, method="compose")
 
         logline = self.news_script.headline
-        final_video = self._add_logline(concat_video, logline)
+        if self.add_logline:
+            final_video = self._add_logline(final_video, logline)
         if self.music:
             final_video = self._add_background_music(final_video)
         final_video = final_video.fadein((1.0/self.fps)*10).fadeout((1.0/self.fps)*10)
@@ -131,7 +136,7 @@ class VideoEditor:
         
         if section.is_interview():
             clip = self._add_byline(clip, section.name, section.title)
-        if section.clip.courtesy:
+        if self.add_courtesy and section.clip.courtesy:
             clip = self._add_courtesy(clip, section.clip.courtesy)
         clip = clip.subclip(0, clip.duration - 0.1)
         clip = clip.audio_fadein((1.0/self.fps)*2).audio_fadeout((1.0/self.fps)*2)
@@ -223,7 +228,7 @@ class VideoEditor:
         broll_clip = broll_clip.subclip(0, min(broll_duration, broll_clip.duration))
         broll_clip = broll_clip.set_duration(broll_duration)
         broll_clip = resize_image_clip(broll_clip, self.output_resolution)
-        if clip.courtesy:
+        if self.add_courtesy and clip.courtesy:
             broll_clip = self._add_courtesy(broll_clip, clip.courtesy)
         return broll_clip
     

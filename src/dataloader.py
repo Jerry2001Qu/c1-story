@@ -85,58 +85,46 @@ class ReutersAPIDataLoader(DataLoader):
     def pull_reuters_api(self) -> None:
         if self.pulled_reuters_api:
             return
+
+        raw_html, headline, language, located = get_item(self.reuters_id)
+
+        parsed_html = html.unescape(raw_html).replace("<p/>", "")
+        bodyhtml = extract_str_between(parsed_html, "<body>", "</body>")
+        shotlist = extract_str_between(bodyhtml, "</p><p>1.", "</p><p>STORY:")[7:-13]
+        shotlist = "\n".join(shotlist.split("</p><p>"))
+
+        storyline = extract_str_between(bodyhtml, "<p>STORY:", "</body>")[9:-11]
+        storyline = "\n".join([line.strip() for line in storyline.split("</p><p>")[:-1]])
+
+        body = "\n".join([line.strip() for line in bodyhtml.split("</p><p>")])[9:-11]
+
+        if len(storyline.split()) < 20:
+            print("Extracting storyline and shotlist")
+            extracted_storyline_and_shotlist = run_chain(extract_storyline_and_shotlist_chain, {"SCRIPT": body})
+            for element in extracted_storyline_and_shotlist:
+                if "storyline" in element:
+                    storyline = element["storyline"]
+                if "shotlist" in element:
+                    shotlist = element["shotlist"]
+            
+            print(storyline)
+            print(shotlist)
+
+        self.shotlist = shotlist
+        self.storyline = storyline
+        self.story_title = headline
+        self.language = language
+        self.location = located
+        self.body = body
+
+        video_asset = get_assets(self.reuters_id)[0]
+        video_url, asset_type = download_asset(self.reuters_id, video_asset["uri"])
+        res = requests.get(video_url)
+        video_file_path = self.storage_path / "video.mp4"
+        with open(video_file_path, "wb") as file:
+            file.write(res.content)
         
-        attempts = 0
-        success = False
-
-        while not success and attempts < 2:
-            try:
-                raw_html, headline, language, located = get_item(self.reuters_id)
-
-                parsed_html = html.unescape(raw_html).replace("<p/>", "")
-                bodyhtml = extract_str_between(parsed_html, "<body>", "</body>")
-                shotlist = extract_str_between(bodyhtml, "</p><p>1.", "</p><p>STORY:")[7:-13]
-                shotlist = "\n".join(shotlist.split("</p><p>"))
-
-                storyline = extract_str_between(bodyhtml, "<p>STORY:", "</body>")[9:-11]
-                storyline = "\n".join([line.strip() for line in storyline.split("</p><p>")[:-1]])
-
-                body = "\n".join([line.strip() for line in bodyhtml.split("</p><p>")])[9:-11]
-
-                if len(storyline.split()) < 20:
-                    print("Extracting storyline and shotlist")
-                    extracted_storyline_and_shotlist = run_chain(extract_storyline_and_shotlist_chain, {"SCRIPT": body})
-                    for element in extracted_storyline_and_shotlist:
-                        if "storyline" in element:
-                            storyline = element["storyline"]
-                        if "shotlist" in element:
-                            shotlist = element["shotlist"]
-                    
-                    print(storyline)
-                    print(shotlist)
-
-                self.shotlist = shotlist
-                self.storyline = storyline
-                self.story_title = headline
-                self.language = language
-                self.location = located
-                self.body = body
-
-                video_asset = get_assets(self.reuters_id)[0]
-                video_url, asset_type = download_asset(self.reuters_id, video_asset["uri"])
-                res = requests.get(video_url)
-                video_file_path = self.storage_path / "video.mp4"
-                with open(video_file_path, "wb") as file:
-                    file.write(res.content)
-                
-                self.video_file_path = video_file_path
-                success = True
-            except Exception as e:
-                get_oauth_token.clear()
-                if attempts == 1:
-                    raise e
-            finally:
-                attempts += 1
+        self.video_file_path = video_file_path
 
         self.pulled_reuters_api = True
         

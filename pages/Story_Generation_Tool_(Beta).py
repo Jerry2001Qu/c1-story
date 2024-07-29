@@ -128,6 +128,14 @@ def run():
         shotlist = dataloader.load_shotlist()
         story_title = dataloader.get_story_title()
         video_file_path = dataloader.get_video_file_path()
+        body = dataloader.get_body()
+
+        if not "".join(filter(lambda x: x.isalnum(), storyline)):
+            error_handler.error("No storyline found")
+        if not "".join(filter(lambda x: x.isalnum(), shotlist)):
+            error_handler.error("No shotlist found")
+        if not "".join(filter(lambda x: x.isalnum(), story_title)):
+            error_handler.error("No story title found")
 
         st.title(story_title)
         st.video(str(video_file_path))
@@ -156,6 +164,12 @@ def run():
                 st.write("Matching clips to shotlist")
                 error_handler.info("Matching clips to shotlist")
                 clip_manager.match_clips()
+                st.write("Breaking up clips")
+                error_handler.info("Breaking up clips")
+                clip_manager.break_up_clips()
+                st.write("Applying courtesy to clips")
+                error_handler.info("Applying courtesy to clips")
+                clip_manager.courtesy_clips(body)
                 st.write("Generating full descriptions")
                 error_handler.info("Generating full descriptions")
                 clip_manager.generate_full_descriptions(story_title)

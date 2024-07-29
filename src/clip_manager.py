@@ -411,6 +411,8 @@ ID {clip.id}: {clip.whisper_results.english_text}
                 return (clip, None)
             except ValueError as e:
                 return (clip, e)
+            except:
+                return (clip, traceback.format_exc())
         
         # STREAMLIT
         progress_bar = st.progress(0.0)

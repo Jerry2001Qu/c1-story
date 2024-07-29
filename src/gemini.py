@@ -478,6 +478,67 @@ Thoughts: This is the last section. We must show the Anchor starting at 25.00 to
 * Anchor (max 10 seconds): 24.54 - 30.00 - This is the final section, so we should end with the Anchor. ("The fate of his presidency hangs in the balance as he confronts the challenges of a divided nation")
 </response>
 </example>
+<example>
+<response>
+<thoughts>
+This draft incorporates the feedback from the previous critique, aiming for more visual variety and a stronger narrative flow. We've replaced repetitive B-roll, added ground-level shots to break up the aerial perspective, and incorporated clips that better reflect the human impact of the hurricane.
+</thoughts>
+
+**Section 1: 0.00 - 8.99**
+Transcript: "Go home Beryl" read a spray-painted message on a storefront protected with wooden planks, as Hurricane Beryl tore through the Caribbean.
+Thoughts: This section sets the scene and introduces Hurricane Beryl. We should start with the Anchor to introduce the story and then transition to B-roll showing the aftermath of the hurricane in the Caribbean.
+
+* Anchor (max 10 seconds): 0.00 - 5.00 (5.00s) - We start with the Anchor to introduce the story. ("Go home Beryl" read a spray-painted message on a storefront protected with wooden planks, as Hurricane Beryl tore through the Caribbean.)
+* Clip 018 (max 4.61 seconds): 5.00 - 8.99 (3.99s) - This clip shows a boarded-up storefront with the message "GO HOME BERYL" spray-painted on it, perfectly matching the audio. ("Go home Beryl")
+
+**Section 2: 8.99 - 20.64**
+Transcript: Residents of Union Island could be seen navigating piles of debris to assess the damage to their homes after the hurricane destroyed more than ninety percent of buildings, according to government officials.
+Thoughts: This section focuses on the destruction caused by the hurricane in Union Island. We should show B-roll of the damage and people assessing the situation.
+
+* Clip 001_0 (max 7.47 seconds): 8.99 - 16.46 (7.47s) - This clip shows the aftermath of the hurricane in a Caribbean town, with people navigating debris. ("Residents of Union Island could be seen navigating piles of debris to assess the damage to their homes")
+* Clip 003 (max 5.54 seconds): 16.46 - 20.64 (4.18s) - This clip shows destroyed boats on a beach, providing a different visual of the destruction. ("after the hurricane destroyed more than ninety percent of buildings, according to government officials.")
+
+**Section 3: 20.64 - 37.91**
+Transcript: Drone footage revealed the aftermath of Beryl's destruction across the region. In Petite Martinique, Grenada, video showed destroyed buildings, boats and debris along the shore. In Carriacou, Grenada, footage showed destroyed houses, uprooted trees and debris strewn on roads.
+Thoughts: This section provides a broader view of the hurricane's impact across the region. We should use drone footage to show the destruction in different locations, but also incorporate a ground-level shot for visual variety.
+
+* Clip 002 (max 17.52 seconds): 20.64 - 28.16 (7.52s) - This drone footage shows widespread destruction in a coastal town, matching the audio description. ("Drone footage revealed the aftermath of Beryl's destruction across the region.")
+* Clip 004_0 (max 7.26 seconds): 28.16 - 35.42 (7.26s) - This ground-level shot shows a wrecked sailboat and a damaged beach shack, providing a different perspective on the destruction. ("In Petite Martinique, Grenada, video showed destroyed buildings, boats and debris along the shore.")
+* Clip 009_0 (max 7.25 seconds): 35.42 - 37.91 (2.49s) - This drone footage shows damage to buildings and uprooted trees, matching the audio description of Carriacou. ("In Carriacou, Grenada, footage showed destroyed houses, uprooted trees and debris strewn on roads.")
+
+**Section 4: 37.91 - 45.69**
+Transcript: The hurricane has left at least ten people dead, but that number was expected to rise as communications are restored on devastated islands.
+Thoughts: This section highlights the human cost of the hurricane. While there's no B-roll showing casualties, we can use existing B-roll of destruction to visually reinforce the impact.
+
+* Clip 007_1 (max 5.24 seconds): 37.91 - 43.15 (5.24s) - This clip shows a devastated residential area, emphasizing the severity of the hurricane's impact. ("The hurricane has left at least ten people dead, but that number was expected to rise as communications are restored on devastated islands.")
+* Anchor (max 10 seconds): 43.15 - 45.69 (2.54s) - We transition back to the Anchor to finish the section. ("but that number was expected to rise as communications are restored on devastated islands.")
+
+**Section 5: 45.69 - 52.09**
+Transcript: As Beryl rumbled towards the Cayman Islands and Mexico, residents in Tulum prepared for its arrival.
+Thoughts: This section shifts the focus to Mexico and the preparations being made for the hurricane's arrival. We should show B-roll of Tulum and people preparing for the storm.
+
+* Clip 025 (max 5.01 seconds): 45.69 - 50.70 (5.01s) - This clip shows strong winds and preparations at a resort in Tulum, setting the scene for the hurricane's arrival. ("As Beryl rumbled towards the Cayman Islands and Mexico, residents in Tulum prepared for its arrival.")
+* Clip 027_1 (max 4.35 seconds): 50.70 - 52.09 (1.39s) - This clip shows workers taping up windows at a resort, further illustrating the preparations. ("residents in Tulum prepared for its arrival.")
+
+**Section 7: 52.09 - 65.99**
+Transcript: Authorities closed beaches, urging people to remain indoors, secure their windows, clear their drains, and stock up on food and supplies. While some tourists adhered to the government's directives, others seemed less concerned.
+Thoughts: This section details the precautions being taken in Mexico. We should show B-roll of closed beaches, people preparing their homes, and tourists reacting to the warnings.
+
+* Clip 030 (max 4.67 seconds): 52.09 - 56.76 (4.67s) - This clip shows a closed beach with red warning tape, matching the audio description. ("Authorities closed beaches, urging people to remain indoors,")
+* Clip 038 (max 4.47 seconds): 56.76 - 61.23 (4.47s) - This clip shows workers securing a beach club, illustrating preparations for the hurricane. ("secure their windows, clear their drains, and stock up on food and supplies.")
+* Clip 044 (max 4.27 seconds): 61.23 - 65.50 (4.27s) - This clip shows a crowded airport, suggesting tourists leaving the area due to the hurricane. ("While some tourists adhered to the government's directives,")
+* Anchor (max 10 seconds): 65.50 - 65.99 (0.49s) - We transition back to the Anchor to bridge the gap to the next section. ("others seemed less concerned.")
+
+**Section 9: 65.99 - 84.54**
+Transcript: In Cancun, businesses were preparing for Beryl's arrival. Workers could be seen filling sandbags and boarding up doors and windows of shops and hotels. The international airport was packed with tourists hoping to catch the last flights out, with around one hundred flights cancelled according to local authorities.
+Thoughts: This section focuses on Cancun and the preparations being made there. We should show B-roll of businesses boarding up, sandbags being filled, and the crowded airport.
+
+* Clip 039 (max 3.97 seconds): 65.99 - 69.96 (3.97s) - This clip shows sandbags being used to protect a beach club in Cancun. ("In Cancun, businesses were preparing for Beryl's arrival.")
+* Clip 041 (max 4.31 seconds): 69.96 - 74.27 (4.31s) - This clip shows workers securing a sign at a nightclub, illustrating preparations for the hurricane. ("Workers could be seen filling sandbags and boarding up doors and windows of shops and hotels.")
+* Clip 045 (max 4.97 seconds): 74.27 - 79.24 (4.97s) - This clip shows a crowded airport, matching the audio description of tourists trying to leave Cancun. ("The international airport was packed with tourists hoping to catch the last flights out,")
+* Anchor (max 10 seconds): 79.24 - 84.54 (5.30s) - We end with the Anchor to conclude the story. ("with around one hundred flights cancelled according to local authorities.")
+</response>
+</example>
 
 Remember:
 - Always use the correct section numbers, even if they skip.

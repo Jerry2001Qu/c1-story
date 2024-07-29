@@ -28,7 +28,7 @@ def graphql_query(query, variables, token=get_oauth_token()):
     response.raise_for_status()
     return response.json()
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=60*60)
 def get_item(item_id):
     query = """
     query GetItem($itemId: ID!) {
@@ -52,7 +52,7 @@ def get_item(item_id):
     text_association = [association for association in associations if association["type"] == "text"][0]
     return text_association["bodyXhtml"], text_association["headLine"], text_association["language"], text_association["located"]
 
-@st.cache_data(show_spinner=False, ttl=60*5)
+@st.cache_data(show_spinner=False, ttl=60*60)
 def download_asset(item_id, rendition_id):
     query = """
     mutation DownloadAsset($itemId: ID!, $renditionId: ID!) {
@@ -71,7 +71,7 @@ def download_asset(item_id, rendition_id):
     data = graphql_query(query, variables)
     return data["data"]["download"]["url"], data["data"]["download"]["type"]
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=60*60)
 def get_assets(item_id, desired_codes=["stream:8256:16x9:mp4"]):
     query = """
     query GetAssets($itemId: ID!) {
