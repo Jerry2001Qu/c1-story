@@ -17,13 +17,9 @@ from typing import Dict, Tuple
 import traceback
 import json
 
-import moviepy.editor as mp
-
 from pydantic import HttpUrl
 
-class VideoEditor:
-    """Handles video editing, including assembling clips and B-roll."""
-
+class StoryBlueprinter:
     def __init__(self, news_script: NewsScript, clip_manager: ClipManager,
                  live_anchor: bool, test_mode: bool, music: bool,
                  music_file: Path,
