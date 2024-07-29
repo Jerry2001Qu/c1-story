@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 from typing import List, Union, Optional, Tuple
 from enum import Enum
 
@@ -12,12 +12,12 @@ class SoundEffect(BaseModel):
     duration: float = Field(1.0, ge=0)
 
 class Soundtrack(BaseModel):
-    src: HttpUrl
+    src: str
     effects: Optional[List[SoundEffect]] = None
     volume: float = Field(1.0, ge=0)
 
 class Font(BaseModel):
-    src: HttpUrl
+    src: str
 
 class Track(BaseModel):
     clips: List["Clip"]
@@ -59,7 +59,7 @@ class Crop(BaseModel):
 
 class VideoAsset(BaseModel):
     type: AssetType = AssetType.VIDEO
-    src: HttpUrl
+    src: str
     trim: float = Field(0.0, ge=0)
     volume: float = Field(1.0, ge=0)
     volumeEffects: Optional[List[SoundEffect]] = None
@@ -68,7 +68,7 @@ class VideoAsset(BaseModel):
 
 class ImageAsset(BaseModel):
     type: AssetType = AssetType.IMAGE
-    src: HttpUrl
+    src: str
     crop: Optional[Crop] = None
 
 class HtmlAsset(BaseModel):
@@ -82,7 +82,7 @@ class HtmlAsset(BaseModel):
 
 class AudioAsset(BaseModel):
     type: AssetType = AssetType.AUDIO
-    src: HttpUrl
+    src: str
     trim: float = Field(0.0, ge=0)
     volume: float = Field(1.0, ge=0)
     speed: float = Field(1.0, ge=0)
