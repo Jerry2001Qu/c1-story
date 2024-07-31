@@ -297,6 +297,7 @@ Then order the quotations based on how well they'd fit into the script & plan th
 - Do not add any transitions between the quotations and the rest of the script
 - Do not change the wording of the news script except to insert the quotations
 - Place quotations in separate paragraphs. You may split paragraphs in the original script.
+- If the script already contains a quotation, you may replace it with its corresponding quotation from the list.
 
 Here are some general criteria of good soundbites:
 - Short soundbites such as chanting or short exclamations. They're good as transitions and adding real voices to the story.
@@ -809,7 +810,7 @@ Here is the list of broll placements:
 {BROLL_PLACEMENTS}
 </broll_placements>
 
-Parse the <broll_placements></broll_placements> into each <section></section>. Start each section at 0. id should not include the clip word. Put your response in <response></response> tags."""
+Parse the <broll_placements></broll_placements> into each <section></section>. Start each section at 0. id should not include the clip word. Your response should be JSON, following the example's structure. Put your response in <response></response> tags."""
 )
 
 fix_broll_prompt = PromptTemplate.from_template(

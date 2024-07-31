@@ -349,8 +349,115 @@ class AudioProcessor:
                         if self.error_handler:
                             self.error_handler.warning(f"Last broll in section {section.id} was too short, merged with previous anchor")
                             self.error_handler.stream_status(pprint.pformat(section.brolls), f"Last broll in section {section.id} was too short, merged with previous anchor")
+    
+    def _validate_and_adjust_graphics_placements(self):
+        for section in self.news_script.get_anchor_sections():
+            # Adjust broll durations if they are shorter than the clip duration
+            for broll in section.brolls:
+                if broll["id"] == "Anchor":
+                    continue
+                clip = self.clip_manager.get_clip(broll["id"])
+                if clip is None:
+                    if self.error_handler:
+                        self.error_handler.warning(f"Broll {broll['id']} in section {section.id} does not exist. Removing broll.")
+                    section.brolls.remove(broll)
+                    continue
 
+                if clip.duration < broll["end"] - broll["start"]:
+                    if self.error_handler:
+                        self.error_handler.warning(f"Broll {broll['id']} in section {section.id} is shorter than its duration. Adjusting broll.")
+                    broll["end"] = broll["start"] + clip.duration
+            
+            # Adjust overlaps
+            for i in range(len(section.brolls) - 1):
+                current_broll = section.brolls[i]
+                next_broll = section.brolls[i + 1]
 
+                if current_broll["end"] > next_broll["start"]:
+                    if self.error_handler:
+                        self.error_handler.warning(f"Overlap detected between broll {current_broll['id']} and {next_broll['id']} in section {section.id}. Adjusting.")
+                    current_broll["end"] = next_broll["start"]
+
+            # Fill gaps between brolls
+            for i in range(len(section.brolls) - 1):
+                current_broll = section.brolls[i]
+                next_broll = section.brolls[i + 1]
+                gap = next_broll["start"] - current_broll["end"]
+                
+                if gap > 0:
+                    if current_broll["id"] == "Anchor":
+                        current_broll["end"] += gap
+                    else:
+                        clip = self.clip_manager.get_clip(current_broll["id"])
+                        remaining_clip_duration = clip.duration - (current_broll["end"] - current_broll["start"])
+                    
+                        if remaining_clip_duration > 0:
+                            # Fill as much of the gap as possible with the current clip
+                            fill_duration = min(gap, remaining_clip_duration)
+                            current_broll["end"] += fill_duration
+                            gap -= fill_duration
+                        
+                        next_broll_duration = next_broll["end"] - next_broll["start"]
+                        next_broll["start"] = current_broll["end"]
+                        next_broll["end"] = next_broll["start"] + next_broll_duration
+            # Last broll is not extended here, but will be in the next total duration section
+
+            # Adjust total duration
+            last_broll = section.brolls[-1]
+            total_broll_duration = last_broll["end"]
+            section_audio_duration = section.anchor_audio_clip.duration
+
+            if total_broll_duration < section_audio_duration:
+                if self.error_handler:
+                    self.error_handler.warning(f"Section {section.id} brolls are shorter than audio. Adjusting brolls.")
+
+                duration_difference = section_audio_duration - total_broll_duration
+                if last_broll["id"] == "Anchor":
+                    if self.error_handler:
+                        self.error_handler.warning(f"Section {section.id} extending last anchor broll to match audio duration.")
+                    last_broll["end"] += duration_difference
+                else:
+                    last_broll_clip = self.clip_manager.get_clip(last_broll["id"])
+                    remaining_clip_duration = last_broll_clip.duration - (last_broll["end"] - last_broll["start"])
+                    if remaining_clip_duration > 0:
+                        added_time = min(duration_difference, remaining_clip_duration)
+                        last_broll["end"] += added_time
+                        duration_difference -= added_time
+
+                    if last_broll["end"] < section_audio_duration:
+                        if self.error_handler:
+                            self.error_handler.warning(f"Section {section.id} adding anchor broll to match audio duration.")
+
+                        new_anchor = {
+                            "id": "Anchor",
+                            "start": last_broll["end"],
+                            "end": section_audio_duration
+                        }
+                        section.brolls.append(new_anchor)
+
+            elif total_broll_duration > section_audio_duration:
+                if self.error_handler:
+                    self.error_handler.warning(f"Section {section.id} brolls are longer than audio. Adjusting brolls.")
+                
+                excess_duration = total_broll_duration - section_audio_duration
+                for broll in reversed(section.brolls):
+                    broll_duration = broll["end"] - broll["start"]
+                    if broll_duration > excess_duration:
+                        broll["end"] -= excess_duration
+                        break
+                    else:
+                        excess_duration -= broll_duration
+                        section.brolls.remove(broll)
+
+            # Final check
+            final_total_duration = sum(broll["end"] - broll["start"] for broll in section.brolls)
+            if abs(final_total_duration - section_audio_duration) > 0.01:  # Allow small floating-point discrepancies
+                if self.error_handler:
+                    self.error_handler.warning(f"Section {section.id} total broll duration does not match audio duration after adjustments.")
+
+        if self.error_handler:
+            self.error_handler.stream_status("Graphics placements validation and adjustment complete")
+            
     def _generate_anchor(self, live_anchor: bool, test_mode: bool):
         for section in self.news_script.get_anchor_sections():
             if section.has_anchor_on_screen():

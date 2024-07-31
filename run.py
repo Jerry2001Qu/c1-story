@@ -11,7 +11,7 @@ from src.audio_processor import AudioProcessor
 from src.gcp import GCSManager
 
 def main():
-    anchor_idx = random.randint(0, 3)
+    anchor_idx = int(os.environ.get("ANCHOR_INDEX", random.randint(0, 2)))
     live_anchor = os.environ.get("LIVE_ANCHOR", "false").lower() == "true"
     test_mode = os.environ.get("TEST_MODE", "true") == "true"
     reuters_id = os.environ.get("REUTERS_ID", "tag:reuters.com,2024:newsml_RW327824062024RP1:6")
@@ -24,7 +24,7 @@ def main():
         ("9f8o652aaiVK5HavyCf1", "l6Qo5Atx1JTwyCLkMKQm", "20251eb0e4504ddbb913f1b09e2bbb8e", "assets/DANIEL-square.png"),
         ("dyhDlCWGL3pDsrANTLru", "l6Qo5Atx1JTwyCLkMKQm", "395e53f63eba4ce9a9e3dddc9a0263ed", "assets/MIRANDA-square.png"),
         # ("H2LXjnBS1droRODepT50", "l6Qo5Atx1JTwyCLkMKQm", "e1dfdd60549940159aa4eb529e6f78a7", "assets/SARAH-square.png"),
-        ("GxOlMeAhhAqPmZNfxxUm", "l6Qo5Atx1JTwyCLkMKQm", "2c67e653633c4894834585e3a9d5b2be", "assets/KARA-square.png"),
+        # ("GxOlMeAhhAqPmZNfxxUm", "l6Qo5Atx1JTwyCLkMKQm", "2c67e653633c4894834585e3a9d5b2be", "assets/KARA-square.png"),
     ]
     anchor_voice_id, voiceover_voice_id, anchor_avatar_id, anchor_image_path = anchor_map[anchor_idx]
 
@@ -86,6 +86,10 @@ def main():
     audio_processor._generate_sot_translations()
     print("Adding B-roll placements")
     audio_processor._add_broll_placements()
+    print("Validating graphic placements")
+    audio_processor._validate_and_adjust_graphics_placements()
+    print("Generating anchor videos")
+    audio_processor._generate_anchor(live_anchor, test_mode)
 
     video_output_file = story_folder / "output.mp4"
     video_editor = VideoEditor(script, clip_manager, live_anchor, test_mode, music, Path("./assets/music-1.mp3"), output_resolution=output_resolution, bitrate=bitrate, logo_path=Path("./assets/lower_thirds_logo.png"), font=Path("./assets/Khand-SemiBold.ttf"), add_logline=add_logline, add_courtesy=add_courtesy, error_handler=error_handler)

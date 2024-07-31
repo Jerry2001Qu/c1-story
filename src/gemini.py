@@ -565,21 +565,38 @@ Put your final edited video sequence inside <response></response> tags. YOU MUST
     content = [part for part in content if part is not None]
 
     response = GEMINI.generate_content(content)
-    gcs.clear_uploaded_blobs()
 
     print("## BROLL GEMINI RESPONSE\n\n", response.text)
 
     try:
         placements = extract_response(response.text)
         if len(placements) > 50:
+            gcs.clear_uploaded_blobs()
             return placements
         else:
-            print("ERROR: GEMINI BROLL RESPONSE NOT FILLED. RETURNING LAST DRAFT")
-            placements = extract_str_between(response.text[response.text.rfind("<draft>"):], "<draft>", "</draft>")
+            print("ERROR: GEMINI BROLL RESPONSE NOT FILLED. CONTINUING")
+            continue_content = [
+                f"""You gave me this: {response.text}
+
+My original instructions were this: {content}
+
+Please continue where you left off and generate a final <response> for me."""
+            ]
+            response = GEMINI.generate_content(continue_content)
+            print("## CONTINUED BROLL GEMINI RESPONSE\n\n", response.text)
+
+            placements = extract_response(response.text)
             if len(placements) > 50:
+                gcs.clear_uploaded_blobs()
                 return placements
             else:
-                raise Exception("GEMINI BROLL RESPONSE NOT FILLED")
+                placements = extract_str_between(response.text[response.text.rfind("<draft>"):], "<draft>", "</draft>")
+                if len(placements) > 50:
+                    gcs.clear_uploaded_blobs()
+                    return placements
+                else:
+                    gcs.clear_uploaded_blobs()
+                    raise Exception("GEMINI BROLL RESPONSE NOT FILLED")
     except ValueError:
         print(response.prompt_feedback)
         print(response.candidates[0].finish_reason)

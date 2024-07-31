@@ -48,6 +48,7 @@ def get_item(item_id):
     }
     data = graphql_query(query, variables)
 
+    print(f"Item Data: {data}")
     associations = data["data"]["item"]["associations"]
     text_association = [association for association in associations if association["type"] == "text"][0]
     return text_association["bodyXhtml"], text_association["headLine"], text_association["language"], text_association["located"]
