@@ -386,6 +386,8 @@ class AudioProcessor:
                 
                 if gap > 0:
                     if current_broll["id"] == "Anchor":
+                        if self.error_handler:
+                            self.error_handler.warning(f"Section {section.id} had gap between brolls {current_broll['id']} and {next_broll['id']}. Extending anchor broll to match audio duration.")
                         current_broll["end"] += gap
                     else:
                         clip = self.clip_manager.get_clip(current_broll["id"])
@@ -396,6 +398,9 @@ class AudioProcessor:
                             fill_duration = min(gap, remaining_clip_duration)
                             current_broll["end"] += fill_duration
                             gap -= fill_duration
+
+                            if self.error_handler:
+                                self.error_handler.warning(f"Section {section.id} had gap between brolls {current_broll['id']} and {next_broll['id']}. Filling gap by {fill_duration} seconds of total {gap} seconds.")
                         
                         next_broll_duration = next_broll["end"] - next_broll["start"]
                         next_broll["start"] = current_broll["end"]
@@ -457,7 +462,7 @@ class AudioProcessor:
 
         if self.error_handler:
             self.error_handler.stream_status("Graphics placements validation and adjustment complete")
-            
+
     def _generate_anchor(self, live_anchor: bool, test_mode: bool):
         for section in self.news_script.get_anchor_sections():
             if section.has_anchor_on_screen():
