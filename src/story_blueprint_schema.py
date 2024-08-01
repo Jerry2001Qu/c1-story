@@ -88,10 +88,26 @@ class AudioAsset(BaseModel):
     speed: float = Field(1.0, ge=0)
     effects: Optional[List[SoundEffect]] = None
 
+class PrebuiltLogline(BaseModel):
+    text: str
+
+class PrebuiltCredits(BaseModel):
+    text: str
+
+class PrebuiltByline(BaseModel):
+    text: str
+
+class PrebuiltTypes(str, Enum):
+    LOGLINE = "logline"
+    CREDITS = "credits"
+    BYLINE = "byline"
+
+PrebuiltData = Union[PrebuiltLogline, PrebuiltCredits, PrebuiltByline]
+
 class PrebuiltAsset(BaseModel):
     type: AssetType = AssetType.PREBUILT
-    key: str
-    data: Optional[List] = None
+    key: PrebuiltTypes
+    data: PrebuiltData
 
 Asset = Union[VideoAsset, ImageAsset, HtmlAsset, AudioAsset, PrebuiltAsset]
 
