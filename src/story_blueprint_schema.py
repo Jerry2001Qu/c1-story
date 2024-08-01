@@ -95,7 +95,8 @@ class PrebuiltCredits(BaseModel):
     text: str
 
 class PrebuiltByline(BaseModel):
-    text: str
+    name: str
+    title: str
 
 class PrebuiltTypes(str, Enum):
     LOGLINE = "logline"
