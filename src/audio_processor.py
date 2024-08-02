@@ -430,15 +430,22 @@ class AudioProcessor:
                         duration_difference -= added_time
 
                     if last_broll["end"] < section_audio_duration:
-                        if self.error_handler:
-                            self.error_handler.warning(f"Section {section.id} adding anchor broll to match audio duration.")
-
-                        new_anchor = {
-                            "id": "Anchor",
-                            "start": last_broll["end"],
-                            "end": section_audio_duration
-                        }
-                        section.brolls.append(new_anchor)
+                        needed_time = section_audio_duration - last_broll["end"]
+                        if needed_time > 1:
+                            if self.error_handler:
+                                self.error_handler.warning(f"Section {section.id} adding anchor broll to match audio duration. Needed {needed_time} seconds.")
+                            new_anchor = {
+                                "id": "Anchor",
+                                "start": last_broll["end"],
+                                "end": section_audio_duration
+                            }
+                            section.brolls.append(new_anchor)
+                        else:
+                            speed_factor = last_broll_clip.duration / (section_audio_duration - last_broll["start"])
+                            if self.error_handler:
+                                self.error_handler.warning(f"Section {section.id} slowing down last broll to match audio duration. Speed factor: {speed_factor}")
+                            last_broll["end"] = section_audio_duration
+                            last_broll["speed_factor"] = speed_factor
 
             elif total_broll_duration > section_audio_duration:
                 if self.error_handler:
